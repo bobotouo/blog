@@ -1,5 +1,9 @@
 <template>
-  <div id="comments" ref="commentsContainer" class="my-8">
+  <div
+    id="comments"
+    ref="commentsContainer"
+    class="my-8 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-4 md:p-6"
+  >
     <!-- Giscus comments widget will be injected here -->
   </div>
 </template>
@@ -13,9 +17,9 @@ const repo = config.public.giscusRepo || "";
 const repoId = config.public.giscusRepoId || "";
 const category = config.public.giscusCategory || "Announcements";
 const categoryId = config.public.giscusCategoryId || "";
-const theme = config.public.giscusTheme || "dark";
+const theme = config.public.giscusTheme || "transparent_dark";
 
-onMounted(() => {
+const loadComments = () => {
   if (commentsLoaded.value || !commentsContainer.value) return;
   if (!repo || !repoId || !categoryId) return;
 
@@ -37,9 +41,23 @@ onMounted(() => {
 
   commentsContainer.value.appendChild(script);
   commentsLoaded.value = true;
+};
+
+onMounted(() => {
+  if (!commentsContainer.value) return;
+
+  if (!("IntersectionObserver" in window)) {
+    loadComments();
+    return;
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    if (entries.some((entry) => entry.isIntersecting)) {
+      loadComments();
+      observer.disconnect();
+    }
+  });
+
+  observer.observe(commentsContainer.value);
 });
 </script>
-
-<style scoped>
-/* No extra styles */
-</style>
