@@ -36,6 +36,10 @@ export default defineNuxtConfig({
     transpile: ["motion-v"],
   },
 
+  nitro: {
+    preset: "netlify",
+  },
+
   // 强制使用单一 Vue 实例，避免 motion-v 等库在 renderSlot 时 currentRenderingInstance 为 null
   vite: {
     resolve: {
