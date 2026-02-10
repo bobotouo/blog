@@ -32,6 +32,9 @@
     </div>
 
     <div class="mt-10">
+      <div class="text-xs uppercase tracking-[0.35em] text-white/50 mb-4">
+        Comments
+      </div>
       <Comments />
     </div>
   </article>
