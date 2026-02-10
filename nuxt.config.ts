@@ -11,7 +11,12 @@ export default defineNuxtConfig({
         { name: "viewport", content: "width=device-width,initial-scale=1" },
         { name: "description", content: "个人博客，使用 Nuxt 3 + Content" },
       ],
+      link: [
+        { rel: "preconnect", href: "https://fonts.googleapis.com" },
+        { rel: "preconnect", href: "https://fonts.gstatic.com", crossorigin: "" },
+      ],
     },
+    pageTransition: { name: "page", mode: "out-in" },
   },
 
   // Modules

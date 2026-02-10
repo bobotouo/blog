@@ -1,5 +1,5 @@
 <template>
-  <div ref="commentsContainer" class="my-8">
+  <div id="comments" ref="commentsContainer" class="my-8">
     <!-- Giscus comments widget will be injected here -->
   </div>
 </template>

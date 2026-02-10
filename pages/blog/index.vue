@@ -12,13 +12,49 @@
           简洁版式与酷炫光感并存，保持阅读专注。
         </p>
       </div>
-      <div class="text-white/50 text-sm">
-        {{ posts?.length ?? 0 }} 篇文章
-      </div>
+      <div class="text-white/50 text-sm">{{ posts?.length ?? 0 }} 篇文章</div>
     </div>
+    <div v-if="featured" class="mb-10">
+      <NuxtLink
+        :to="featured._path"
+        class="group grid gap-6 md:grid-cols-[1.2fr_1fr] rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl overflow-hidden hover:bg-white/10 transition"
+      >
+        <div class="h-60 md:h-full">
+          <img
+            v-if="featured.coverImage"
+            :src="featured.coverImage"
+            alt="cover"
+            loading="lazy"
+            decoding="async"
+            class="h-full w-full object-cover group-hover:scale-[1.02] transition"
+          />
+          <div
+            v-else
+            class="h-full w-full bg-[linear-gradient(135deg,_rgba(34,211,238,0.25),_rgba(249,115,22,0.15))]"
+          />
+        </div>
+        <div class="p-6 md:p-8 space-y-4">
+          <div class="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-white/40">
+            <span>Featured</span>
+            <span class="text-white/30">→</span>
+          </div>
+          <h2 class="text-3xl md:text-4xl font-semibold text-white group-hover:text-[color:var(--accent)] transition">
+            {{ featured.title }}
+          </h2>
+          <p class="text-sm text-white/60">{{ formatDate(featured.date) }}</p>
+          <p class="text-white/80" v-if="featured.description">
+            {{ featured.description }}
+          </p>
+          <div class="text-xs uppercase tracking-[0.25em] text-white/40">
+            继续阅读 →
+          </div>
+        </div>
+      </NuxtLink>
+    </div>
+
     <div class="grid gap-6 md:grid-cols-2">
       <article
-        v-for="post in posts"
+        v-for="post in rest"
         :key="post._path"
         class="group p-6 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md hover:bg-white/10 transition-all duration-300 shadow-[0_0_0_rgba(0,0,0,0)] hover:shadow-[0_20px_60px_rgba(0,0,0,0.35)]"
       >
@@ -34,6 +70,7 @@
           <p class="text-white/80" v-if="post.description">
             {{ post.description }}
           </p>
+          <div class="text-xs text-white/40">查看评论 →</div>
         </NuxtLink>
       </article>
     </div>
@@ -48,6 +85,9 @@ definePageMeta({
 const { data: posts } = await useAsyncData("blog", async () => {
   return await queryContent("blog").sort({ date: -1 }).find();
 });
+
+const featured = computed(() => posts.value?.[0] ?? null);
+const rest = computed(() => posts.value?.slice(1) ?? []);
 
 function formatDate(date: string | Date) {
   return useDateFormat(date, "YYYY-MM-DD").value;

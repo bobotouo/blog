@@ -73,31 +73,6 @@
               看看我的快照
             </NuxtLink>
           </Motion>
-
-          <Motion
-            tag="div"
-            :initial="{ y: 12, opacity: 0 }"
-            :animate="{ y: 0, opacity: 1 }"
-            :transition="{ duration: 0.6, delay: 0.75, ease: 'easeOut' }"
-            class="mt-12 grid grid-cols-2 md:grid-cols-4 gap-6 text-sm text-white/60"
-          >
-            <div class="space-y-2">
-              <p class="text-white text-lg font-semibold">真实</p>
-              <p>记录正在发生的日子</p>
-            </div>
-            <div class="space-y-2">
-              <p class="text-white text-lg font-semibold">轻量</p>
-              <p>只保留必要的内容</p>
-            </div>
-            <div class="space-y-2">
-              <p class="text-white text-lg font-semibold">酷炫</p>
-              <p>一冷一暖的霓虹色</p>
-            </div>
-            <div class="space-y-2">
-              <p class="text-white text-lg font-semibold">日常</p>
-              <p>快照式的生活片段</p>
-            </div>
-          </Motion>
         </div>
         <template #fallback>
           <div class="max-w-5xl mx-auto w-full text-white">
@@ -117,6 +92,63 @@
           </div>
         </template>
       </ClientOnly>
+
+      <section class="max-w-5xl mx-auto w-full mt-16">
+        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+          <div>
+            <p class="text-xs uppercase tracking-[0.4em] text-white/50 mb-4">
+              My Snapshots
+            </p>
+            <h2 class="text-3xl md:text-4xl font-semibold text-white">
+              我的快照
+            </h2>
+            <p class="mt-3 text-white/60 max-w-xl">
+              最近的一些生活片段与心情记录。
+            </p>
+          </div>
+          <NuxtLink
+            to="/snapshots"
+            class="text-sm text-white/60 hover:text-white transition"
+          >
+            查看全部 →
+          </NuxtLink>
+        </div>
+
+        <div class="mt-8 grid gap-6 md:grid-cols-3">
+          <NuxtLink
+            v-for="item in snapshots"
+            :key="item._path"
+            :to="item._path"
+            class="group rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md overflow-hidden hover:bg-white/10 transition"
+          >
+            <div class="h-44 w-full overflow-hidden">
+              <img
+                v-if="item.images && item.images.length"
+                :src="item.images[0]"
+                alt="snapshot"
+                loading="lazy"
+                decoding="async"
+                class="h-full w-full object-cover group-hover:scale-[1.03] transition"
+              />
+              <div
+                v-else
+                class="h-full w-full bg-[linear-gradient(135deg,_rgba(34,211,238,0.2),_rgba(249,115,22,0.2))]"
+              />
+            </div>
+            <div class="p-5">
+              <p class="text-xs uppercase tracking-[0.3em] text-white/40">
+                {{ formatDate(item.date) }}
+              </p>
+              <h3 class="mt-3 text-xl font-semibold text-white">
+                {{ item.title }}
+              </h3>
+              <p v-if="item.summary" class="mt-2 text-white/70 text-sm">
+                {{ item.summary }}
+              </p>
+            </div>
+          </NuxtLink>
+        </div>
+      </section>
     </main>
   </div>
 </template>
@@ -124,6 +156,15 @@
 <script setup lang="ts">
 import { Motion } from 'motion-v';
 import RotatingText from '~/components/RotatingText.vue';
+
+const { data: snapshotData } = await useAsyncData("home-snapshots", async () => {
+  return await queryContent("snapshots").sort({ date: -1 }).limit(3).find();
+});
+const snapshots = computed(() => snapshotData.value ?? []);
+
+function formatDate(date: string | Date) {
+  return useDateFormat(date, "YYYY-MM-DD").value;
+}
 </script>
 
 <style scoped></style>
