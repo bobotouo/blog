@@ -17,7 +17,7 @@ const repo = config.public.giscusRepo || "";
 const repoId = config.public.giscusRepoId || "";
 const category = config.public.giscusCategory || "Announcements";
 const categoryId = config.public.giscusCategoryId || "";
-const theme = config.public.giscusTheme || "transparent_dark";
+const theme = config.public.giscusTheme || "dark_dimmed";
 
 const loadComments = () => {
   if (commentsLoaded.value || !commentsContainer.value) return;
