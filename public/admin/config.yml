@@ -1,6 +1,5 @@
 backend:
-  name: github
-  repo: bobotouo/new-blog
+  name: git-gateway
   branch: main
   auth_type: implicit
 
