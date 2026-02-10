@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+
+@layer base {
+  html,
+  body {
+    @apply antialiased;
+    font-family: "Space Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    background-color: #0a0f14;
+    color: #e2e8f0;
+  }
+}
+
+@layer base {
+  :root {
+    --bg-deep: #05070b;
+    --bg-main: #0a0f14;
+    --bg-soft: #111827;
+    --fg-main: #e2e8f0;
+    --fg-muted: #94a3b8;
+    --accent: #22d3ee;
+    --accent-2: #a3e635;
+    --accent-3: #f97316;
+  }
+}
+
+@layer utilities {
+  .bg-grid {
+    background-image: linear-gradient(
+        to right,
+        rgba(255, 255, 255, 0.06) 1px,
+        transparent 1px
+      ),
+      linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0.06) 1px,
+        transparent 1px
+      );
+    background-size: 48px 48px;
+  }
+
+  .text-shadow-soft {
+    text-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  }
+}
