@@ -44,6 +44,11 @@ export default defineNuxtConfig({
 
   nitro: {
     preset: "netlify",
+    prerender: {
+      crawlLinks: true,
+      failOnError: false,
+      routes: ["/", "/blog", "/snapshots"],
+    },
   },
 
   // 强制使用单一 Vue 实例，避免 motion-v 等库在 renderSlot 时 currentRenderingInstance 为 null
