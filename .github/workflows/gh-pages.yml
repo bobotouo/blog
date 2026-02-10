@@ -30,6 +30,7 @@ jobs:
       - name: Generate static site
         env:
           NUXT_APP_BASE_URL: /blog/
+          NITRO_PRESET: static
         run: pnpm generate
 
       - name: Deploy
