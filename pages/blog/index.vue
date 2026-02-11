@@ -98,6 +98,9 @@ const { data: posts } = await useAsyncData("blog", async () => {
 const featured = computed(() => posts.value?.[0] ?? null);
 const rest = computed(() => posts.value?.slice(1) ?? []);
 
+const route = useRoute();
+usePageStats(route.path);
+
 function formatDate(date: string | Date) {
   return useDateFormat(date, "YYYY-MM-DD").value;
 }
