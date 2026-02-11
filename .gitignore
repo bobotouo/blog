@@ -17,3 +17,4 @@ yarn-error.log*
 public/blog-list.json
 public/blog/
 public/snapshots-list.json
+public/snapshots/

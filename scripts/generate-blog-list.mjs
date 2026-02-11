@@ -72,11 +72,16 @@ list.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
 writeFileSync(join(publicDir, "blog-list.json"), JSON.stringify(list), "utf-8");
 console.log("[generate-blog-list] wrote", list.length, "posts to blog-list.json and blog/<slug>.json");
 
-// 快照列表静态 JSON（静态站 snapshots 列表页客户端回退）
+// 快照列表 + 快照详情静态 JSON（静态站 snapshots 列表/详情页客户端回退）
 const snapshotsDir = join(__dirname, "..", "content", "snapshots");
+const snapshotsJsonDir = join(publicDir, "snapshots");
 const snapshotFiles = readdirSync(snapshotsDir, { withFileTypes: true })
   .filter((e) => e.isFile() && (e.name.endsWith(".md") || e.name.endsWith(".mdx")))
   .map((e) => e.name);
+
+try {
+  mkdirSync(snapshotsJsonDir, { recursive: true });
+} catch {}
 
 const snapshotsList = [];
 for (const name of snapshotFiles) {
@@ -84,7 +89,7 @@ for (const name of snapshotFiles) {
   const raw = readFileSync(join(snapshotsDir, name), "utf-8");
   const fm = parseFrontmatter(raw);
   const date = fm.date ? (typeof fm.date === "string" ? fm.date : String(fm.date)) : "";
-  snapshotsList.push({
+  const meta = {
     _path: `/snapshots/${slug}`,
     title: fm.title ?? slug,
     date,
@@ -93,8 +98,15 @@ for (const name of snapshotFiles) {
     location: fm.location ?? undefined,
     mood: fm.mood ?? undefined,
     tags: fm.tags ?? undefined,
-  });
+  };
+  snapshotsList.push(meta);
+
+  const bodyMatch = raw.match(/^---\r?\n[\s\S]*?\r?\n---\r?\n([\s\S]*)/);
+  const bodyMd = bodyMatch ? bodyMatch[1].trim() : "";
+  const bodyHtml = marked.parse(bodyMd, { async: false });
+  const detail = { ...meta, body: typeof bodyHtml === "string" ? bodyHtml : String(bodyHtml) };
+  writeFileSync(join(snapshotsJsonDir, `${slug}.json`), JSON.stringify(detail), "utf-8");
 }
 snapshotsList.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
 writeFileSync(join(publicDir, "snapshots-list.json"), JSON.stringify(snapshotsList), "utf-8");
-console.log("[generate-blog-list] wrote", snapshotsList.length, "snapshots to snapshots-list.json");
+console.log("[generate-blog-list] wrote", snapshotsList.length, "snapshots to snapshots-list.json and snapshots/<slug>.json");

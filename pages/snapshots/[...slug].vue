@@ -43,7 +43,8 @@
       </div>
 
       <div class="prose prose-invert max-w-none">
-        <ContentRenderer :value="snapshot as any" />
+        <div v-if="staticBody" v-html="staticBody" />
+        <ContentRenderer v-else-if="snapshot" :value="snapshot as any" />
       </div>
     </div>
 
@@ -62,17 +63,40 @@ definePageMeta({
 });
 
 const route = useRoute();
-const { views } = usePageStats(route.path);
-const { count: commentCount } = useCommentCount(route.path);
+const config = useRuntimeConfig();
+const base = (config.public.baseUrl as string) || "/";
+const fullPath = base.replace(/\/$/, "") + route.path;
+const { views } = usePageStats(fullPath);
+const { count: commentCount } = useCommentCount(fullPath);
 
 const slug = Array.isArray(route.params.slug)
   ? route.params.slug.join("/")
   : route.params.slug;
 const contentPath = `/snapshots/${slug}`;
+const basePath = base.replace(/\/$/, "");
 
-const { data: snapshot } = await useAsyncData(`snapshot-${contentPath}`, () =>
-  queryContent(contentPath).findOne(),
-);
+const { data: snapshot } = await useAsyncData(`snapshot-${contentPath}`, async () => {
+  if (import.meta.server) {
+    return await queryContent(contentPath).findOne();
+  }
+  const cached = useNuxtData(`snapshot-${contentPath}`).data.value;
+  if (cached) return cached;
+  try {
+    return await queryContent(contentPath).findOne();
+  } catch {
+    const fallback = await $fetch<{ body?: string; title?: string; date?: string }>(
+      `${basePath}/snapshots/${slug}.json`,
+    ).catch(() => null);
+    return fallback ?? null;
+  }
+});
+
+// 仅当 body 为字符串时用 v-html（静态 JSON）；Netlify 上 queryContent 返回的 body 是对象，用 ContentRenderer
+const staticBody = computed(() => {
+  const s = snapshot.value as { body?: unknown } | null | undefined;
+  const b = s?.body;
+  return typeof b === "string" ? b : null;
+});
 
 if (!snapshot.value) {
   throw createError({ statusCode: 404, statusMessage: "Page not found" });

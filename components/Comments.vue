@@ -34,9 +34,9 @@ const loadComments = () => {
   script.setAttribute("data-repo-id", repoId);
   script.setAttribute("data-category", category);
   script.setAttribute("data-category-id", categoryId);
-  script.setAttribute("data-mapping", "pathname");
-  // 显式传完整 pathname，避免静态站 base 导致 term 不一致而 404
-  const term = typeof window !== "undefined" ? window.location.pathname : "";
+  // 用完整 URL 作为 term，避免 pathname 被归一化导致与 GitHub 讨论标题不一致而 404
+  script.setAttribute("data-mapping", "specific");
+  const term = typeof window !== "undefined" ? window.location.href : "";
   if (term) script.setAttribute("data-term", term);
   script.setAttribute("data-reactions-enabled", "1");
   script.setAttribute("data-emit-metadata", "0");

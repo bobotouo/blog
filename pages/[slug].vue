@@ -85,9 +85,11 @@ const { data: post } = await useAsyncData(`blog-post-${contentPath}`, async () =
   }
 });
 
+// 仅当 body 为字符串时用 v-html（静态 JSON）；Netlify 上 queryContent 返回的 body 是对象，用 ContentRenderer
 const staticBody = computed(() => {
-  const p = post.value as { body?: string } | null | undefined;
-  return p?.body ?? null;
+  const p = post.value as { body?: unknown } | null | undefined;
+  const b = p?.body;
+  return typeof b === "string" ? b : null;
 });
 
 if (!post.value) {
