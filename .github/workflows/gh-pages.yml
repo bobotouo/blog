@@ -29,7 +29,8 @@ jobs:
 
       - name: Generate static site
         env:
-          NUXT_APP_BASE_URL: /blog/
+          NUXT_APP_BASE_URL: /
+          NUXT_APP_CDN_URL: /blog/
           NITRO_PRESET: static
           NUXT_PUBLIC_BASE_URL: /blog/
           NUXT_GH_PAGES: "true"

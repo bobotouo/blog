@@ -25,10 +25,8 @@ const snapshotRoutes = collectRoutes(
   "/snapshots",
 );
 const isGhPages = process.env.NUXT_GH_PAGES === "true";
-const appBase =
-  process.env.NUXT_APP_BASE_URL ||
-  process.env.NUXT_PUBLIC_BASE_URL ||
-  "/";
+const appBase = process.env.NUXT_APP_BASE_URL || "/";
+const cdnBase = process.env.NUXT_APP_CDN_URL || "";
 const normalizedBase = appBase.endsWith("/") ? appBase : `${appBase}/`;
 const baseRoutes = ["/", "/blog", "/snapshots", ...blogRoutes, ...snapshotRoutes];
 const prerenderRoutes = baseRoutes;
@@ -51,6 +49,8 @@ export default defineNuxtConfig({
     },
     pageTransition: { name: "page", mode: "out-in" },
     baseURL: appBase,
+    cdnURL: cdnBase,
+    buildAssetsDir: "/_nuxt/",
   },
 
   // Modules
