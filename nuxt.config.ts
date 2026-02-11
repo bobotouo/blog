@@ -93,6 +93,7 @@ export default defineNuxtConfig({
       giscusCategoryId: "",
       giscusTheme: "dark",
       statsBase: "",
+      baseUrl: process.env.NUXT_PUBLIC_BASE_URL || "/",
     },
   },
 });

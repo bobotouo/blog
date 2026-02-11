@@ -31,6 +31,7 @@ jobs:
         env:
           NUXT_APP_BASE_URL: /blog/
           NITRO_PRESET: static
+          NUXT_PUBLIC_BASE_URL: /blog/
         run: pnpm generate
 
       - name: Deploy
