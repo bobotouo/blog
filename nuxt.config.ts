@@ -61,10 +61,6 @@ export default defineNuxtConfig({
     "@vueuse/nuxt",
   ],
 
-  experimental: {
-    payloadExtraction: false,
-  },
-
   // Content module config
   content: {
     // files are placed under the `content/` directory
