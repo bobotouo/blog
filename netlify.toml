@@ -1,4 +1,4 @@
-# Nuxt 3 + Nitro：构建产物在 .output，详见 docs/DEPLOY-NETLIFY.md
+# Nuxt 3 + Nitro：构建产物在 dist，函数由 Nitro 输出到 .netlify/functions-internal
 [build]
   command = "npm run build && npm run build:netlify-dist"
   publish = "dist"
@@ -6,3 +6,9 @@
 [build.environment]
   NODE_VERSION = "20"
   NITRO_PRESET = "netlify"
+
+# 未命中静态文件时交给 Nitro server，否则 /api/*、/stats 等会 404
+[[redirects]]
+  from = "/*"
+  to = "/.netlify/functions/server"
+  status = 200
