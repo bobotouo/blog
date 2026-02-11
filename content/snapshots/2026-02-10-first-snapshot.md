@@ -5,7 +5,7 @@ summary: 塞尔达真乃神作, 真好玩!
 location: 海拉鲁大陆
 mood: calm
 images:
-  - /uploads/195400-15234476401273.jpeg
+  - /uploads/195400-15234476401273.jpg
 tags:
   - 自由
   - 冒险
