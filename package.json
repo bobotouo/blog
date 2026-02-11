@@ -7,7 +7,8 @@
     "test:unit": "vitest run",
     "dev": "nuxt dev",
     "build": "nuxt build",
-    "generate": "nuxt generate",
+    "generate": "node scripts/generate-blog-list.mjs && nuxt generate",
+    "pregenerate": "node scripts/generate-blog-list.mjs",
     "start": "nuxt start",
     "lint": "eslint --ext .js,.ts,.vue .",
     "format": "prettier --write ."

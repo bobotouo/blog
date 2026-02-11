@@ -83,7 +83,15 @@ definePageMeta({
 });
 
 const { data: posts } = await useAsyncData("blog", async () => {
-  return await queryContent("blog").sort({ date: -1 }).find();
+  if (import.meta.server) {
+    return await queryContent("blog").sort({ date: -1 }).find();
+  }
+  const cached = useNuxtData("blog").data.value;
+  if (cached?.length !== undefined) return cached;
+  const config = useRuntimeConfig();
+  const base = (config.public.baseUrl as string) || "/";
+  const basePath = base.replace(/\/$/, "");
+  return await $fetch<unknown[]>(`${basePath}/blog-list.json`);
 });
 
 const featured = computed(() => posts.value?.[0] ?? null);
