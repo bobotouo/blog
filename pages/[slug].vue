@@ -31,7 +31,8 @@
       </div>
 
       <div class="prose prose-invert max-w-none">
-        <ContentRenderer :value="post as any" />
+        <div v-if="staticBody" v-html="staticBody" />
+        <ContentRenderer v-else-if="post" :value="post as any" />
       </div>
     </div>
 
@@ -66,10 +67,28 @@ const { views } = usePageStats(fullPath);
 const { count: commentCount } = useCommentCount(fullPath);
 
 const contentPath = `/blog/${slug}`;
+const basePath = base.replace(/\/$/, "");
 
-const { data: post } = await useAsyncData(`blog-post-${contentPath}`, () =>
-  queryContent(contentPath).findOne(),
-);
+const { data: post } = await useAsyncData(`blog-post-${contentPath}`, async () => {
+  if (import.meta.server) {
+    return await queryContent(contentPath).findOne();
+  }
+  const cached = useNuxtData(`blog-post-${contentPath}`).data.value;
+  if (cached) return cached;
+  try {
+    return await queryContent(contentPath).findOne();
+  } catch {
+    const fallback = await $fetch<{ body?: string; title?: string; date?: string; tags?: string[] }>(
+      `${basePath}/blog/${slug}.json`,
+    ).catch(() => null);
+    return fallback ?? null;
+  }
+});
+
+const staticBody = computed(() => {
+  const p = post.value as { body?: string } | null | undefined;
+  return p?.body ?? null;
+});
 
 if (!post.value) {
   throw createError({ statusCode: 404, statusMessage: "Page not found" });

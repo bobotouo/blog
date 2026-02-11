@@ -12,3 +12,7 @@ pnpm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 *.log
+
+# 构建时生成的静态数据，不提交
+public/blog-list.json
+public/blog/

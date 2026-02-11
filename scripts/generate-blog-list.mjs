@@ -1,14 +1,16 @@
 /**
- * 构建时生成 public/blog-list.json，供静态站（GitHub Pages）博客列表页客户端请求。
- * 仅使用 Node 内置模块，解析 content/blog/*.md 的 frontmatter。
+ * 构建时生成 public/blog-list.json 与 public/blog/<slug>.json，
+ * 供静态站（GitHub Pages）博客列表页与文章页客户端请求。
  */
-import { readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { marked } from "marked";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const contentDir = join(__dirname, "..", "content", "blog");
-const outPath = join(__dirname, "..", "public", "blog-list.json");
+const publicDir = join(__dirname, "..", "public");
+const blogJsonDir = join(publicDir, "blog");
 
 function parseFrontmatter(raw) {
   const match = raw.match(/^---\r?\n([\s\S]*?)\r?\n---/);
@@ -39,22 +41,33 @@ const files = readdirSync(contentDir, { withFileTypes: true })
   .filter((e) => e.isFile() && (e.name.endsWith(".md") || e.name.endsWith(".mdx")))
   .map((e) => e.name);
 
+try {
+  mkdirSync(blogJsonDir, { recursive: true });
+} catch {}
+
 const list = [];
 for (const name of files) {
   const slug = name.replace(/\.(md|mdx)$/, "");
   const raw = readFileSync(join(contentDir, name), "utf-8");
   const fm = parseFrontmatter(raw);
   const date = fm.date ? (typeof fm.date === "string" ? fm.date : String(fm.date)) : "";
-  list.push({
+  const meta = {
     _path: `/blog/${slug}`,
     title: fm.title ?? slug,
     date,
     description: fm.description ?? undefined,
     tags: fm.tags ?? undefined,
     coverImage: fm.coverImage ?? undefined,
-  });
+  };
+  list.push(meta);
+
+  const bodyMatch = raw.match(/^---\r?\n[\s\S]*?\r?\n---\r?\n([\s\S]*)/);
+  const bodyMd = bodyMatch ? bodyMatch[1].trim() : "";
+  const bodyHtml = marked.parse(bodyMd, { async: false });
+  const article = { ...meta, body: typeof bodyHtml === "string" ? bodyHtml : String(bodyHtml) };
+  writeFileSync(join(blogJsonDir, `${slug}.json`), JSON.stringify(article), "utf-8");
 }
 
 list.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
-writeFileSync(outPath, JSON.stringify(list), "utf-8");
-console.log("[generate-blog-list] wrote", list.length, "posts to", outPath);
+writeFileSync(join(publicDir, "blog-list.json"), JSON.stringify(list), "utf-8");
+console.log("[generate-blog-list] wrote", list.length, "posts to blog-list.json and blog/<slug>.json");

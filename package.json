@@ -25,6 +25,7 @@
     "eslint-plugin-vue": "^9.24.0",
     "giscus": "^1.4.0",
     "gsap": "^3.12.5",
+    "marked": "^17.0.1",
     "nuxt": "^3.10.0",
     "postcss": "^8.4.31",
     "prettier": "^3.2.5",

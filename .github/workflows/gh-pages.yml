@@ -40,8 +40,8 @@ jobs:
           NUXT_PUBLIC_GISCUS_THEME: dark_dimmed
         run: pnpm generate
 
-      - name: Copy SPA index to 404.html for GitHub Pages fallback
-        run: cp .output/public/index.html .output/public/404.html
+      - name: Copy SPA shell (200.html) to 404.html so refresh keeps current route
+        run: cp .output/public/200.html .output/public/404.html
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v4
