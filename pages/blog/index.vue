@@ -19,14 +19,14 @@
         :to="articlePath(featured._path)"
         class="group grid gap-6 md:grid-cols-[1.1fr_1fr] rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl overflow-hidden hover:bg-white/10 transition"
       >
-        <div class="h-52 md:h-full">
+        <div class="max-h-[220px] min-h-[52px]">
           <img
             v-if="featured.coverImage"
             :src="featured.coverImage"
             alt="cover"
             loading="lazy"
             decoding="async"
-            class="max-h-200 w-full object-cover group-hover:scale-[1.02] transition"
+            class=" w-full object-cover group-hover:scale-[1.02] transition"
           />
           <div
             v-else
@@ -52,11 +52,12 @@
       </NuxtLink>
     </div>
 
-    <div class="grid gap-6 md:grid-cols-2">
+    <!-- 两列瀑布流：使用 CSS 多列布局，每张卡片 break-inside-avoid 保证不被打断 -->
+    <div class="columns-1 md:columns-2 [column-gap:1.5rem]">
       <article
         v-for="post in rest"
         :key="post._path"
-        class="group p-5 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md hover:bg-white/10 transition-all duration-300 shadow-[0_0_0_rgba(0,0,0,0)] hover:shadow-[0_20px_60px_rgba(0,0,0,0.35)]"
+        class="group p-5 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md hover:bg-white/10 transition-all duration-300 shadow-[0_0_0_rgba(0,0,0,0)] hover:shadow-[0_20px_60px_rgba(0,0,0,0.35)] break-inside-avoid mb-6"
       >
         <NuxtLink :to="articlePath(post._path)" class="block space-y-3">
           <div class="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-white/40">
