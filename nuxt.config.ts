@@ -24,11 +24,23 @@ const snapshotRoutes = collectRoutes(
   join(process.cwd(), "content", "snapshots"),
   "/snapshots",
 );
+// 顶层文章路由 /:slug，使 GitHub Pages base /blog/ 下文章 URL 为 /blog/:slug
+const articleSlugRoutes = collectRoutes(
+  join(process.cwd(), "content", "blog"),
+  "",
+).map((s) => (s.startsWith("/") ? s : `/${s}`));
 const isGhPages = process.env.NUXT_GH_PAGES === "true";
 const appBase = process.env.NUXT_APP_BASE_URL || "/";
 const cdnBase = process.env.NUXT_APP_CDN_URL || "";
 const normalizedBase = appBase.endsWith("/") ? appBase : `${appBase}/`;
-const baseRoutes = ["/", "/blog", "/snapshots", ...blogRoutes, ...snapshotRoutes];
+const baseRoutes = [
+  "/",
+  "/blog",
+  "/snapshots",
+  ...articleSlugRoutes,
+  ...blogRoutes,
+  ...snapshotRoutes,
+];
 const withTrailingSlash = (route: string) =>
   route === "/" ? route : route.endsWith("/") ? route : `${route}/`;
 const prerenderRoutes = Array.from(

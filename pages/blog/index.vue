@@ -16,7 +16,7 @@
     </div>
     <div v-if="featured" class="mb-10">
       <NuxtLink
-        :to="featured._path"
+        :to="articlePath(featured._path)"
         class="group grid gap-6 md:grid-cols-[1.1fr_1fr] rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl overflow-hidden hover:bg-white/10 transition"
       >
         <div class="h-52 md:h-full">
@@ -58,7 +58,7 @@
         :key="post._path"
         class="group p-5 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md hover:bg-white/10 transition-all duration-300 shadow-[0_0_0_rgba(0,0,0,0)] hover:shadow-[0_20px_60px_rgba(0,0,0,0.35)]"
       >
-        <NuxtLink :to="post._path" class="block space-y-3">
+        <NuxtLink :to="articlePath(post._path)" class="block space-y-3">
           <div class="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-white/40">
             <span>Article</span>
             <span class="text-white/30">→</span>
@@ -91,6 +91,11 @@ const rest = computed(() => posts.value?.slice(1) ?? []);
 
 function formatDate(date: string | Date) {
   return useDateFormat(date, "YYYY-MM-DD").value;
+}
+
+/** 文章页路径：在 base /blog/ 下为 /blog/:slug，故应用内用 /:slug */
+function articlePath(contentPath: string) {
+  return contentPath.replace(/^\/blog\//, "/") || "/";
 }
 </script>
 
