@@ -30,6 +30,12 @@ const appBase =
   process.env.NUXT_PUBLIC_BASE_URL ||
   "/";
 const normalizedBase = appBase.endsWith("/") ? appBase : `${appBase}/`;
+const ghPrefix =
+  isGhPages && normalizedBase !== "/" ? normalizedBase.slice(0, -1) : "";
+const baseRoutes = ["/", "/blog", "/snapshots", ...blogRoutes, ...snapshotRoutes];
+const prerenderRoutes = isGhPages
+  ? baseRoutes.map((route) => `${ghPrefix}${route}`)
+  : baseRoutes;
 
 export default defineNuxtConfig({
   compatibilityDate: "2026-01-30",
@@ -48,7 +54,7 @@ export default defineNuxtConfig({
       ],
     },
     pageTransition: { name: "page", mode: "out-in" },
-    baseURL: process.env.NUXT_APP_BASE_URL || "/",
+    baseURL: appBase,
   },
 
   // Modules
@@ -64,7 +70,9 @@ export default defineNuxtConfig({
     // files are placed under the `content/` directory
     // enable markdown frontmatter schema if needed later
     api: {
-      baseURL: isGhPages ? `${normalizedBase}api/_content` : "/api/_content",
+      baseURL: isGhPages
+        ? `${ghPrefix}/api/_content`
+        : "/api/_content",
     },
     experimental: {
       clientDB: isGhPages,
@@ -86,12 +94,12 @@ export default defineNuxtConfig({
       ? {
           crawlLinks: false,
           failOnError: false,
-          routes: ["/", "/blog", "/snapshots", ...blogRoutes, ...snapshotRoutes],
+          routes: prerenderRoutes,
         }
       : {
           crawlLinks: true,
           failOnError: false,
-          routes: ["/", "/blog", "/snapshots", ...blogRoutes, ...snapshotRoutes],
+          routes: prerenderRoutes,
         },
   },
 
@@ -112,7 +120,7 @@ export default defineNuxtConfig({
       giscusCategoryId: "",
       giscusTheme: "dark",
       statsBase: "",
-      baseUrl: process.env.NUXT_PUBLIC_BASE_URL || "/",
+      baseUrl: appBase,
     },
   },
 });
