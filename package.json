@@ -7,6 +7,7 @@
     "test:unit": "vitest run",
     "dev": "nuxt dev",
     "build": "nuxt build",
+    "build:netlify-dist": "node -e \"const fs=require('fs');const path=require('path');const src=path.join(process.cwd(),'.output','public');const dest=path.join(process.cwd(),'dist');if(fs.existsSync(dest))fs.rmSync(dest,{recursive:true});fs.cpSync(src,dest,{recursive:true});\"",
     "generate": "node scripts/generate-blog-list.mjs && nuxt generate",
     "pregenerate": "node scripts/generate-blog-list.mjs",
     "start": "nuxt start",

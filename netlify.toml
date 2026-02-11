@@ -1,6 +1,6 @@
-# Nuxt 3 + Nitro：构建产物在 .output，详见 docs/DEPLOY-NETLIFY.md
+# Nuxt 3 + Nitro：先 build 得到 .output 与 .netlify（server 函数），再把静态资源拷到 dist 供发布
 [build]
-  command = "npm run build"
+  command = "npm run build && npm run build:netlify-dist"
   publish = "dist"
 
 [build.environment]
