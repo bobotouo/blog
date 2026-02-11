@@ -16,3 +16,4 @@ yarn-error.log*
 # 构建时生成的静态数据，不提交
 public/blog-list.json
 public/blog/
+public/snapshots-list.json

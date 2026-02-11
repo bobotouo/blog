@@ -66,8 +66,16 @@ definePageMeta({
   layout: "blog",
 });
 
+const config = useRuntimeConfig();
+const basePath = ((config.public.baseUrl as string) || "/").replace(/\/$/, "");
+
 const { data: snapshots } = await useAsyncData("snapshots", async () => {
-  return await queryContent("snapshots").sort({ date: -1 }).find();
+  if (import.meta.server) {
+    return await queryContent("snapshots").sort({ date: -1 }).find();
+  }
+  const cached = useNuxtData("snapshots").data.value;
+  if (cached?.length !== undefined) return cached;
+  return await $fetch<unknown[]>(`${basePath}/snapshots-list.json`);
 });
 
 function formatDate(date: string | Date) {

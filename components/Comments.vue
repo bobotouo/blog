@@ -35,6 +35,9 @@ const loadComments = () => {
   script.setAttribute("data-category", category);
   script.setAttribute("data-category-id", categoryId);
   script.setAttribute("data-mapping", "pathname");
+  // 显式传完整 pathname，避免静态站 base 导致 term 不一致而 404
+  const term = typeof window !== "undefined" ? window.location.pathname : "";
+  if (term) script.setAttribute("data-term", term);
   script.setAttribute("data-reactions-enabled", "1");
   script.setAttribute("data-emit-metadata", "0");
   script.setAttribute("data-input-position", "bottom");

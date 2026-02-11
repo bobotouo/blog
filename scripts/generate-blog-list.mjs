@@ -71,3 +71,30 @@ for (const name of files) {
 list.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
 writeFileSync(join(publicDir, "blog-list.json"), JSON.stringify(list), "utf-8");
 console.log("[generate-blog-list] wrote", list.length, "posts to blog-list.json and blog/<slug>.json");
+
+// 快照列表静态 JSON（静态站 snapshots 列表页客户端回退）
+const snapshotsDir = join(__dirname, "..", "content", "snapshots");
+const snapshotFiles = readdirSync(snapshotsDir, { withFileTypes: true })
+  .filter((e) => e.isFile() && (e.name.endsWith(".md") || e.name.endsWith(".mdx")))
+  .map((e) => e.name);
+
+const snapshotsList = [];
+for (const name of snapshotFiles) {
+  const slug = name.replace(/\.(md|mdx)$/, "");
+  const raw = readFileSync(join(snapshotsDir, name), "utf-8");
+  const fm = parseFrontmatter(raw);
+  const date = fm.date ? (typeof fm.date === "string" ? fm.date : String(fm.date)) : "";
+  snapshotsList.push({
+    _path: `/snapshots/${slug}`,
+    title: fm.title ?? slug,
+    date,
+    summary: fm.summary ?? undefined,
+    images: fm.images ?? undefined,
+    location: fm.location ?? undefined,
+    mood: fm.mood ?? undefined,
+    tags: fm.tags ?? undefined,
+  });
+}
+snapshotsList.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+writeFileSync(join(publicDir, "snapshots-list.json"), JSON.stringify(snapshotsList), "utf-8");
+console.log("[generate-blog-list] wrote", snapshotsList.length, "snapshots to snapshots-list.json");
