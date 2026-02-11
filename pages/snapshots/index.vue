@@ -75,7 +75,7 @@ const { data: snapshots } = await useAsyncData("snapshots", async () => {
   }
   const cached = useNuxtData("snapshots").data.value;
   if (cached?.length !== undefined) return cached;
-  return await $fetch<unknown[]>(`${basePath}/snapshots-list.json`);
+  return await $fetch<unknown[]>(`${basePath}/snapshots-list.json`).catch(() => []);
 });
 
 function formatDate(date: string | Date) {

@@ -91,7 +91,7 @@ const { data: posts } = await useAsyncData("blog", async () => {
   const config = useRuntimeConfig();
   const base = (config.public.baseUrl as string) || "/";
   const basePath = base.replace(/\/$/, "");
-  return await $fetch<unknown[]>(`${basePath}/blog-list.json`);
+  return await $fetch<unknown[]>(`${basePath}/blog-list.json`).catch(() => []);
 });
 
 const featured = computed(() => posts.value?.[0] ?? null);

@@ -12,16 +12,55 @@ const contentDir = join(__dirname, "..", "content", "blog");
 const publicDir = join(__dirname, "..", "public");
 const blogJsonDir = join(publicDir, "blog");
 
+// 静态站 base（如 /blog/）下，将 /uploads /images 等资源路径加上 base 前缀，否则图片 404
+const staticBase = process.env.NUXT_APP_BASE_URL || "";
+const assetPrefix = staticBase.replace(/\/$/, ""); // e.g. "/blog"
+
+function rewriteAssetPaths(html) {
+  if (!assetPrefix || typeof html !== "string") return html;
+  return html
+    .replace(/src="\/uploads\//g, `src="${assetPrefix}/uploads/`)
+    .replace(/href="\/uploads\//g, `href="${assetPrefix}/uploads/`)
+    .replace(/src="\/images\//g, `src="${assetPrefix}/images/`)
+    .replace(/href="\/images\//g, `href="${assetPrefix}/images/`);
+}
+
+function rewriteAssetInMeta(value) {
+  if (!assetPrefix || value == null) return value;
+  if (typeof value === "string" && (value.startsWith("/uploads/") || value.startsWith("/images/"))) {
+    return `${assetPrefix}${value}`;
+  }
+  if (Array.isArray(value)) {
+    return value.map((v) => (typeof v === "string" && (v.startsWith("/uploads/") || v.startsWith("/images/")) ? `${assetPrefix}${v}` : v));
+  }
+  return value;
+}
+
 function parseFrontmatter(raw) {
   const match = raw.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   if (!match) return {};
   const lines = match[1].trim().split(/\r?\n/);
   const obj = {};
-  for (const line of lines) {
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i];
     const colon = line.indexOf(":");
-    if (colon === -1) continue;
+    if (colon === -1) {
+      i++;
+      continue;
+    }
     let key = line.slice(0, colon).trim();
     let value = line.slice(colon + 1).trim();
+    if (value === "" && /^\s+-\s+/.test(lines[i + 1] || "")) {
+      const arr = [];
+      i++;
+      while (i < lines.length && /^\s+-\s+/.test(lines[i])) {
+        arr.push(lines[i].replace(/^\s+-\s+/, "").trim().replace(/^["']|["']$/g, ""));
+        i++;
+      }
+      obj[key] = arr;
+      continue;
+    }
     if (value.startsWith('"') && value.endsWith('"')) {
       value = value.slice(1, -1).replace(/\\"/g, '"');
     } else if (value.startsWith("[") && value.endsWith("]")) {
@@ -33,6 +72,7 @@ function parseFrontmatter(raw) {
     } else if (value === "true") value = true;
     else if (value === "false") value = false;
     obj[key] = value;
+    i++;
   }
   return obj;
 }
@@ -57,14 +97,15 @@ for (const name of files) {
     date,
     description: fm.description ?? undefined,
     tags: fm.tags ?? undefined,
-    coverImage: fm.coverImage ?? undefined,
+    coverImage: rewriteAssetInMeta(fm.coverImage) ?? fm.coverImage,
   };
   list.push(meta);
 
   const bodyMatch = raw.match(/^---\r?\n[\s\S]*?\r?\n---\r?\n([\s\S]*)/);
   const bodyMd = bodyMatch ? bodyMatch[1].trim() : "";
-  const bodyHtml = marked.parse(bodyMd, { async: false });
-  const article = { ...meta, body: typeof bodyHtml === "string" ? bodyHtml : String(bodyHtml) };
+  let bodyHtml = marked.parse(bodyMd, { async: false });
+  bodyHtml = rewriteAssetPaths(typeof bodyHtml === "string" ? bodyHtml : String(bodyHtml));
+  const article = { ...meta, body: bodyHtml };
   writeFileSync(join(blogJsonDir, `${slug}.json`), JSON.stringify(article), "utf-8");
 }
 
@@ -94,7 +135,7 @@ for (const name of snapshotFiles) {
     title: fm.title ?? slug,
     date,
     summary: fm.summary ?? undefined,
-    images: fm.images ?? undefined,
+    images: rewriteAssetInMeta(fm.images) ?? fm.images,
     location: fm.location ?? undefined,
     mood: fm.mood ?? undefined,
     tags: fm.tags ?? undefined,
@@ -103,8 +144,9 @@ for (const name of snapshotFiles) {
 
   const bodyMatch = raw.match(/^---\r?\n[\s\S]*?\r?\n---\r?\n([\s\S]*)/);
   const bodyMd = bodyMatch ? bodyMatch[1].trim() : "";
-  const bodyHtml = marked.parse(bodyMd, { async: false });
-  const detail = { ...meta, body: typeof bodyHtml === "string" ? bodyHtml : String(bodyHtml) };
+  let bodyHtml = marked.parse(bodyMd, { async: false });
+  bodyHtml = rewriteAssetPaths(typeof bodyHtml === "string" ? bodyHtml : String(bodyHtml));
+  const detail = { ...meta, body: bodyHtml };
   writeFileSync(join(snapshotsJsonDir, `${slug}.json`), JSON.stringify(detail), "utf-8");
 }
 snapshotsList.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
