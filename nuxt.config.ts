@@ -1,4 +1,29 @@
+import { readdirSync } from "node:fs";
+import { join } from "node:path";
 import { defineNuxtConfig } from "nuxt/config";
+
+const collectRoutes = (dir: string, base: string): string[] => {
+  try {
+    const entries = readdirSync(dir, { withFileTypes: true });
+    return entries
+      .filter((entry) => entry.isFile())
+      .map((entry) => entry.name)
+      .filter((name) => name.endsWith(".md") || name.endsWith(".json"))
+      .map((name) => name.replace(/\.(md|json)$/, ""))
+      .map((slug) => `${base}/${slug}`);
+  } catch {
+    return [];
+  }
+};
+
+const blogRoutes = collectRoutes(
+  join(process.cwd(), "content", "blog"),
+  "/blog",
+);
+const snapshotRoutes = collectRoutes(
+  join(process.cwd(), "content", "snapshots"),
+  "/snapshots",
+);
 
 export default defineNuxtConfig({
   compatibilityDate: "2026-01-30",
@@ -47,7 +72,7 @@ export default defineNuxtConfig({
     prerender: {
       crawlLinks: true,
       failOnError: false,
-      routes: ["/", "/blog", "/snapshots"],
+      routes: ["/", "/blog", "/snapshots", ...blogRoutes, ...snapshotRoutes],
     },
   },
 

@@ -17,9 +17,9 @@
     <div v-if="featured" class="mb-10">
       <NuxtLink
         :to="featured._path"
-        class="group grid gap-6 md:grid-cols-[1.2fr_1fr] rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl overflow-hidden hover:bg-white/10 transition"
+        class="group grid gap-6 md:grid-cols-[1.1fr_1fr] rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl overflow-hidden hover:bg-white/10 transition"
       >
-        <div class="h-60 md:h-full">
+        <div class="h-52 md:h-full">
           <img
             v-if="featured.coverImage"
             :src="featured.coverImage"
@@ -33,12 +33,12 @@
             class="h-full w-full bg-[linear-gradient(135deg,_rgba(34,211,238,0.25),_rgba(249,115,22,0.15))]"
           />
         </div>
-        <div class="p-6 md:p-8 space-y-4">
+        <div class="p-5 md:p-6 space-y-3">
           <div class="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-white/40">
             <span>Featured</span>
             <span class="text-white/30">→</span>
           </div>
-          <h2 class="text-3xl md:text-4xl font-semibold text-white group-hover:text-[color:var(--accent)] transition">
+          <h2 class="text-2xl md:text-3xl font-semibold text-white group-hover:text-[color:var(--accent)] transition">
             {{ featured.title }}
           </h2>
           <p class="text-sm text-white/60">{{ formatDate(featured.date) }}</p>
@@ -56,9 +56,9 @@
       <article
         v-for="post in rest"
         :key="post._path"
-        class="group p-6 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md hover:bg-white/10 transition-all duration-300 shadow-[0_0_0_rgba(0,0,0,0)] hover:shadow-[0_20px_60px_rgba(0,0,0,0.35)]"
+        class="group p-5 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md hover:bg-white/10 transition-all duration-300 shadow-[0_0_0_rgba(0,0,0,0)] hover:shadow-[0_20px_60px_rgba(0,0,0,0.35)]"
       >
-        <NuxtLink :to="post._path" class="block space-y-4">
+        <NuxtLink :to="post._path" class="block space-y-3">
           <div class="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-white/40">
             <span>Article</span>
             <span class="text-white/30">→</span>

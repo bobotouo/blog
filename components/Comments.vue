@@ -17,7 +17,9 @@ const repo = config.public.giscusRepo || "";
 const repoId = config.public.giscusRepoId || "";
 const category = config.public.giscusCategory || "Announcements";
 const categoryId = config.public.giscusCategoryId || "";
-const theme = config.public.giscusTheme || "dark_dimmed";
+const rawTheme = config.public.giscusTheme || "";
+const theme =
+  rawTheme && rawTheme !== "preferred_color_scheme" ? rawTheme : "dark_dimmed";
 
 const loadComments = () => {
   if (commentsLoaded.value || !commentsContainer.value) return;
@@ -45,19 +47,6 @@ const loadComments = () => {
 
 onMounted(() => {
   if (!commentsContainer.value) return;
-
-  if (!("IntersectionObserver" in window)) {
-    loadComments();
-    return;
-  }
-
-  const observer = new IntersectionObserver((entries) => {
-    if (entries.some((entry) => entry.isIntersecting)) {
-      loadComments();
-      observer.disconnect();
-    }
-  });
-
-  observer.observe(commentsContainer.value);
+  loadComments();
 });
 </script>
