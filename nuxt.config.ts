@@ -30,12 +30,8 @@ const appBase =
   process.env.NUXT_PUBLIC_BASE_URL ||
   "/";
 const normalizedBase = appBase.endsWith("/") ? appBase : `${appBase}/`;
-const ghPrefix =
-  isGhPages && normalizedBase !== "/" ? normalizedBase.slice(0, -1) : "";
 const baseRoutes = ["/", "/blog", "/snapshots", ...blogRoutes, ...snapshotRoutes];
-const prerenderRoutes = isGhPages
-  ? baseRoutes.map((route) => `${ghPrefix}${route}`)
-  : baseRoutes;
+const prerenderRoutes = baseRoutes;
 
 export default defineNuxtConfig({
   compatibilityDate: "2026-01-30",
@@ -70,12 +66,10 @@ export default defineNuxtConfig({
     // files are placed under the `content/` directory
     // enable markdown frontmatter schema if needed later
     api: {
-      baseURL: isGhPages
-        ? `${ghPrefix}/api/_content`
-        : "/api/_content",
+      baseURL: isGhPages ? `${normalizedBase}api/_content` : "/api/_content",
     },
     experimental: {
-      clientDB: isGhPages,
+      clientDB: true,
     },
   },
 
