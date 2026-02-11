@@ -1,0 +1,3 @@
+# 将未匹配到静态文件的请求交给 Nitro server，解决 /stats 等 SSR 路由 404
+# 见 https://docs.netlify.com/routing/redirects/
+/*  /.netlify/functions/server  200
