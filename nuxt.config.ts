@@ -24,6 +24,7 @@ const snapshotRoutes = collectRoutes(
   join(process.cwd(), "content", "snapshots"),
   "/snapshots",
 );
+const isGhPages = process.env.NUXT_GH_PAGES === "true";
 
 export default defineNuxtConfig({
   compatibilityDate: "2026-01-30",
@@ -67,13 +68,21 @@ export default defineNuxtConfig({
     transpile: ["motion-v"],
   },
 
+  ssr: !isGhPages,
   nitro: {
-    preset: process.env.NITRO_PRESET || "netlify",
-    prerender: {
-      crawlLinks: true,
-      failOnError: false,
-      routes: ["/", "/blog", "/snapshots", ...blogRoutes, ...snapshotRoutes],
-    },
+    preset: isGhPages ? "static" : process.env.NITRO_PRESET || "netlify",
+    prerender: isGhPages
+      ? {
+          crawlLinks: false,
+          failOnError: false,
+          routes: ["/"],
+          fallback: "404.html",
+        }
+      : {
+          crawlLinks: true,
+          failOnError: false,
+          routes: ["/", "/blog", "/snapshots", ...blogRoutes, ...snapshotRoutes],
+        },
   },
 
   // 强制使用单一 Vue 实例，避免 motion-v 等库在 renderSlot 时 currentRenderingInstance 为 null

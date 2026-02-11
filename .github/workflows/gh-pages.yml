@@ -32,6 +32,12 @@ jobs:
           NUXT_APP_BASE_URL: /blog/
           NITRO_PRESET: static
           NUXT_PUBLIC_BASE_URL: /blog/
+          NUXT_GH_PAGES: "true"
+          NUXT_PUBLIC_GISCUS_REPO: bobotouo/blog
+          NUXT_PUBLIC_GISCUS_REPO_ID: R_kgDORMxRqg
+          NUXT_PUBLIC_GISCUS_CATEGORY: Announcements
+          NUXT_PUBLIC_GISCUS_CATEGORY_ID: DIC_kwDORMxRqs4C2IoF
+          NUXT_PUBLIC_GISCUS_THEME: dark_dimmed
         run: pnpm generate
 
       - name: Deploy

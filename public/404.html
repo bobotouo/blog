@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="refresh" content="0; url=/blog/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Redirecting…</title>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var base = '/blog/';
+        var path = window.location.pathname.replace(base, '/');
+        var search = window.location.search || '';
+        var hash = window.location.hash || '';
+        var target = base + '#' + path + search + hash;
+        window.location.replace(target);
+      })();
+    </script>
+  </body>
+</html>
