@@ -115,6 +115,10 @@ export default defineNuxtConfig({
           failOnError: false,
           routes: prerenderRoutes,
         },
+    // 确保 API 路由不被预渲染，由 server 函数处理
+    routeRules: {
+      "/api/**": { ssr: false, headers: { "Cache-Control": "public, max-age=0, must-revalidate" } },
+    },
   },
 
   // 强制使用单一 Vue 实例，避免 motion-v 等库在 renderSlot 时 currentRenderingInstance 为 null

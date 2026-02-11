@@ -9,12 +9,14 @@ const cwd = process.cwd();
 const outputPublic = join(cwd, '.output', 'public');
 const outputRoot = join(cwd, '.output');
 const dest = join(cwd, 'dist');
-const netlifyFunctions = join(cwd, '.netlify', 'functions-internal');
+const netlifyFunctionsInternal = join(cwd, '.netlify', 'functions-internal');
+const netlifyFunctions = join(cwd, '.netlify', 'functions');
 
 console.log('Checking build output...');
 console.log('  .output exists:', existsSync(outputRoot));
 console.log('  dist exists:', existsSync(dest));
-console.log('  .netlify/functions-internal exists:', existsSync(netlifyFunctions));
+console.log('  .netlify/functions-internal exists:', existsSync(netlifyFunctionsInternal));
+console.log('  .netlify/functions exists:', existsSync(netlifyFunctions));
 
 if (existsSync(outputRoot)) {
   const entries = readdirSync(outputRoot);
@@ -70,11 +72,42 @@ if (existsSync(outputPublic)) {
 }
 
 // 检查 server 函数是否存在
-if (!existsSync(netlifyFunctions)) {
-  console.warn('⚠ WARNING: .netlify/functions-internal does not exist!');
-  console.warn('  API routes (/api/*) will not work.');
-  console.warn('  Make sure NITRO_PRESET=netlify is set in build environment.');
+const netlifyRoot = join(cwd, '.netlify');
+if (!existsSync(netlifyRoot)) {
+  console.error('✗ ERROR: .netlify directory does not exist!');
+  console.error('  API routes (/api/*) will not work.');
+  console.error('  Make sure NITRO_PRESET=netlify is set in build environment.');
+  console.error('  Current NITRO_PRESET:', process.env.NITRO_PRESET || 'not set');
+  process.exit(1);
 } else {
-  const funcEntries = readdirSync(netlifyFunctions);
-  console.log('✓ Server functions found:', funcEntries.join(', '));
+  console.log('✓ .netlify directory exists');
+  const netlifyEntries = readdirSync(netlifyRoot);
+  console.log('  .netlify contents:', netlifyEntries.join(', '));
+  
+  // 检查 functions-internal（Nitro 构建输出）或 functions（Netlify 部署）
+  const funcDirs = [];
+  if (existsSync(netlifyFunctionsInternal)) {
+    funcDirs.push({ name: 'functions-internal', path: netlifyFunctionsInternal });
+  }
+  if (existsSync(netlifyFunctions)) {
+    funcDirs.push({ name: 'functions', path: netlifyFunctions });
+  }
+  
+  if (funcDirs.length === 0) {
+    console.error('✗ ERROR: No .netlify/functions-internal or .netlify/functions found!');
+    console.error('  API routes (/api/*) will not work.');
+    console.error('  Make sure NITRO_PRESET=netlify is set and build completed successfully.');
+    process.exit(1);
+  }
+  
+  for (const { name, path: funcPath } of funcDirs) {
+    const funcEntries = readdirSync(funcPath);
+    console.log(`✓ ${name} found:`, funcEntries.join(', '));
+    const serverFunc = join(funcPath, 'server');
+    if (existsSync(serverFunc)) {
+      console.log(`✓ Server function exists in ${name} at:`, serverFunc);
+    } else {
+      console.warn(`⚠ Server function not found in ${name}`);
+    }
+  }
 }
