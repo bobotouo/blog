@@ -1,7 +1,7 @@
 # Nuxt 3 + Nitro：构建产物在 .output，详见 docs/DEPLOY-NETLIFY.md
 [build]
   command = "npm run build"
-  publish = ".output"
+  publish = "dist"
 
 [build.environment]
   NODE_VERSION = "20"
