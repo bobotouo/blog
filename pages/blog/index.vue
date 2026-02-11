@@ -9,7 +9,7 @@
           记录、思考、延伸
         </h1>
         <p class="mt-3 text-white/60 max-w-xl">
-          简洁版式与酷炫光感并存，保持阅读专注。
+          保持阅读专注。
         </p>
       </div>
       <div class="text-white/50 text-sm">{{ posts?.length ?? 0 }} 篇文章</div>
@@ -26,7 +26,7 @@
             alt="cover"
             loading="lazy"
             decoding="async"
-            class="h-full w-full object-cover group-hover:scale-[1.02] transition"
+            class="max-h-200 w-full object-cover group-hover:scale-[1.02] transition"
           />
           <div
             v-else
