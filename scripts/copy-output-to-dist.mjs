@@ -1,36 +1,80 @@
 #!/usr/bin/env node
 /**
- * 将 .output/public 复制到 dist，供 Netlify 发布
+ * 检查构建输出：Netlify preset 可能直接输出到 dist，或需要从 .output/public 复制
  */
-import { existsSync, rmSync, cpSync, readdirSync } from 'fs';
+import { existsSync, readdirSync, cpSync, rmSync } from 'fs';
 import { join } from 'path';
 
 const cwd = process.cwd();
 const outputPublic = join(cwd, '.output', 'public');
 const outputRoot = join(cwd, '.output');
 const dest = join(cwd, 'dist');
+const netlifyFunctions = join(cwd, '.netlify', 'functions-internal');
 
 console.log('Checking build output...');
 console.log('  .output exists:', existsSync(outputRoot));
+console.log('  dist exists:', existsSync(dest));
+console.log('  .netlify/functions-internal exists:', existsSync(netlifyFunctions));
+
 if (existsSync(outputRoot)) {
   const entries = readdirSync(outputRoot);
   console.log('  .output contents:', entries.join(', '));
 }
 
+// 如果 dist 已存在且包含 index.html 和 _nuxt，说明 Netlify preset 已直接输出到 dist
 if (existsSync(dest)) {
-  console.log('Removing existing dist...');
-  rmSync(dest, { recursive: true });
+  const distEntries = readdirSync(dest);
+  console.log('  dist contents:', distEntries.slice(0, 10).join(', '), distEntries.length > 10 ? '...' : '');
+  const hasIndex = distEntries.includes('index.html');
+  const hasNuxt = distEntries.some(e => e.startsWith('_nuxt') || e === '_nuxt');
+  console.log('  dist has index.html:', hasIndex);
+  console.log('  dist has _nuxt:', hasNuxt);
+  
+  if (hasIndex && hasNuxt) {
+    console.log('✓ dist already contains build output from Netlify preset');
+    // 确保 _redirects 文件存在
+    const redirectsFile = join(dest, '_redirects');
+    if (!existsSync(redirectsFile)) {
+      console.log('⚠ _redirects not found in dist, checking public/_redirects...');
+      const publicRedirects = join(cwd, 'public', '_redirects');
+      if (existsSync(publicRedirects)) {
+        cpSync(publicRedirects, redirectsFile);
+        console.log('✓ Copied _redirects from public/ to dist/');
+      } else {
+        console.warn('⚠ No _redirects file found! API routes may not work.');
+      }
+    } else {
+      console.log('✓ _redirects file exists in dist');
+    }
+    process.exit(0);
+  }
 }
 
+// 如果 dist 不存在或不完整，尝试从 .output/public 复制
 if (existsSync(outputPublic)) {
   console.log('Copying .output/public to dist...');
-  cpSync(outputPublic, dest, { recursive: true });
-  console.log('✓ Successfully copied to dist');
-} else {
-  console.error('✗ ERROR: .output/public does not exist!');
-  console.error('Build may have failed or output structure is different.');
-  if (existsSync(outputRoot)) {
-    console.error('Available in .output:', readdirSync(outputRoot).join(', '));
+  if (existsSync(dest)) {
+    rmSync(dest, { recursive: true });
   }
-  process.exit(1);
+  cpSync(outputPublic, dest, { recursive: true });
+  console.log('✓ Successfully copied .output/public to dist');
+} else {
+  console.log('⚠ .output/public does not exist');
+  console.log('Assuming Netlify preset outputs directly to dist');
+  if (!existsSync(dest)) {
+    console.error('✗ ERROR: dist does not exist and .output/public is missing!');
+    console.error('Build may have failed.');
+    process.exit(1);
+  }
+  console.log('✓ dist exists, using it as-is');
+}
+
+// 检查 server 函数是否存在
+if (!existsSync(netlifyFunctions)) {
+  console.warn('⚠ WARNING: .netlify/functions-internal does not exist!');
+  console.warn('  API routes (/api/*) will not work.');
+  console.warn('  Make sure NITRO_PRESET=netlify is set in build environment.');
+} else {
+  const funcEntries = readdirSync(netlifyFunctions);
+  console.log('✓ Server functions found:', funcEntries.join(', '));
 }
