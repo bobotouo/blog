@@ -49,8 +49,13 @@ const route = useRoute();
 const { views } = usePageStats(route.path);
 const { count: commentCount } = useCommentCount(route.path);
 
-const { data: post } = await useAsyncData(`blog-post-${route.path}`, () =>
-  queryContent(route.path).findOne(),
+const slug = Array.isArray(route.params.slug)
+  ? route.params.slug.join("/")
+  : route.params.slug;
+const contentPath = `/blog/${slug}`;
+
+const { data: post } = await useAsyncData(`blog-post-${contentPath}`, () =>
+  queryContent(contentPath).findOne(),
 );
 
 if (!post.value) {

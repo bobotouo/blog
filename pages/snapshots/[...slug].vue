@@ -65,8 +65,13 @@ const route = useRoute();
 const { views } = usePageStats(route.path);
 const { count: commentCount } = useCommentCount(route.path);
 
-const { data: snapshot } = await useAsyncData(`snapshot-${route.path}`, () =>
-  queryContent(route.path).findOne(),
+const slug = Array.isArray(route.params.slug)
+  ? route.params.slug.join("/")
+  : route.params.slug;
+const contentPath = `/snapshots/${slug}`;
+
+const { data: snapshot } = await useAsyncData(`snapshot-${contentPath}`, () =>
+  queryContent(contentPath).findOne(),
 );
 
 if (!snapshot.value) {
