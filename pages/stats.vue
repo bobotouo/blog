@@ -1,5 +1,5 @@
 <!--
-  后台访问统计页：总访问量 + 按页面分布，仅自己查看
+  访问统计页：总访问量 + 按页面/设备/地域分布，仅自己查看（路径 /stats 避免与 /admin Decap CMS 冲突）
 -->
 <template>
   <section class="max-w-3xl mx-auto py-10 px-6">

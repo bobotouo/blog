@@ -37,7 +37,7 @@ const baseRoutes = [
   "/",
   "/blog",
   "/snapshots",
-  "/admin/stats",
+  "/stats",
   ...articleSlugRoutes,
   ...blogRoutes,
   ...snapshotRoutes,
