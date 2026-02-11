@@ -29,7 +29,14 @@ const appBase = process.env.NUXT_APP_BASE_URL || "/";
 const cdnBase = process.env.NUXT_APP_CDN_URL || "";
 const normalizedBase = appBase.endsWith("/") ? appBase : `${appBase}/`;
 const baseRoutes = ["/", "/blog", "/snapshots", ...blogRoutes, ...snapshotRoutes];
-const prerenderRoutes = baseRoutes;
+const withTrailingSlash = (route: string) =>
+  route === "/" ? route : route.endsWith("/") ? route : `${route}/`;
+const prerenderRoutes = Array.from(
+  new Set([
+    ...baseRoutes,
+    ...baseRoutes.map(withTrailingSlash),
+  ]),
+);
 
 export default defineNuxtConfig({
   compatibilityDate: "2026-01-30",
