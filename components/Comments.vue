@@ -2,16 +2,17 @@
   <div
     id="comments"
     ref="commentsContainer"
-    class="relative my-8 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-4 md:p-6"
+    :class="{ 'comments-ready': widgetReady }"
+    class="relative my-8 min-h-[18rem] rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-4 md:min-h-[20rem] md:p-6"
   >
     <Transition name="skeleton-fade">
       <div
         v-if="showSkeleton"
-        class="absolute inset-0 z-10 rounded-2xl bg-[rgba(10,14,20,0.72)] p-4 md:p-6 space-y-3"
+        class="comments-skeleton"
       >
-        <div class="h-4 w-40 rounded bg-white/10 animate-pulse" />
-        <div class="h-20 w-full rounded-xl bg-white/10 animate-pulse" />
-        <div class="h-20 w-full rounded-xl bg-white/10 animate-pulse" />
+        <div class="comments-skeleton-title" />
+        <div class="comments-skeleton-item" />
+        <div class="comments-skeleton-item" />
       </div>
     </Transition>
     <p
@@ -152,5 +153,61 @@ onUnmounted(() => {
 .skeleton-fade-enter-from,
 .skeleton-fade-leave-to {
   opacity: 0;
+}
+
+.comments-skeleton {
+  position: absolute;
+  inset: 1px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: calc(1rem - 1px);
+  background: linear-gradient(180deg, rgba(11, 16, 25, 0.78), rgba(8, 12, 20, 0.74));
+  pointer-events: none;
+}
+
+.comments-skeleton-title,
+.comments-skeleton-item {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.06));
+  background-size: 220% 100%;
+  animation: skeleton-shimmer 1.25s ease-in-out infinite;
+}
+
+.comments-skeleton-title {
+  height: 0.95rem;
+  width: min(16rem, 48%);
+  border-radius: 999px;
+}
+
+.comments-skeleton-item {
+  flex: 1;
+  min-height: 5.25rem;
+  border-radius: 0.9rem;
+}
+
+:global(#comments .giscus-frame) {
+  opacity: 0;
+  transition: opacity 0.22s ease;
+}
+
+:global(#comments.comments-ready .giscus-frame) {
+  opacity: 1;
+}
+
+@media (min-width: 768px) {
+  .comments-skeleton {
+    padding: 1.5rem;
+  }
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
 }
 </style>
