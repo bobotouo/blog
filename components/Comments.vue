@@ -2,10 +2,13 @@
   <div
     id="comments"
     ref="commentsContainer"
-    class="my-8 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-4 md:p-6"
+    class="relative my-8 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-4 md:p-6"
   >
     <Transition name="skeleton-fade">
-      <div v-if="showSkeleton" class="space-y-3">
+      <div
+        v-if="showSkeleton"
+        class="absolute inset-0 z-10 rounded-2xl bg-[rgba(10,14,20,0.72)] p-4 md:p-6 space-y-3"
+      >
         <div class="h-4 w-40 rounded bg-white/10 animate-pulse" />
         <div class="h-20 w-full rounded-xl bg-white/10 animate-pulse" />
         <div class="h-20 w-full rounded-xl bg-white/10 animate-pulse" />
@@ -26,6 +29,7 @@ const commentsContainer = ref<HTMLElement | null>(null);
 const commentsLoaded = ref(false);
 const widgetReady = ref(false);
 let widgetObserver: MutationObserver | null = null;
+let frameResizeObserver: ResizeObserver | null = null;
 
 const config = useRuntimeConfig();
 const repo = config.public.giscusRepo || "";
@@ -77,6 +81,30 @@ const loadComments = () => {
   commentsLoaded.value = true;
 };
 
+const markReadyWhenFrameVisible = (frame: HTMLIFrameElement) => {
+  const rect = frame.getBoundingClientRect();
+  if (rect.height >= 160) {
+    widgetReady.value = true;
+  }
+};
+
+const bindFrameObservers = (frame: HTMLIFrameElement) => {
+  frame.addEventListener("load", () => {
+    // load 触发后，内容高度不一定立刻稳定，这里延后一帧再判断
+    requestAnimationFrame(() => {
+      markReadyWhenFrameVisible(frame);
+    });
+  });
+
+  if (frameResizeObserver) {
+    frameResizeObserver.disconnect();
+  }
+  frameResizeObserver = new ResizeObserver(() => {
+    markReadyWhenFrameVisible(frame);
+  });
+  frameResizeObserver.observe(frame);
+};
+
 const detectWidgetReady = () => {
   if (!commentsContainer.value) return;
   const frame = commentsContainer.value.querySelector<HTMLIFrameElement>(".giscus-frame");
@@ -84,14 +112,9 @@ const detectWidgetReady = () => {
 
   if (frame.dataset.readyBound !== "1") {
     frame.dataset.readyBound = "1";
-    frame.addEventListener("load", () => {
-      widgetReady.value = true;
-    });
+    bindFrameObservers(frame);
   }
-
-  if (frame.contentWindow) {
-    widgetReady.value = true;
-  }
+  markReadyWhenFrameVisible(frame);
 };
 
 onMounted(() => {
@@ -112,6 +135,10 @@ onUnmounted(() => {
   if (widgetObserver) {
     widgetObserver.disconnect();
     widgetObserver = null;
+  }
+  if (frameResizeObserver) {
+    frameResizeObserver.disconnect();
+    frameResizeObserver = null;
   }
 });
 </script>
