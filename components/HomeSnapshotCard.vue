@@ -13,40 +13,55 @@
       <div class="absolute inset-0 bg-[linear-gradient(150deg,rgba(133,201,255,0.14),rgba(75,108,255,0.03)_36%,rgba(2,12,28,0.22))]" aria-hidden />
       <div class="absolute inset-0 bg-[radial-gradient(circle_at_14%_8%,rgba(255,255,255,0.38),transparent_30%),radial-gradient(circle_at_92%_88%,rgba(88,212,255,0.22),transparent_38%)]" aria-hidden />
 
-      <Transition name="snapshot-switch" mode="out-in">
-        <article :key="activeSnapshot.key" class="relative p-1.5 pb-14">
-          <div
-            v-if="activeSnapshot.coverImage"
-            class="aspect-[4/3] w-full overflow-hidden rounded-[1.5rem] bg-slate-900/35"
+      <div
+        class="snapshot-stage relative overflow-hidden transition-[height] duration-300 ease-out"
+        :style="stageStyle"
+      >
+        <Transition
+          name="snapshot-switch"
+          mode="out-in"
+          @before-leave="lockStageHeight"
+          @after-enter="syncStageHeight"
+        >
+          <article
+            :key="activeSnapshot.key"
+            ref="activeSlideRef"
+            class="relative p-1.5 pb-14"
           >
-            <img
-              :src="activeSnapshot.coverImage"
-              :alt="activeSnapshot.title"
-              class="h-full w-full object-cover"
-            />
-          </div>
-          <div
-            v-else
-            class="snapshot-text-shell aspect-[4/3] w-full px-5 py-6 flex items-center justify-center text-center"
-          >
-            <p class="snapshot-text-animate text-base md:text-lg font-medium leading-relaxed text-white/90">
-              {{ activeSnapshot.summary || activeSnapshot.title }}
-            </p>
-          </div>
-
-          <div class="mt-3 px-3 pr-28">
-            <p class="text-[1.06rem] font-semibold text-white/95 line-clamp-1">
-              {{ activeSnapshot.title }}
-            </p>
-            <p
-              v-if="activeSnapshot.summary && activeSnapshot.coverImage"
-              class="mt-1 text-sm text-white/80 line-clamp-2"
+            <div
+              v-if="activeSnapshot.coverImage"
+              class="aspect-[4/3] w-full overflow-hidden rounded-[1.5rem] bg-slate-900/35"
             >
-              {{ activeSnapshot.summary }}
-            </p>
-          </div>
-        </article>
-      </Transition>
+              <img
+                :src="activeSnapshot.coverImage"
+                :alt="activeSnapshot.title"
+                class="h-full w-full object-cover"
+                @load="syncStageHeight"
+              />
+            </div>
+            <div
+              v-else
+              class="snapshot-text-shell aspect-[4/3] w-full px-5 py-6 flex items-center justify-center text-center"
+            >
+              <p class="snapshot-text-animate text-base md:text-lg font-medium leading-relaxed text-white/90">
+                {{ activeSnapshot.summary || activeSnapshot.title }}
+              </p>
+            </div>
+
+            <div class="mt-3 px-3 pr-28">
+              <p class="text-[1.06rem] font-semibold text-white/95 line-clamp-1">
+                {{ activeSnapshot.title }}
+              </p>
+              <p
+                v-if="activeSnapshot.summary && activeSnapshot.coverImage"
+                class="mt-1 text-sm text-white/80 line-clamp-2"
+              >
+                {{ activeSnapshot.summary }}
+              </p>
+            </div>
+          </article>
+        </Transition>
+      </div>
 
       <div
         v-if="hasMultiple"
@@ -69,7 +84,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, watch } from "vue";
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 
 type SnapshotItem = {
   key: string;
@@ -112,6 +127,8 @@ const normalizedSnapshots = computed<SnapshotItem[]>(() => {
 const hasMultiple = computed(() => normalizedSnapshots.value.length > 1);
 const currentIndex = ref(0);
 const cardRef = ref<HTMLElement | null>(null);
+const activeSlideRef = ref<HTMLElement | null>(null);
+const stageHeight = ref<number | null>(null);
 const tiltX = ref(0);
 const tiltY = ref(0);
 const activeSnapshot = computed(
@@ -120,6 +137,9 @@ const activeSnapshot = computed(
 const cardTransformStyle = computed(() => ({
   transform: `perspective(680px) rotateX(${tiltX.value}deg) rotateY(${tiltY.value}deg) rotateZ(4.6deg)`
 }));
+const stageStyle = computed(() =>
+  stageHeight.value ? { height: `${stageHeight.value}px` } : {}
+);
 
 let switchTimer: ReturnType<typeof setInterval> | null = null;
 
@@ -151,8 +171,20 @@ const onMouseLeave = (): void => {
   tiltY.value = 0;
 };
 
+const lockStageHeight = (el: Element): void => {
+  stageHeight.value = (el as HTMLElement).offsetHeight;
+};
+
+const syncStageHeight = (): void => {
+  if (!activeSlideRef.value) return;
+  stageHeight.value = activeSlideRef.value.offsetHeight;
+};
+
 onMounted(() => {
   startSwitchTimer();
+  nextTick(() => {
+    syncStageHeight();
+  });
 });
 
 onUnmounted(() => {
@@ -164,6 +196,18 @@ watch(
   () => {
     currentIndex.value = 0;
     startSwitchTimer();
+    nextTick(() => {
+      syncStageHeight();
+    });
+  }
+);
+
+watch(
+  () => activeSnapshot.value.key,
+  () => {
+    nextTick(() => {
+      syncStageHeight();
+    });
   }
 );
 </script>

@@ -31,7 +31,7 @@
 
     <div class="mt-6 flex gap-4 text-sm text-white/50">
       <NuxtLink to="/blog" class="hover:text-white transition">返回博客</NuxtLink>
-      <NuxtLink to="/admin/" class="hover:text-white transition">内容后台</NuxtLink>
+      <NuxtLink to="/admin" class="hover:text-white transition">内容后台</NuxtLink>
     </div>
   </section>
 </template>

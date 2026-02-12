@@ -41,13 +41,15 @@
           <div
             v-for="(img, idx) in item.images"
             :key="`${item._path}-img-${idx}`"
-            class="flex items-start justify-center overflow-hidden"
+            class="flex items-start"
           >
-            <img
-              :src="img"
-              alt="snapshot"
-              class="block h-auto w-full max-h-[20rem] max-w-[28rem] rounded-2xl border border-white/15 object-contain"
-            />
+            <div class="inline-block max-w-full overflow-hidden rounded-2xl border border-white/15">
+              <img
+                :src="img"
+                alt="snapshot"
+                class="block h-auto w-auto max-h-[20rem] max-w-full md:max-w-[28rem] object-contain"
+              />
+            </div>
           </div>
         </div>
 
