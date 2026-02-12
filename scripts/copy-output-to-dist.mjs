@@ -2,7 +2,7 @@
 /**
  * 检查构建输出：Netlify preset 可能直接输出到 dist，或需要从 .output/public 复制
  */
-import { existsSync, readdirSync, cpSync, rmSync } from 'fs';
+import { existsSync, readdirSync, readFileSync, cpSync, rmSync, writeFileSync } from 'fs';
 import { join } from 'path';
 
 const cwd = process.cwd();
@@ -36,17 +36,18 @@ if (existsSync(dest)) {
     console.log('✓ dist already contains build output from Netlify preset');
     // 确保 _redirects 文件存在
     const redirectsFile = join(dest, '_redirects');
+    // 优先保留 Nitro 写入的 dist/_redirects（不包含 /* -> function，避免 API 收到错误 path）
     if (!existsSync(redirectsFile)) {
-      console.log('⚠ _redirects not found in dist, checking public/_redirects...');
+      console.log('⚠ _redirects not found in dist, copying from public/ if present');
       const publicRedirects = join(cwd, 'public', '_redirects');
       if (existsSync(publicRedirects)) {
         cpSync(publicRedirects, redirectsFile);
         console.log('✓ Copied _redirects from public/ to dist/');
       } else {
-        console.warn('⚠ No _redirects file found! API routes may not work.');
+        console.warn('⚠ No _redirects in dist or public; API may rely on function path: "/*"');
       }
     } else {
-      console.log('✓ _redirects file exists in dist');
+      console.log('✓ _redirects exists in dist (Nitro or previous copy)');
     }
     process.exit(0);
   }
@@ -55,10 +56,20 @@ if (existsSync(dest)) {
 // 如果 dist 不存在或不完整，尝试从 .output/public 复制
 if (existsSync(outputPublic)) {
   console.log('Copying .output/public to dist...');
+  const redirectsInDist = join(dest, '_redirects');
+  const savedRedirects = existsSync(redirectsInDist) ? readFileSync(redirectsInDist, 'utf8') : null;
   if (existsSync(dest)) {
     rmSync(dest, { recursive: true });
   }
   cpSync(outputPublic, dest, { recursive: true });
+  if (savedRedirects) {
+    writeFileSync(join(dest, '_redirects'), savedRedirects);
+    console.log('✓ Restored Nitro _redirects into dist');
+  }
+  if (!existsSync(join(dest, '_redirects')) && existsSync(join(cwd, 'public', '_redirects'))) {
+    cpSync(join(cwd, 'public', '_redirects'), join(dest, '_redirects'));
+    console.log('✓ Copied _redirects from public/ to dist/');
+  }
   console.log('✓ Successfully copied .output/public to dist');
 } else {
   console.log('⚠ .output/public does not exist');

@@ -1,1 +1,1 @@
-/*  /.netlify/functions/server  200
+# 不在此写 /* -> /.netlify/functions/server，由 Nitro 的 server path: "/*" 处理，以保留原始请求路径
