@@ -2,7 +2,8 @@ import { promises as fs } from "node:fs";
 import { dirname, join } from "node:path";
 
 const dbPath = join(process.cwd(), "server", "db", "stats.json");
-const isNetlify = process.env.NETLIFY === "true";
+// Netlify 函数运行时只注入 SITE_ID/SITE_NAME/URL，不注入 NETLIFY；用 SITE_ID 判断
+const isNetlify = !!process.env.SITE_ID;
 
 export type DeviceType = "desktop" | "mobile" | "tablet" | "bot" | "unknown";
 
