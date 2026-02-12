@@ -4,6 +4,12 @@
     ref="commentsContainer"
     class="my-8 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-4 md:p-6"
   >
+    <p
+      v-if="showConfigHint"
+      class="text-sm text-white/60"
+    >
+      评论系统未配置：请在本地环境变量中设置 Giscus 参数后重启开发服务。
+    </p>
     <!-- Giscus comments widget will be injected here -->
   </div>
 </template>
@@ -20,6 +26,18 @@ const categoryId = config.public.giscusCategoryId || "";
 const rawTheme = config.public.giscusTheme || "";
 const theme =
   rawTheme && rawTheme !== "preferred_color_scheme" ? rawTheme : "dark_dimmed";
+const showConfigHint = computed(
+  () => import.meta.dev && (!repo || !repoId || !categoryId)
+);
+
+useHead({
+  link: [
+    { rel: "dns-prefetch", href: "https://giscus.app" },
+    { rel: "dns-prefetch", href: "https://github.githubassets.com" },
+    { rel: "preconnect", href: "https://giscus.app", crossorigin: "" },
+    { rel: "preconnect", href: "https://github.githubassets.com", crossorigin: "" },
+  ],
+});
 
 const loadComments = () => {
   if (commentsLoaded.value || !commentsContainer.value) return;

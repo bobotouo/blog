@@ -1,15 +1,20 @@
 {
   "views": {
     "/snapshots/2026-02-12-second-snapshot": 1,
-    "/snapshots/2026-02-10-first-snapshot": 5
+    "/snapshots/2026-02-10-first-snapshot": 5,
+    "/blog": 3,
+    "/blog/": 3,
+    "/2026-02-11-happy-day": 6,
+    "/2024-01-01-welcome": 3
   },
   "byDevice": {
-    "desktop": 6
+    "desktop": 9,
+    "mobile": 12
   },
   "byCountry": {
-    "XX": 6
+    "XX": 21
   },
   "daily": {
-    "2026-02-12": 6
+    "2026-02-12": 21
   }
 }
