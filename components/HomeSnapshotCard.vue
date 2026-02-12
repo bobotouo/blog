@@ -129,13 +129,15 @@ const currentIndex = ref(0);
 const cardRef = ref<HTMLElement | null>(null);
 const activeSlideRef = ref<HTMLElement | null>(null);
 const stageHeight = ref<number | null>(null);
+const isNarrow = ref(false);
 const tiltX = ref(0);
 const tiltY = ref(0);
 const activeSnapshot = computed(
   () => normalizedSnapshots.value[currentIndex.value] || normalizedSnapshots.value[0]
 );
+const baseRotate = computed(() => (isNarrow.value ? 0 : 4.6));
 const cardTransformStyle = computed(() => ({
-  transform: `perspective(680px) rotateX(${tiltX.value}deg) rotateY(${tiltY.value}deg) rotateZ(4.6deg)`
+  transform: `perspective(680px) rotateX(${tiltX.value}deg) rotateY(${tiltY.value}deg) rotateZ(${baseRotate.value}deg)`
 }));
 const stageStyle = computed(() =>
   stageHeight.value ? { height: `${stageHeight.value}px` } : {}
@@ -158,6 +160,7 @@ const startSwitchTimer = (): void => {
 };
 
 const onMouseMove = (event: MouseEvent): void => {
+  if (isNarrow.value) return;
   if (!cardRef.value) return;
   const rect = cardRef.value.getBoundingClientRect();
   const px = (event.clientX - rect.left) / rect.width;
@@ -171,6 +174,14 @@ const onMouseLeave = (): void => {
   tiltY.value = 0;
 };
 
+const handleViewportChange = (): void => {
+  isNarrow.value = window.innerWidth < 768;
+  if (isNarrow.value) {
+    tiltX.value = 0;
+    tiltY.value = 0;
+  }
+};
+
 const lockStageHeight = (el: Element): void => {
   stageHeight.value = (el as HTMLElement).offsetHeight;
 };
@@ -181,6 +192,8 @@ const syncStageHeight = (): void => {
 };
 
 onMounted(() => {
+  handleViewportChange();
+  window.addEventListener("resize", handleViewportChange);
   startSwitchTimer();
   nextTick(() => {
     syncStageHeight();
@@ -188,6 +201,7 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
+  window.removeEventListener("resize", handleViewportChange);
   clearSwitchTimer();
 });
 
