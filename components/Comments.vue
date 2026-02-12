@@ -4,6 +4,13 @@
     ref="commentsContainer"
     class="my-8 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-4 md:p-6"
   >
+    <Transition name="skeleton-fade">
+      <div v-if="showSkeleton" class="space-y-3">
+        <div class="h-4 w-40 rounded bg-white/10 animate-pulse" />
+        <div class="h-20 w-full rounded-xl bg-white/10 animate-pulse" />
+        <div class="h-20 w-full rounded-xl bg-white/10 animate-pulse" />
+      </div>
+    </Transition>
     <p
       v-if="showConfigHint"
       class="text-sm text-white/60"
@@ -17,6 +24,8 @@
 <script setup lang="ts">
 const commentsContainer = ref<HTMLElement | null>(null);
 const commentsLoaded = ref(false);
+const widgetReady = ref(false);
+let widgetObserver: MutationObserver | null = null;
 
 const config = useRuntimeConfig();
 const repo = config.public.giscusRepo || "";
@@ -26,9 +35,11 @@ const categoryId = config.public.giscusCategoryId || "";
 const rawTheme = config.public.giscusTheme || "";
 const theme =
   rawTheme && rawTheme !== "preferred_color_scheme" ? rawTheme : "dark_dimmed";
+const hasGiscusConfig = computed(() => !!repo && !!repoId && !!categoryId);
 const showConfigHint = computed(
-  () => import.meta.dev && (!repo || !repoId || !categoryId)
+  () => import.meta.dev && !hasGiscusConfig.value
 );
+const showSkeleton = computed(() => hasGiscusConfig.value && !widgetReady.value);
 
 useHead({
   link: [
@@ -41,7 +52,7 @@ useHead({
 
 const loadComments = () => {
   if (commentsLoaded.value || !commentsContainer.value) return;
-  if (!repo || !repoId || !categoryId) return;
+  if (!hasGiscusConfig.value) return;
 
   const script = document.createElement("script");
   script.src = "https://giscus.app/client.js";
@@ -66,8 +77,53 @@ const loadComments = () => {
   commentsLoaded.value = true;
 };
 
+const detectWidgetReady = () => {
+  if (!commentsContainer.value) return;
+  const frame = commentsContainer.value.querySelector<HTMLIFrameElement>(".giscus-frame");
+  if (!frame) return;
+
+  if (frame.dataset.readyBound !== "1") {
+    frame.dataset.readyBound = "1";
+    frame.addEventListener("load", () => {
+      widgetReady.value = true;
+    });
+  }
+
+  if (frame.contentWindow) {
+    widgetReady.value = true;
+  }
+};
+
 onMounted(() => {
   if (!commentsContainer.value) return;
+  widgetReady.value = false;
+  widgetObserver = new MutationObserver(() => {
+    detectWidgetReady();
+  });
+  widgetObserver.observe(commentsContainer.value, {
+    childList: true,
+    subtree: true,
+  });
   loadComments();
+  detectWidgetReady();
+});
+
+onUnmounted(() => {
+  if (widgetObserver) {
+    widgetObserver.disconnect();
+    widgetObserver = null;
+  }
 });
 </script>
+
+<style scoped>
+.skeleton-fade-enter-active,
+.skeleton-fade-leave-active {
+  transition: opacity 0.28s ease;
+}
+
+.skeleton-fade-enter-from,
+.skeleton-fade-leave-to {
+  opacity: 0;
+}
+</style>

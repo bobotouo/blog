@@ -65,6 +65,12 @@ export default defineNuxtConfig({
       link: [
         { rel: "preconnect", href: "https://fonts.googleapis.com" },
         { rel: "preconnect", href: "https://fonts.gstatic.com", crossorigin: "" },
+        { rel: "dns-prefetch", href: "https://giscus.app" },
+        { rel: "dns-prefetch", href: "https://github.githubassets.com" },
+        { rel: "dns-prefetch", href: "https://github.com" },
+        { rel: "dns-prefetch", href: "https://api.github.com" },
+        { rel: "preconnect", href: "https://giscus.app", crossorigin: "" },
+        { rel: "preconnect", href: "https://github.githubassets.com", crossorigin: "" },
       ],
     },
     pageTransition: { name: "page", mode: "out-in" },
