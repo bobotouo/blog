@@ -1,3 +1,15 @@
 {
-  "views": {}
+  "views": {
+    "/snapshots/2026-02-12-second-snapshot": 1,
+    "/snapshots/2026-02-10-first-snapshot": 5
+  },
+  "byDevice": {
+    "desktop": 6
+  },
+  "byCountry": {
+    "XX": 6
+  },
+  "daily": {
+    "2026-02-12": 6
+  }
 }

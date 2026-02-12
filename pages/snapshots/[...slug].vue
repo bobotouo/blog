@@ -26,9 +26,13 @@
         <div
           v-for="(img, idx) in snapshot.images"
           :key="`${snapshot?._path}-img-${idx}`"
-          class="h-56 overflow-hidden rounded-2xl border border-white/10"
+          class="flex items-start justify-center overflow-hidden"
         >
-          <img :src="img" alt="snapshot" class="h-full w-full object-cover" />
+          <img
+            :src="img"
+            alt="snapshot"
+            class="block h-auto w-full max-h-[32rem] max-w-[42rem] rounded-2xl border border-white/15 object-contain"
+          />
         </div>
       </div>
 
