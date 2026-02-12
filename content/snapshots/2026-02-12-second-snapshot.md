@@ -5,7 +5,7 @@ summary: 芜湖,起飞🛫
 location: 杭州
 mood: calm
 images:
-  - https://wx4.sinaimg.cn/mw690/6d30030fly1gjerh6bkqdg208c08hwnq.gif
+  - /uploads/0ceba84f9e03a568f5665a7c3d029bb9.gif
 tags:
   - 开心
   - 快乐
