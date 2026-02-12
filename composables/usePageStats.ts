@@ -1,22 +1,33 @@
 import { onMounted, ref } from "vue";
 
+/** 统计 API 的 base：未配置 statsBase 时用当前站点同源 /api */
+function getStatsApiBase(): string {
+  const config = useRuntimeConfig();
+  const base = config.public.statsBase as string | undefined;
+  if (base) return base;
+  if (import.meta.client && typeof window !== "undefined") {
+    return `${window.location.origin}/api`;
+  }
+  return "";
+}
+
 export const usePageStats = (path: string) => {
   const views = ref<number | null>(null);
-  const config = useRuntimeConfig();
-  const statsBase = config.public.statsBase || "";
 
   const track = async () => {
-    if (!process.client || !statsBase) return;
+    if (!import.meta.client) return;
+    const apiBase = getStatsApiBase();
+    if (!apiBase) return;
 
     const payload = JSON.stringify({ path });
 
     if (navigator.sendBeacon) {
       const blob = new Blob([payload], { type: "application/json" });
-      navigator.sendBeacon(`${statsBase}/track`, blob);
+      navigator.sendBeacon(`${apiBase}/track`, blob);
       return;
     }
 
-    await fetch(`${statsBase}/track`, {
+    await fetch(`${apiBase}/track`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: payload,
@@ -25,8 +36,9 @@ export const usePageStats = (path: string) => {
   };
 
   const load = async () => {
-    if (!statsBase) return;
-    const { data } = await useFetch(`${statsBase}/stats`, {
+    const apiBase = getStatsApiBase();
+    if (!apiBase) return;
+    const { data } = await useFetch(`${apiBase}/stats`, {
       query: { path },
       server: false,
     });
