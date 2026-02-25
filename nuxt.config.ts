@@ -106,6 +106,15 @@ export default defineNuxtConfig({
     transpile: ["motion-v"],
   },
 
+  // 链接 hover 时预取，配合 lazy 数据实现秒开
+  experimental: {
+    defaults: {
+      nuxtLink: {
+        prefetchOn: "interaction",
+      },
+    },
+  },
+
   ssr: true,
   nitro: {
     preset: isGhPages ? "static" : process.env.NITRO_PRESET || "netlify",

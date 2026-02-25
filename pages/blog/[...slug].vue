@@ -9,33 +9,45 @@
     </button>
 
     <div class="mt-6 rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-8 md:p-10 shadow-[0_30px_80px_rgba(0,0,0,0.45)]">
-      <p class="text-xs uppercase tracking-[0.4em] text-white/40 mb-4">Feature</p>
-      <h1 class="text-4xl md:text-5xl font-semibold text-white mb-4">
-        {{ post?.title }}
-      </h1>
-      <div class="text-sm text-white/60 mb-6 flex flex-wrap items-center gap-4">
-        <span>{{ formatDate(post?.date) }}</span>
-        <span v-if="views !== null" class="text-white/40">· {{ views }} 次阅读</span>
-        <span v-if="commentCount !== null" class="text-white/40">
-          · {{ commentCount }} 条评论
-        </span>
+      <div v-if="pending" class="article-skeleton space-y-6">
+        <div class="article-skeleton-line h-3 w-20 rounded-full" />
+        <div class="article-skeleton-line h-10 max-w-xl rounded-lg" />
+        <div class="article-skeleton-line h-4 w-48 rounded-full" />
+        <div class="space-y-2 pt-4">
+          <div class="article-skeleton-line h-4 w-full rounded" />
+          <div class="article-skeleton-line h-4 w-full rounded" />
+          <div class="article-skeleton-line h-4 max-w-[66%] rounded" />
+        </div>
       </div>
-      <div v-if="post?.tags" class="flex flex-wrap gap-2 mb-8">
-        <span
-          v-for="tag in post?.tags"
-          :key="tag"
+      <template v-else-if="post">
+        <p class="text-xs uppercase tracking-[0.4em] text-white/40 mb-4">Feature</p>
+        <h1 class="text-4xl md:text-5xl font-semibold text-white mb-4">
+          {{ post.title }}
+        </h1>
+        <div class="text-sm text-white/60 mb-6 flex flex-wrap items-center gap-4">
+          <span>{{ formatDate(post.date) }}</span>
+          <span v-if="views !== null" class="text-white/40">· {{ views }} 次阅读</span>
+          <span v-if="commentCount !== null" class="text-white/40">
+            · {{ commentCount }} 条评论
+          </span>
+        </div>
+        <div v-if="post.tags" class="flex flex-wrap gap-2 mb-8">
+          <span
+            v-for="tag in post.tags"
+            :key="tag"
           class="px-4 py-1.5 bg-white/10 text-white/80 rounded-full text-xs border border-white/15"
         >
           {{ tag }}
         </span>
-      </div>
+        </div>
 
-      <div class="prose prose-invert max-w-none">
-        <ContentRenderer :value="post as any" />
-      </div>
+        <div class="prose prose-invert max-w-none">
+          <ContentRenderer :value="post as any" />
+        </div>
+      </template>
     </div>
 
-    <div class="mt-10">
+    <div v-if="!pending && post" class="mt-10">
       <div class="text-xs uppercase tracking-[0.35em] text-white/50 mb-4">
         Comments
       </div>
@@ -66,15 +78,21 @@ const slug = Array.isArray(route.params.slug)
   : route.params.slug;
 const contentPath = `/blog/${slug}`;
 
-const { data: post } = await useAsyncData(
+const { data: post, pending } = await useAsyncData(
   `blog-post-${contentPath}`,
   () => queryContent(contentPath).findOne(),
-  { getCachedData: () => (import.meta.dev ? null : undefined) },
+  { getCachedData: import.meta.dev ? () => undefined : undefined, lazy: true },
 );
 
-if (!post.value) {
-  throw createError({ statusCode: 404, statusMessage: "Page not found" });
-}
+watch(
+  [pending, post],
+  ([p, data]) => {
+    if (!p && !data) {
+      throw createError({ statusCode: 404, statusMessage: "Page not found" });
+    }
+  },
+  { immediate: true },
+);
 
 function formatDate(date: string | Date | undefined) {
   if (!date) return "";
@@ -150,5 +168,20 @@ function formatDate(date: string | Date | undefined) {
 }
 .prose strong {
   color: #ffffff;
+}
+
+.article-skeleton-line {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.06));
+  background-size: 220% 100%;
+  animation: article-skeleton-shimmer 1.25s ease-in-out infinite;
+}
+
+@keyframes article-skeleton-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
 }
 </style>

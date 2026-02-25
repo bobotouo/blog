@@ -57,13 +57,10 @@
           </div>
         </div>
 
-        <div class="flex-shrink-0 w-full md:w-[320px] lg:w-[360px]">
+        <div class="flex-shrink-0 w-full md:w-[320px] lg:w-[360px] min-h-[18rem] md:min-h-[20rem]">
           <HomeSnapshotCard
-            v-if="homeSnapshots.length"
+            :loading="pending"
             :snapshots="homeSnapshots"
-          />
-          <HomeSnapshotCard
-            v-else
             title="日常快照"
             summary="像朋友圈一样记录生活片段，轻量、直接。"
           />
@@ -82,7 +79,7 @@ import HomeSnapshotCard from "~/components/HomeSnapshotCard.vue";
 const config = useRuntimeConfig();
 const basePath = ((config.public.baseUrl as string) || "/").replace(/\/$/, "");
 
-const { data: snapshots } = await useAsyncData(
+const { data: snapshots, pending } = await useAsyncData(
   "home-latest-snapshot",
   async () => {
     if (import.meta.server) {
@@ -100,7 +97,7 @@ const { data: snapshots } = await useAsyncData(
     const jsonPath = basePath ? `${basePath}/snapshots-list.json` : "/snapshots-list.json";
     return await $fetch<unknown[]>(jsonPath).catch(() => []);
   },
-  { getCachedData: () => (import.meta.dev ? null : undefined) },
+  { getCachedData: () => (import.meta.dev ? null : undefined), lazy: true },
 );
 
 // 静态部署（GitHub Pages）首屏 payload 可能缺数据，客户端补拉 JSON

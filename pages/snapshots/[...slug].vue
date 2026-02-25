@@ -9,29 +9,43 @@
     </button>
 
     <div class="mt-6 rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-8 md:p-10 shadow-[0_30px_80px_rgba(0,0,0,0.45)]">
-      <p class="text-xs uppercase tracking-[0.4em] text-white/40 mb-4">Snapshot</p>
-      <h1 class="text-4xl md:text-5xl font-semibold text-white mb-4">
-        {{ snapshot?.title }}
-      </h1>
-      <div class="text-sm text-white/60 mb-6 flex flex-wrap items-center gap-4">
-        <span>{{ formatDate(snapshot?.date) }}</span>
-        <span v-if="snapshot?.location" class="text-white/40">· {{ snapshot?.location }}</span>
-        <span v-if="views !== null" class="text-white/40">· {{ views }} 次浏览</span>
-        <span v-if="commentCount !== null" class="text-white/40">
-          · {{ commentCount }} 条评论
-        </span>
+      <div v-if="pending" class="snapshot-skeleton space-y-6">
+        <div class="snapshot-skeleton-line h-3 w-24 rounded-full" />
+        <div class="snapshot-skeleton-line h-10 max-w-xl rounded-lg" />
+        <div class="snapshot-skeleton-line h-4 w-56 rounded-full" />
+        <div class="grid gap-3 sm:grid-cols-2 pt-4">
+          <div class="snapshot-skeleton-line aspect-[4/3] w-full rounded-2xl" />
+          <div class="snapshot-skeleton-line aspect-[4/3] w-full rounded-2xl" />
+        </div>
+        <div class="space-y-2 pt-4">
+          <div class="snapshot-skeleton-line h-4 w-full rounded" />
+          <div class="snapshot-skeleton-line h-4 max-w-[80%] rounded" />
+        </div>
       </div>
+      <template v-else-if="snapshot">
+        <p class="text-xs uppercase tracking-[0.4em] text-white/40 mb-4">Snapshot</p>
+        <h1 class="text-4xl md:text-5xl font-semibold text-white mb-4">
+          {{ snapshot.title }}
+        </h1>
+        <div class="text-sm text-white/60 mb-6 flex flex-wrap items-center gap-4">
+          <span>{{ formatDate(snapshot.date) }}</span>
+          <span v-if="snapshot.location" class="text-white/40">· {{ snapshot.location }}</span>
+          <span v-if="views !== null" class="text-white/40">· {{ views }} 次浏览</span>
+          <span v-if="commentCount !== null" class="text-white/40">
+            · {{ commentCount }} 条评论
+          </span>
+        </div>
 
-      <p v-if="snapshot?.summary" class="text-white/70 mb-6">
-        {{ snapshot?.summary }}
-      </p>
+        <p v-if="snapshot.summary" class="text-white/70 mb-6">
+          {{ snapshot.summary }}
+        </p>
 
-      <div v-if="snapshot?.images && snapshot?.images.length" class="grid gap-3 sm:grid-cols-2 mb-8">
-        <div
-          v-for="(img, idx) in snapshot.images"
-          :key="`${snapshot?._path}-img-${idx}`"
-          class="flex items-start justify-center overflow-hidden"
-        >
+        <div v-if="snapshot.images && snapshot.images.length" class="grid gap-3 sm:grid-cols-2 mb-8">
+          <div
+            v-for="(img, idx) in snapshot.images"
+            :key="`${snapshot._path}-img-${idx}`"
+            class="flex items-start justify-center overflow-hidden"
+          >
           <img
             :src="img"
             alt="snapshot"
@@ -40,26 +54,27 @@
             decoding="async"
             class="block h-auto w-full max-h-[32rem] max-w-[42rem] rounded-2xl border border-white/15 object-contain"
           />
+          </div>
         </div>
-      </div>
 
-      <div v-if="snapshot?.tags" class="flex flex-wrap gap-2 mb-8">
-        <span
-          v-for="tag in snapshot.tags"
-          :key="tag"
-          class="px-3 py-1 text-xs uppercase tracking-[0.2em] text-white/60 border border-white/10 rounded-full"
-        >
-          {{ tag }}
-        </span>
-      </div>
+        <div v-if="snapshot.tags" class="flex flex-wrap gap-2 mb-8">
+          <span
+            v-for="tag in snapshot.tags"
+            :key="tag"
+            class="px-3 py-1 text-xs uppercase tracking-[0.2em] text-white/60 border border-white/10 rounded-full"
+          >
+            {{ tag }}
+          </span>
+        </div>
 
-      <div class="prose prose-invert max-w-none">
-        <div v-if="staticBody" v-html="staticBody" />
-        <ContentRenderer v-else-if="snapshot" :value="snapshot as any" />
-      </div>
+        <div class="prose prose-invert max-w-none">
+          <div v-if="staticBody" v-html="staticBody" />
+          <ContentRenderer v-else :value="snapshot as any" />
+        </div>
+      </template>
     </div>
 
-    <div class="mt-10">
+    <div v-if="!pending && snapshot" class="mt-10">
       <div class="text-xs uppercase tracking-[0.35em] text-white/50 mb-4">
         Comments
       </div>
@@ -94,7 +109,7 @@ const slug = Array.isArray(route.params.slug)
 const contentPath = `/snapshots/${slug}`;
 const basePath = base.replace(/\/$/, "");
 
-const { data: snapshot } = await useAsyncData(
+const { data: snapshot, pending } = await useAsyncData(
   `snapshot-${contentPath}`,
   async () => {
     if (import.meta.server) {
@@ -111,7 +126,17 @@ const { data: snapshot } = await useAsyncData(
       return fallback ?? null;
     }
   },
-  { getCachedData: () => (import.meta.dev ? null : undefined) },
+  { getCachedData: () => (import.meta.dev ? null : undefined), lazy: true },
+);
+
+watch(
+  [pending, snapshot],
+  ([p, data]) => {
+    if (!p && !data) {
+      throw createError({ statusCode: 404, statusMessage: "Page not found" });
+    }
+  },
+  { immediate: true },
 );
 
 // 仅当 body 为字符串时用 v-html（静态 JSON）；Netlify 上 queryContent 返回的 body 是对象，用 ContentRenderer
@@ -120,10 +145,6 @@ const staticBody = computed(() => {
   const b = s?.body;
   return typeof b === "string" ? b : null;
 });
-
-if (!snapshot.value) {
-  throw createError({ statusCode: 404, statusMessage: "Page not found" });
-}
 
 function formatDate(date: string | Date | undefined) {
   if (!date) return "";
@@ -175,5 +196,20 @@ function formatDate(date: string | Date | undefined) {
   background: rgba(34, 211, 238, 0.08);
   padding: 1rem;
   border-radius: 0 0.5rem 0.5rem 0;
+}
+
+.snapshot-skeleton-line {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.06));
+  background-size: 220% 100%;
+  animation: snapshot-skeleton-shimmer 1.25s ease-in-out infinite;
+}
+
+@keyframes snapshot-skeleton-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
 }
 </style>

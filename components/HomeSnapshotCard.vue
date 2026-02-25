@@ -5,16 +5,27 @@
   >
     <div
       ref="cardRef"
-      class="snapshot-card liquid-glass relative overflow-hidden rounded-[2rem] border border-white/20 bg-white/[0.07] shadow-[0_16px_42px_rgba(0,0,0,0.45),inset_0_1px_0_rgba(255,255,255,0.32)] transition duration-300 group-hover:-translate-y-1 group-hover:shadow-[0_24px_56px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.42)]"
+      class="snapshot-card liquid-glass relative overflow-hidden rounded-[2rem] border border-white/20 bg-white/[0.07] shadow-[0_16px_42px_rgba(0,0,0,0.45),inset_0_1px_0_rgba(255,255,255,0.32)] transition duration-300 group-hover:-translate-y-1 group-hover:shadow-[0_24px_56px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.42)] min-h-[18rem] md:min-h-[20rem]"
       :style="cardTransformStyle"
       @mousemove="onMouseMove"
       @mouseleave="onMouseLeave"
     >
+      <Transition name="skeleton-fade">
+        <div
+          v-if="loading"
+          class="snapshot-skeleton absolute inset-0 z-10 flex flex-col gap-3 p-5 rounded-[2rem] pointer-events-none"
+        >
+          <div class="snapshot-skeleton-block aspect-[4/3] w-full rounded-[1.5rem]" />
+          <div class="snapshot-skeleton-line h-4 max-w-[75%] rounded-full" />
+          <div class="snapshot-skeleton-line h-3 max-w-[50%] rounded-full" />
+        </div>
+      </Transition>
       <div class="absolute inset-0 bg-[linear-gradient(150deg,rgba(133,201,255,0.14),rgba(75,108,255,0.03)_36%,rgba(2,12,28,0.22))]" aria-hidden />
       <div class="absolute inset-0 bg-[radial-gradient(circle_at_14%_8%,rgba(255,255,255,0.38),transparent_30%),radial-gradient(circle_at_92%_88%,rgba(88,212,255,0.22),transparent_38%)]" aria-hidden />
 
       <div
-        class="snapshot-stage relative min-h-[14rem] overflow-hidden transition-[height] duration-300 ease-out"
+        class="snapshot-stage relative min-h-[14rem] overflow-hidden transition-[height] duration-300 ease-out transition-opacity duration-200"
+        :class="{ 'opacity-0': loading, 'opacity-100': !loading }"
         :style="stageStyle"
         ref="stageRef"
       >
@@ -62,7 +73,7 @@
       </div>
 
       <div
-        v-if="hasMultiple"
+        v-if="!loading && hasMultiple"
         class="absolute left-4 bottom-4 flex items-center gap-1.5"
         aria-hidden="true"
       >
@@ -74,7 +85,10 @@
         />
       </div>
 
-      <span class="snapshot-cta absolute right-3 bottom-3 inline-flex items-center rounded-full px-3.5 py-1.5 text-sm font-semibold tracking-[0.02em] text-cyan-50/85 shadow-[0_6px_16px_rgba(0,124,179,0.28)]">
+      <span
+        v-show="!loading"
+        class="snapshot-cta absolute right-3 bottom-3 inline-flex items-center rounded-full px-3.5 py-1.5 text-sm font-semibold tracking-[0.02em] text-cyan-50/85 shadow-[0_6px_16px_rgba(0,124,179,0.28)]"
+      >
         进入快照 →
       </span>
     </div>
@@ -92,6 +106,7 @@ type SnapshotItem = {
 };
 
 const props = defineProps<{
+  loading?: boolean;
   title?: string;
   summary?: string;
   coverImage?: string;
@@ -294,6 +309,36 @@ watch(
   }
   50% {
     text-shadow: 0 6px 20px rgba(255, 255, 255, 0.24);
+  }
+}
+
+.skeleton-fade-enter-active,
+.skeleton-fade-leave-active {
+  transition: opacity 0.28s ease;
+}
+
+.skeleton-fade-enter-from,
+.skeleton-fade-leave-to {
+  opacity: 0;
+}
+
+.snapshot-skeleton {
+  background: linear-gradient(180deg, rgba(11, 16, 25, 0.78), rgba(8, 12, 20, 0.74));
+}
+
+.snapshot-skeleton-block,
+.snapshot-skeleton-line {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.06));
+  background-size: 220% 100%;
+  animation: skeleton-shimmer 1.25s ease-in-out infinite;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
   }
 }
 </style>
