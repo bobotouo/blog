@@ -6,6 +6,7 @@
 [build.environment]
   NODE_VERSION = "20"
   NITRO_PRESET = "netlify"
+  NUXT_PUBLIC_COMMENTS_API_BASE = "https://blog.bobotou112.dpdns.org"
 
 # 不在这里做 /* -> function 的 rewrite，否则函数会收到 /.netlify/functions/server 导致 API 404。
 # Nitro 已把 server 配置为 path: "/*"、preferStatic: true，由 Netlify 直接按路径调用函数并保留原始 URL。

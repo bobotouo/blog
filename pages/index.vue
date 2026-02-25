@@ -97,10 +97,25 @@ const { data: snapshots } = await useAsyncData(
         /* fallback */
       }
     }
-    return await $fetch<unknown[]>(`${basePath}/snapshots-list.json`).catch(() => []);
+    const jsonPath = basePath ? `${basePath}/snapshots-list.json` : "/snapshots-list.json";
+    return await $fetch<unknown[]>(jsonPath).catch(() => []);
   },
   { getCachedData: () => (import.meta.dev ? null : undefined) },
 );
+
+// 静态部署（GitHub Pages）首屏 payload 可能缺数据，客户端补拉 JSON
+onMounted(async () => {
+  if (
+    import.meta.client &&
+    (!snapshots.value || !Array.isArray(snapshots.value) || snapshots.value.length === 0)
+  ) {
+    const jsonPath = basePath ? `${basePath}/snapshots-list.json` : "/snapshots-list.json";
+    const list = await $fetch<unknown[]>(jsonPath).catch(() => []);
+    if (Array.isArray(list) && list.length > 0) {
+      snapshots.value = list;
+    }
+  }
+});
 
 /** 重写资源路径：GitHub Pages 等有 base 时给 /uploads、/images 加前缀 */
 function withBasePath(path: string): string {

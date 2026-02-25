@@ -71,8 +71,18 @@ export const useCommentCount = (path: string) => {
       return;
     }
 
+    const config = useRuntimeConfig();
+    const apiBase = (config.public.commentsApiBase as string) || "";
+    const baseUrl = (config.public.baseUrl as string) || "/";
+    const basePath = baseUrl.replace(/\/$/, "");
+    const url = apiBase
+      ? `${apiBase.replace(/\/$/, "")}/api/comments`
+      : basePath
+        ? `${basePath}/api/comments`
+        : "/api/comments";
+
     try {
-      const data = await $fetch<{ comments: number | null }>("/api/comments", {
+      const data = await $fetch<{ comments: number | null }>(url, {
         query: { path },
         timeout: 4500,
       });
@@ -81,7 +91,7 @@ export const useCommentCount = (path: string) => {
         saveCache(data.comments);
       }
     } catch {
-      // Keep count as null on failure.
+      // 静态部署无 /api，404 属正常，保持 count 为 null
     }
   };
 

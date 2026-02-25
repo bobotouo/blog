@@ -143,6 +143,8 @@ export default defineNuxtConfig({
       giscusCategoryId: "",
       giscusTheme: "dark",
       statsBase: "",
+      /** GitHub Pages 等静态部署无 /api，可指向 Netlify 等有后端的地址，如 "https://blog.xxx.netlify.app" */
+      commentsApiBase: "",
       baseUrl: appBase,
     },
   },

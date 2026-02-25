@@ -38,6 +38,7 @@ jobs:
           NUXT_PUBLIC_GISCUS_CATEGORY: Announcements
           NUXT_PUBLIC_GISCUS_CATEGORY_ID: DIC_kwDORMxRqs4C2IoF
           NUXT_PUBLIC_GISCUS_THEME: dark_dimmed
+          NUXT_PUBLIC_COMMENTS_API_BASE: https://blog.bobotou112.dpdns.org
         run: pnpm generate
 
       - name: Copy SPA shell (200.html) to 404.html so refresh keeps current route
