@@ -6,7 +6,7 @@
   "scripts": {
     "test:unit": "vitest run",
     "dev": "node scripts/generate-blog-list.mjs && nuxt dev",
-    "build": "nuxt build",
+    "build": "node scripts/generate-blog-list.mjs && nuxt build",
     "build:netlify-dist": "node scripts/copy-output-to-dist.mjs",
     "generate": "node scripts/generate-blog-list.mjs && nuxt generate",
     "pregenerate": "node scripts/generate-blog-list.mjs",

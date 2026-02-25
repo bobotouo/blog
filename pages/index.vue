@@ -102,10 +102,27 @@ const { data: snapshots } = await useAsyncData(
   { getCachedData: () => (import.meta.dev ? null : undefined) },
 );
 
+/** 重写资源路径：GitHub Pages 等有 base 时给 /uploads、/images 加前缀 */
+function withBasePath(path: string): string {
+  const base = (config.public.baseUrl as string) || "/";
+  if (!base || base === "/") return path;
+  const prefix = base.replace(/\/$/, "");
+  if (path.startsWith("/uploads/") || path.startsWith("/images/")) {
+    return prefix + path;
+  }
+  return path;
+}
+
 const homeSnapshots = computed(() => {
   const list = snapshots.value;
   if (!Array.isArray(list) || list.length === 0) return [];
-  return list.slice(0, 5) as Array<{ title?: string; summary?: string; images?: string[] }>;
+  return list.slice(0, 5).map((item) => {
+    const raw = item as { title?: string; summary?: string; images?: string[] };
+    return {
+      ...raw,
+      images: raw.images?.map((img) => (typeof img === "string" ? withBasePath(img) : img)),
+    };
+  }) as Array<{ title?: string; summary?: string; images?: string[] }>;
 });
 </script>
 

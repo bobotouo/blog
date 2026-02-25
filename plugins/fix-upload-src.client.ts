@@ -8,11 +8,11 @@ export default defineNuxtPlugin(() => {
   const fixImages = () => {
     if (!base || base === "/") return;
     document
-      .querySelectorAll<HTMLImageElement>('img[src^="/uploads/"]')
+      .querySelectorAll<HTMLImageElement>('img[src^="/uploads/"], img[src^="/images/"]')
       .forEach((img) => {
         const src = img.getAttribute("src");
         if (!src) return;
-        if (src.startsWith(`${base}/uploads/`)) return;
+        if (src.startsWith(`${base}/`)) return;
         img.setAttribute("src", `${base}${src}`);
       });
   };

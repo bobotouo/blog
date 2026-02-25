@@ -86,11 +86,7 @@ export const useCommentCount = (path: string) => {
   };
 
   onMounted(() => {
-    if ("requestIdleCallback" in window) {
-      window.requestIdleCallback(() => load(), { timeout: 2000 });
-      return;
-    }
-    window.setTimeout(() => load(), 900);
+    load();
   });
 
   return { count };

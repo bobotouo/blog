@@ -52,15 +52,8 @@ export const usePageStats = (path: string) => {
   };
 
   onMounted(() => {
-    const run = () => {
-      track();
-      load();
-    };
-    if ("requestIdleCallback" in window) {
-      window.requestIdleCallback(() => run(), { timeout: 1500 });
-      return;
-    }
-    window.setTimeout(run, 700);
+    track();
+    load();
   });
 
   return { views };
