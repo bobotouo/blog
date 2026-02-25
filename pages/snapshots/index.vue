@@ -47,6 +47,8 @@
               <img
                 :src="img"
                 alt="snapshot"
+                loading="lazy"
+                decoding="async"
                 class="block h-auto w-auto max-h-[20rem] max-w-full md:max-w-[28rem] object-contain"
               />
             </div>
@@ -75,14 +77,25 @@ definePageMeta({
 const config = useRuntimeConfig();
 const basePath = ((config.public.baseUrl as string) || "/").replace(/\/$/, "");
 
-const { data: snapshots } = await useAsyncData("snapshots", async () => {
-  if (import.meta.server) {
-    return await queryContent("snapshots").sort({ date: -1 }).find();
-  }
-  const cached = useNuxtData("snapshots").data.value;
-  if (cached?.length !== undefined) return cached;
-  return await $fetch<unknown[]>(`${basePath}/snapshots-list.json`).catch(() => []);
-});
+const { data: snapshots } = await useAsyncData(
+  "snapshots",
+  async () => {
+    if (import.meta.server) {
+      return await queryContent("snapshots").sort({ date: -1 }).find();
+    }
+    const cached = useNuxtData("snapshots").data.value;
+    if (cached?.length !== undefined) return cached;
+    if (import.meta.dev) {
+      try {
+        return await queryContent("snapshots").sort({ date: -1 }).find();
+      } catch {
+        /* fallback */
+      }
+    }
+    return await $fetch<unknown[]>(`${basePath}/snapshots-list.json`).catch(() => []);
+  },
+  { getCachedData: () => (import.meta.dev ? null : undefined) },
+);
 
 function formatDate(date: string | Date) {
   return useDateFormat(date, "YYYY-MM-DD").value;

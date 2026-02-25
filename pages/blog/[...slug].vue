@@ -1,8 +1,12 @@
 <template>
   <article class="max-w-4xl mx-auto py-10 px-6">
-    <NuxtLink to="/blog" class="text-xs uppercase tracking-[0.35em] text-white/50">
+    <button
+      type="button"
+      class="inline-block bg-transparent border-0 p-0 text-left text-xs uppercase tracking-[0.35em] text-white/50 hover:text-white/70 transition cursor-pointer font-inherit"
+      @click="goBack"
+    >
       ← 返回列表
-    </NuxtLink>
+    </button>
 
     <div class="mt-6 rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-8 md:p-10 shadow-[0_30px_80px_rgba(0,0,0,0.45)]">
       <p class="text-xs uppercase tracking-[0.4em] text-white/40 mb-4">Feature</p>
@@ -46,6 +50,14 @@ definePageMeta({
 });
 
 const route = useRoute();
+const router = useRouter();
+const goBack = () => {
+  if (import.meta.client && window.history.length > 1) {
+    router.back();
+  } else {
+    navigateTo("/blog");
+  }
+};
 const { views } = usePageStats(route.path);
 const { count: commentCount } = useCommentCount(route.path);
 
@@ -54,8 +66,10 @@ const slug = Array.isArray(route.params.slug)
   : route.params.slug;
 const contentPath = `/blog/${slug}`;
 
-const { data: post } = await useAsyncData(`blog-post-${contentPath}`, () =>
-  queryContent(contentPath).findOne(),
+const { data: post } = await useAsyncData(
+  `blog-post-${contentPath}`,
+  () => queryContent(contentPath).findOne(),
+  { getCachedData: () => (import.meta.dev ? null : undefined) },
 );
 
 if (!post.value) {

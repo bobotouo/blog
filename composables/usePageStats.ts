@@ -38,19 +38,29 @@ export const usePageStats = (path: string) => {
   const load = async () => {
     const apiBase = getStatsApiBase();
     if (!apiBase) return;
-    const { data } = await useFetch(`${apiBase}/stats`, {
-      query: { path },
-      server: false,
-    });
-
-    if (data.value && typeof data.value.views === "number") {
-      views.value = data.value.views;
+    try {
+      const data = await $fetch<{ views?: number }>(`${apiBase}/stats`, {
+        query: { path },
+        timeout: 4000,
+      });
+      if (typeof data?.views === "number") {
+        views.value = data.views;
+      }
+    } catch {
+      // Keep views as null on failure.
     }
   };
 
   onMounted(() => {
-    track();
-    load();
+    const run = () => {
+      track();
+      load();
+    };
+    if ("requestIdleCallback" in window) {
+      window.requestIdleCallback(() => run(), { timeout: 1500 });
+      return;
+    }
+    window.setTimeout(run, 700);
   });
 
   return { views };

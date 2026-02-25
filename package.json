@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "test:unit": "vitest run",
-    "dev": "nuxt dev",
+    "dev": "node scripts/generate-blog-list.mjs && nuxt dev",
     "build": "nuxt build",
     "build:netlify-dist": "node scripts/copy-output-to-dist.mjs",
     "generate": "node scripts/generate-blog-list.mjs && nuxt generate",

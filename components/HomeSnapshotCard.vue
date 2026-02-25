@@ -14,53 +14,51 @@
       <div class="absolute inset-0 bg-[radial-gradient(circle_at_14%_8%,rgba(255,255,255,0.38),transparent_30%),radial-gradient(circle_at_92%_88%,rgba(88,212,255,0.22),transparent_38%)]" aria-hidden />
 
       <div
-        class="snapshot-stage relative overflow-hidden transition-[height] duration-300 ease-out"
+        class="snapshot-stage relative min-h-[14rem] overflow-hidden transition-[height] duration-300 ease-out"
         :style="stageStyle"
+        ref="stageRef"
       >
-        <Transition
-          name="snapshot-switch"
-          mode="out-in"
-          @before-leave="lockStageHeight"
-          @after-enter="syncStageHeight"
+        <article
+          v-for="(item, idx) in normalizedSnapshots"
+          :key="item.key"
+          class="slide-article absolute inset-x-0 top-0 p-1.5 pb-14 opacity-0 transition-opacity duration-300 ease-out pointer-events-none"
+          :class="{ 'slide-article-active opacity-100 pointer-events-auto': idx === currentIndex }"
         >
-          <article
-            :key="activeSnapshot.key"
-            ref="activeSlideRef"
-            class="relative p-1.5 pb-14"
+          <div
+            v-if="item.coverImage"
+            class="aspect-[4/3] w-full overflow-hidden rounded-[1.5rem] bg-slate-900/35"
           >
-            <div
-              v-if="activeSnapshot.coverImage"
-              class="aspect-[4/3] w-full overflow-hidden rounded-[1.5rem] bg-slate-900/35"
-            >
-              <img
-                :src="activeSnapshot.coverImage"
-                :alt="activeSnapshot.title"
-                class="h-full w-full object-cover"
-                @load="syncStageHeight"
-              />
-            </div>
-            <div
-              v-else
-              class="snapshot-text-shell aspect-[4/3] w-full px-5 py-6 flex items-center justify-center text-center"
-            >
-              <p class="snapshot-text-animate text-base md:text-lg font-medium leading-relaxed text-white/90">
-                {{ activeSnapshot.summary || activeSnapshot.title }}
-              </p>
-            </div>
+            <img
+              :src="item.coverImage"
+              :alt="item.title"
+              :loading="idx === 0 ? 'eager' : 'lazy'"
+              :fetchpriority="idx === 0 ? 'high' : 'auto'"
+              decoding="async"
+              class="h-full w-full object-cover"
+              @load="onSlideImageLoad(idx)"
+            />
+          </div>
+          <div
+            v-else
+            class="snapshot-text-shell aspect-[4/3] w-full px-5 py-6 flex items-center justify-center text-center"
+          >
+            <p class="snapshot-text-animate text-base md:text-lg font-medium leading-relaxed text-white/90">
+              {{ item.summary || item.title }}
+            </p>
+          </div>
 
-            <div class="mt-3 px-3 pr-28">
-              <p class="text-[1.06rem] font-semibold text-white/95 line-clamp-1">
-                {{ activeSnapshot.title }}
-              </p>
-              <p
-                v-if="activeSnapshot.summary && activeSnapshot.coverImage"
-                class="mt-1 text-sm text-white/80 line-clamp-2"
-              >
-                {{ activeSnapshot.summary }}
-              </p>
-            </div>
-          </article>
-        </Transition>
+          <div class="mt-3 px-3 pr-28">
+            <p class="text-[1.06rem] font-semibold text-white/95 line-clamp-1">
+              {{ item.title }}
+            </p>
+            <p
+              v-if="item.summary && item.coverImage"
+              class="mt-1 text-sm text-white/80 line-clamp-2"
+            >
+              {{ item.summary }}
+            </p>
+          </div>
+        </article>
       </div>
 
       <div
@@ -127,7 +125,7 @@ const normalizedSnapshots = computed<SnapshotItem[]>(() => {
 const hasMultiple = computed(() => normalizedSnapshots.value.length > 1);
 const currentIndex = ref(0);
 const cardRef = ref<HTMLElement | null>(null);
-const activeSlideRef = ref<HTMLElement | null>(null);
+const stageRef = ref<HTMLElement | null>(null);
 const stageHeight = ref<number | null>(null);
 const isNarrow = ref(false);
 const tiltX = ref(0);
@@ -182,18 +180,31 @@ const handleViewportChange = (): void => {
   }
 };
 
-const lockStageHeight = (el: Element): void => {
-  stageHeight.value = (el as HTMLElement).offsetHeight;
+const syncStageHeight = (): void => {
+  if (!stageRef.value) return;
+  const activeEl = stageRef.value.children[currentIndex.value] as HTMLElement | undefined;
+  if (!activeEl) return;
+  stageHeight.value = activeEl.offsetHeight;
 };
 
-const syncStageHeight = (): void => {
-  if (!activeSlideRef.value) return;
-  stageHeight.value = activeSlideRef.value.offsetHeight;
+const onSlideImageLoad = (idx: number): void => {
+  if (idx === currentIndex.value) syncStageHeight();
+};
+
+/** 预加载所有轮播图，避免切换时重复下载 */
+const preloadCarouselImages = (): void => {
+  normalizedSnapshots.value.forEach((item) => {
+    if (item.coverImage) {
+      const img = new Image();
+      img.src = item.coverImage!;
+    }
+  });
 };
 
 onMounted(() => {
   handleViewportChange();
   window.addEventListener("resize", handleViewportChange);
+  preloadCarouselImages();
   startSwitchTimer();
   nextTick(() => {
     syncStageHeight();
@@ -209,6 +220,7 @@ watch(
   () => normalizedSnapshots.value.length,
   () => {
     currentIndex.value = 0;
+    preloadCarouselImages();
     startSwitchTimer();
     nextTick(() => {
       syncStageHeight();
@@ -217,7 +229,7 @@ watch(
 );
 
 watch(
-  () => activeSnapshot.value.key,
+  () => currentIndex.value,
   () => {
     nextTick(() => {
       syncStageHeight();
@@ -263,21 +275,6 @@ watch(
 
 .snapshot-text-animate {
   animation: text-float 3s ease-in-out infinite, text-glow 2.7s ease-in-out infinite;
-}
-
-.snapshot-switch-enter-active,
-.snapshot-switch-leave-active {
-  transition: all 0.42s ease;
-}
-
-.snapshot-switch-enter-from {
-  opacity: 0;
-  transform: translateX(14px) scale(0.98);
-}
-
-.snapshot-switch-leave-to {
-  opacity: 0;
-  transform: translateX(-14px) scale(0.98);
 }
 
 @keyframes text-float {

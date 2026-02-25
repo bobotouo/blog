@@ -1,20 +1,24 @@
 {
   "views": {
-    "/snapshots/2026-02-12-second-snapshot": 1,
-    "/snapshots/2026-02-10-first-snapshot": 5,
-    "/blog": 3,
-    "/blog/": 3,
-    "/2026-02-11-happy-day": 6,
-    "/2024-01-01-welcome": 3
+    "/snapshots/2026-02-12-second-snapshot": 2,
+    "/snapshots/2026-02-10-first-snapshot": 7,
+    "/blog": 13,
+    "/blog/": 7,
+    "/2026-02-11-happy-day": 9,
+    "/2024-01-01-welcome": 3,
+    "/2022-11-01-black-macos": 4,
+    "/2022-12-11-tools-collection": 2,
+    "/snapshots/2026-02-12": 12
   },
   "byDevice": {
     "desktop": 9,
-    "mobile": 12
+    "mobile": 50
   },
   "byCountry": {
-    "XX": 21
+    "XX": 59
   },
   "daily": {
-    "2026-02-12": 21
+    "2026-02-12": 21,
+    "2026-02-25": 38
   }
 }

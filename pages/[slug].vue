@@ -4,9 +4,13 @@
 -->
 <template>
   <article class="max-w-4xl mx-auto py-10 px-6">
-    <NuxtLink to="/blog" class="text-xs uppercase tracking-[0.35em] text-white/50">
+    <button
+      type="button"
+      class="inline-block bg-transparent border-0 p-0 text-left text-xs uppercase tracking-[0.35em] text-white/50 hover:text-white/70 transition cursor-pointer font-inherit"
+      @click="goBack"
+    >
       ← 返回列表
-    </NuxtLink>
+    </button>
 
     <div class="mt-6 rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-8 md:p-10 shadow-[0_30px_80px_rgba(0,0,0,0.45)]">
       <p class="text-xs uppercase tracking-[0.4em] text-white/40 mb-4">Feature</p>
@@ -57,6 +61,14 @@ definePageMeta({
 });
 
 const route = useRoute();
+const router = useRouter();
+const goBack = () => {
+  if (import.meta.client && window.history.length > 1) {
+    router.back();
+  } else {
+    navigateTo("/blog");
+  }
+};
 const slug = route.params.slug as string;
 
 // 与 Giscus 的 pathname 一致，用于评论数与统计
@@ -69,21 +81,25 @@ const { count: commentCount } = useCommentCount(fullPath);
 const contentPath = `/blog/${slug}`;
 const basePath = base.replace(/\/$/, "");
 
-const { data: post } = await useAsyncData(`blog-post-${contentPath}`, async () => {
-  if (import.meta.server) {
-    return await queryContent(contentPath).findOne();
-  }
-  const cached = useNuxtData(`blog-post-${contentPath}`).data.value;
-  if (cached) return cached;
-  try {
-    return await queryContent(contentPath).findOne();
-  } catch {
-    const fallback = await $fetch<{ body?: string; title?: string; date?: string; tags?: string[] }>(
-      `${basePath}/blog/${slug}.json`,
-    ).catch(() => null);
-    return fallback ?? null;
-  }
-});
+const { data: post } = await useAsyncData(
+  `blog-post-${contentPath}`,
+  async () => {
+    if (import.meta.server) {
+      return await queryContent(contentPath).findOne();
+    }
+    const cached = useNuxtData(`blog-post-${contentPath}`).data.value;
+    if (cached) return cached;
+    try {
+      return await queryContent(contentPath).findOne();
+    } catch {
+      const fallback = await $fetch<{ body?: string; title?: string; date?: string; tags?: string[] }>(
+        `${basePath}/blog/${slug}.json`,
+      ).catch(() => null);
+      return fallback ?? null;
+    }
+  },
+  { getCachedData: () => (import.meta.dev ? null : undefined) },
+);
 
 // 仅当 body 为字符串时用 v-html（静态 JSON）；Netlify 上 queryContent 返回的 body 是对象，用 ContentRenderer
 const staticBody = computed(() => {

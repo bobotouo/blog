@@ -24,7 +24,8 @@
             v-if="featured.coverImage"
             :src="featured.coverImage"
             alt="cover"
-            loading="lazy"
+            loading="eager"
+            fetchpriority="high"
             decoding="async"
             class=" w-full object-cover group-hover:scale-[1.02] transition"
           />
@@ -83,17 +84,29 @@ definePageMeta({
   layout: "blog",
 });
 
-const { data: posts } = await useAsyncData("blog", async () => {
-  if (import.meta.server) {
-    return await queryContent("blog").sort({ date: -1 }).find();
-  }
-  const cached = useNuxtData("blog").data.value;
-  if (cached?.length !== undefined) return cached;
-  const config = useRuntimeConfig();
-  const base = (config.public.baseUrl as string) || "/";
-  const basePath = base.replace(/\/$/, "");
-  return await $fetch<unknown[]>(`${basePath}/blog-list.json`).catch(() => []);
-});
+const config = useRuntimeConfig();
+const base = (config.public.baseUrl as string) || "/";
+const basePath = base.replace(/\/$/, "");
+
+const { data: posts } = await useAsyncData(
+  "blog",
+  async () => {
+    if (import.meta.server) {
+      return await queryContent("blog").sort({ date: -1 }).find();
+    }
+    const cached = useNuxtData("blog").data.value;
+    if (cached?.length !== undefined) return cached;
+    if (import.meta.dev) {
+      try {
+        return await queryContent("blog").sort({ date: -1 }).find();
+      } catch {
+        /* fallback */
+      }
+    }
+    return await $fetch<unknown[]>(`${basePath}/blog-list.json`).catch(() => []);
+  },
+  { getCachedData: () => (import.meta.dev ? null : undefined) },
+);
 
 const featured = computed(() => posts.value?.[0] ?? null);
 const rest = computed(() => posts.value?.slice(1) ?? []);

@@ -73,7 +73,6 @@ export default defineNuxtConfig({
         { rel: "preconnect", href: "https://github.githubassets.com", crossorigin: "" },
       ],
     },
-    pageTransition: { name: "page", mode: "out-in" },
     baseURL: appBase,
     cdnURL: cdnBase,
     buildAssetsDir: "/_nuxt/",
@@ -127,7 +126,7 @@ export default defineNuxtConfig({
     },
   },
 
-  // 强制使用单一 Vue 实例，避免 motion-v 等库在 renderSlot 时 currentRenderingInstance 为 null
+  // 强制使用单一 Vue 实例，避免多副本 Vue 导致运行时上下文异常
   vite: {
     resolve: {
       dedupe: ["vue", "vue-demi"],
