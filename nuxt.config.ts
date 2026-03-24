@@ -161,12 +161,15 @@ export default defineNuxtConfig({
       ? {
           crawlLinks: false,
           failOnError: false,
+          concurrency: 2,
           routes: prerenderRoutes,
         }
       : {
-          crawlLinks: true,
+          // Netlify 有 SSR 函数，只预渲染少量关键页面加速首屏，其余由函数动态渲染
+          crawlLinks: false,
           failOnError: false,
-          routes: prerenderRoutes,
+          concurrency: 2,
+          routes: ["/", "/blog", "/ai-fiction", "/snapshots"],
         },
     // 确保 API 路由不被预渲染，由 server 函数处理
     routeRules: {
@@ -174,10 +177,13 @@ export default defineNuxtConfig({
     },
   },
 
-  // 强制使用单一 Vue 实例，避免多副本 Vue 导致运行时上下文异常
   vite: {
     resolve: {
       dedupe: ["vue", "vue-demi"],
+    },
+    ssr: {
+      // three.js/gsap 仅客户端使用，不打入 SSR bundle，节省几百 MB 构建内存
+      external: ["three", "gsap"],
     },
   },
 

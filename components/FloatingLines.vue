@@ -1,22 +1,15 @@
 <script setup lang="ts">
 import {
-  Clock,
-  Mesh,
-  OrthographicCamera,
-  PlaneGeometry,
-  Scene,
-  ShaderMaterial,
-  Vector2,
-  Vector3,
-  WebGLRenderer,
-} from "three";
-import {
   onBeforeUnmount,
   onMounted,
   ref,
   watch,
   type CSSProperties,
 } from "vue";
+
+// three.js 仅客户端 WebGL 需要，动态 import 避免 SSR bundle 膨胀 37 MB+
+const loadThree = () => import("three");
+type THREE = Awaited<ReturnType<typeof loadThree>>;
 
 const vertexShader = `
 precision highp float;
@@ -249,17 +242,10 @@ const props = withDefaults(defineProps<FloatingLinesProps>(), {
   mixBlendMode: "screen",
 });
 
-function hexToVec3(hex: string): Vector3 {
+function hexToRgb(hex: string): [number, number, number] {
   let value = hex.trim();
-
-  if (value.startsWith("#")) {
-    value = value.slice(1);
-  }
-
-  let r = 255;
-  let g = 255;
-  let b = 255;
-
+  if (value.startsWith("#")) value = value.slice(1);
+  let r = 255, g = 255, b = 255;
   if (value.length === 3) {
     r = parseInt(value[0] + value[0], 16);
     g = parseInt(value[1] + value[1], 16);
@@ -269,21 +255,21 @@ function hexToVec3(hex: string): Vector3 {
     g = parseInt(value.slice(2, 4), 16);
     b = parseInt(value.slice(4, 6), 16);
   }
-
-  return new Vector3(r / 255, g / 255, b / 255);
+  return [r / 255, g / 255, b / 255];
 }
 
 const containerRef = ref<HTMLElement | null>(null);
-const targetMouseRef = ref(new Vector2(-1000, -1000));
-const currentMouseRef = ref(new Vector2(-1000, -1000));
-const targetInfluenceRef = ref(0);
-const currentInfluenceRef = ref(0);
-const targetParallaxRef = ref(new Vector2(0, 0));
-const currentParallaxRef = ref(new Vector2(0, 0));
+let targetMouse = { x: -1000, y: -1000 };
+let currentMouse = { x: -1000, y: -1000 };
+let targetInfluence = 0;
+let currentInfluence = 0;
+let targetParallax = { x: 0, y: 0 };
+let currentParallax = { x: 0, y: 0 };
 
 let cleanup: (() => void) | null = null;
-const setup = () => {
+const setup = async () => {
   if (!containerRef.value) return;
+  const T = await loadThree();
 
   const getLineCount = (waveType: "top" | "middle" | "bottom"): number => {
     if (typeof props.lineCount === "number") return props.lineCount;
@@ -319,12 +305,12 @@ const setup = () => {
     ? getLineDistance("bottom") * 0.01
     : 0.01;
 
-  const scene = new Scene();
+  const scene = new T.Scene();
 
-  const camera = new OrthographicCamera(-1, 1, 1, -1, 0, 1);
+  const camera = new T.OrthographicCamera(-1, 1, 1, -1, 0, 1);
   camera.position.z = 1;
 
-  const renderer = new WebGLRenderer({ antialias: true, alpha: true });
+  const renderer = new T.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setClearColor(0x000000, 0);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.domElement.style.width = "100%";
@@ -333,7 +319,7 @@ const setup = () => {
 
   const uniforms = {
     iTime: { value: 0 },
-    iResolution: { value: new Vector3(1, 1, 1) },
+    iResolution: { value: new T.Vector3(1, 1, 1) },
     animationSpeed: { value: props.animationSpeed },
 
     enableTop: { value: props.enabledWaves.includes("top") },
@@ -349,28 +335,28 @@ const setup = () => {
     bottomLineDistance: { value: bottomLineDistance },
 
     topWavePosition: {
-      value: new Vector3(
+      value: new T.Vector3(
         props.topWavePosition?.x ?? 10.0,
         props.topWavePosition?.y ?? 0.5,
         props.topWavePosition?.rotate ?? -0.4,
       ),
     },
     middleWavePosition: {
-      value: new Vector3(
+      value: new T.Vector3(
         props.middleWavePosition?.x ?? 5.0,
         props.middleWavePosition?.y ?? 0.0,
         props.middleWavePosition?.rotate ?? 0.2,
       ),
     },
     bottomWavePosition: {
-      value: new Vector3(
+      value: new T.Vector3(
         props.bottomWavePosition?.x ?? 2.0,
         props.bottomWavePosition?.y ?? -0.7,
         props.bottomWavePosition?.rotate ?? 0.4,
       ),
     },
 
-    iMouse: { value: new Vector2(-1000, -1000) },
+    iMouse: { value: new T.Vector2(-1000, -1000) },
     interactive: { value: props.interactive },
     bendRadius: { value: props.bendRadius },
     bendStrength: { value: props.bendStrength },
@@ -378,12 +364,12 @@ const setup = () => {
 
     parallax: { value: props.parallax },
     parallaxStrength: { value: props.parallaxStrength },
-    parallaxOffset: { value: new Vector2(0, 0) },
+    parallaxOffset: { value: new T.Vector2(0, 0) },
 
     lineGradient: {
       value: Array.from(
         { length: MAX_GRADIENT_STOPS },
-        () => new Vector3(1, 1, 1),
+        () => new T.Vector3(1, 1, 1),
       ),
     },
     lineGradientCount: { value: 0 },
@@ -394,22 +380,22 @@ const setup = () => {
     uniforms.lineGradientCount.value = stops.length;
 
     stops.forEach((hex, i) => {
-      const color = hexToVec3(hex);
-      uniforms.lineGradient.value[i].set(color.x, color.y, color.z);
+      const [r, g, b] = hexToRgb(hex);
+      uniforms.lineGradient.value[i].set(r, g, b);
     });
   }
 
-  const material = new ShaderMaterial({
+  const material = new T.ShaderMaterial({
     uniforms,
     vertexShader,
     fragmentShader,
   });
 
-  const geometry = new PlaneGeometry(2, 2);
-  const mesh = new Mesh(geometry, material);
+  const geometry = new T.PlaneGeometry(2, 2);
+  const mesh = new T.Mesh(geometry, material);
   scene.add(mesh);
 
-  const clock = new Clock();
+  const clock = new T.Clock();
 
   const setSize = () => {
     const el = containerRef.value!;
@@ -438,23 +424,23 @@ const setup = () => {
     const y = event.clientY - rect.top;
     const dpr = renderer.getPixelRatio();
 
-    targetMouseRef.value.set(x * dpr, (rect.height - y) * dpr);
-    targetInfluenceRef.value = 1.0;
+    targetMouse = { x: x * dpr, y: (rect.height - y) * dpr };
+    targetInfluence = 1.0;
 
     if (props.parallax) {
       const centerX = rect.width / 2;
       const centerY = rect.height / 2;
       const offsetX = (x - centerX) / rect.width;
       const offsetY = -(y - centerY) / rect.height;
-      targetParallaxRef.value.set(
-        offsetX * props.parallaxStrength,
-        offsetY * props.parallaxStrength,
-      );
+      targetParallax = {
+        x: offsetX * props.parallaxStrength,
+        y: offsetY * props.parallaxStrength,
+      };
     }
   };
 
   const handlePointerLeave = () => {
-    targetInfluenceRef.value = 0.0;
+    targetInfluence = 0.0;
   };
 
   if (props.interactive) {
@@ -467,21 +453,24 @@ const setup = () => {
     uniforms.iTime.value = clock.getElapsedTime();
 
     if (props.interactive) {
-      currentMouseRef.value.lerp(targetMouseRef.value, props.mouseDamping);
-      uniforms.iMouse.value.copy(currentMouseRef.value);
+      const d = props.mouseDamping;
+      currentMouse = {
+        x: currentMouse.x + (targetMouse.x - currentMouse.x) * d,
+        y: currentMouse.y + (targetMouse.y - currentMouse.y) * d,
+      };
+      uniforms.iMouse.value.set(currentMouse.x, currentMouse.y);
 
-      currentInfluenceRef.value +=
-        (targetInfluenceRef.value - currentInfluenceRef.value) *
-        props.mouseDamping;
-      uniforms.bendInfluence.value = currentInfluenceRef.value;
+      currentInfluence += (targetInfluence - currentInfluence) * d;
+      uniforms.bendInfluence.value = currentInfluence;
     }
 
     if (props.parallax) {
-      currentParallaxRef.value.lerp(
-        targetParallaxRef.value,
-        props.mouseDamping,
-      );
-      uniforms.parallaxOffset.value.copy(currentParallaxRef.value);
+      const d = props.mouseDamping;
+      currentParallax = {
+        x: currentParallax.x + (targetParallax.x - currentParallax.x) * d,
+        y: currentParallax.y + (targetParallax.y - currentParallax.y) * d,
+      };
+      uniforms.parallaxOffset.value.set(currentParallax.x, currentParallax.y);
     }
 
     renderer.render(scene, camera);
