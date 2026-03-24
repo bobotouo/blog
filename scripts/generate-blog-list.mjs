@@ -8,9 +8,9 @@ import { fileURLToPath } from "node:url";
 import { marked } from "marked";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const contentDir = join(__dirname, "..", "content", "blog");
 const publicDir = join(__dirname, "..", "public");
 const blogJsonDir = join(publicDir, "blog");
+const fictionJsonDir = join(publicDir, "ai-fiction");
 
 // 静态站 base（如 /blog/）下，将 /uploads /images 等资源路径加上 base 前缀，否则图片 404
 const staticBase = process.env.NUXT_APP_BASE_URL || "";
@@ -77,41 +77,210 @@ function parseFrontmatter(raw) {
   return obj;
 }
 
-const files = readdirSync(contentDir, { withFileTypes: true })
-  .filter((e) => e.isFile() && (e.name.endsWith(".md") || e.name.endsWith(".mdx")))
-  .map((e) => e.name);
-
-try {
-  mkdirSync(blogJsonDir, { recursive: true });
-} catch {}
-
-const list = [];
-for (const name of files) {
-  const slug = name.replace(/\.(md|mdx)$/, "");
-  const raw = readFileSync(join(contentDir, name), "utf-8");
-  const fm = parseFrontmatter(raw);
-  const date = fm.date ? (typeof fm.date === "string" ? fm.date : String(fm.date)) : "";
-  const meta = {
-    _path: `/blog/${slug}`,
-    title: fm.title ?? slug,
-    date,
-    description: fm.description ?? undefined,
-    tags: fm.tags ?? undefined,
-    coverImage: rewriteAssetInMeta(fm.coverImage) ?? fm.coverImage,
-  };
-  list.push(meta);
-
-  const bodyMatch = raw.match(/^---\r?\n[\s\S]*?\r?\n---\r?\n([\s\S]*)/);
-  const bodyMd = bodyMatch ? bodyMatch[1].trim() : "";
-  let bodyHtml = marked.parse(bodyMd, { async: false });
-  bodyHtml = rewriteAssetPaths(typeof bodyHtml === "string" ? bodyHtml : String(bodyHtml));
-  const article = { ...meta, body: bodyHtml };
-  writeFileSync(join(blogJsonDir, `${slug}.json`), JSON.stringify(article), "utf-8");
+function collectMarkdownSlugs(dir, prefix = "") {
+  const slugs = [];
+  let entries = [];
+  try {
+    entries = readdirSync(dir, { withFileTypes: true });
+  } catch {
+    return slugs;
+  }
+  for (const entry of entries) {
+    const rel = prefix ? `${prefix}/${entry.name}` : entry.name;
+    const abs = join(dir, entry.name);
+    if (entry.isDirectory()) {
+      slugs.push(...collectMarkdownSlugs(abs, rel));
+      continue;
+    }
+    if (entry.isFile() && (entry.name.endsWith(".md") || entry.name.endsWith(".mdx"))) {
+      slugs.push(rel.replace(/\.(md|mdx)$/, ""));
+    }
+  }
+  return slugs;
 }
 
-list.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
-writeFileSync(join(publicDir, "blog-list.json"), JSON.stringify(list), "utf-8");
-console.log("[generate-blog-list] wrote", list.length, "posts to blog-list.json and blog/<slug>.json");
+function readMarkdownBySlug(contentDir, slug) {
+  try {
+    return readFileSync(join(contentDir, `${slug}.md`), "utf-8");
+  } catch {
+    return readFileSync(join(contentDir, `${slug}.mdx`), "utf-8");
+  }
+}
+
+/** 有 frontmatter 时取正文；无 frontmatter 时整篇为正文（章节常见） */
+function extractBodyMarkdown(raw) {
+  const m = raw.match(/^---\r?\n[\s\S]*?\r?\n---\s*([\s\S]*)$/);
+  if (m) return (m[1] ?? "").trim();
+  return raw.trim();
+}
+
+function firstNonEmptyLine(text) {
+  const line = text.split(/\r?\n/).find((l) => l.trim());
+  return line ? line.trim() : "";
+}
+
+/** 同小说内章节排序：优先文件名前缀数字，否则中文 locale 自然序 */
+function compareChapterFileName(a, b) {
+  const fa = a.split("/").pop() || a;
+  const fb = b.split("/").pop() || b;
+  const na = fa.match(/^(\d+)/)?.[1];
+  const nb = fb.match(/^(\d+)/)?.[1];
+  if (na && nb && na !== nb) return Number(na) - Number(nb);
+  return fa.localeCompare(fb, "zh-CN", { numeric: true });
+}
+
+function generateArticleSet({ contentFolder, routeBase, listName, detailDir }) {
+  const contentDir = join(__dirname, "..", "content", contentFolder);
+  const slugs = collectMarkdownSlugs(contentDir);
+
+  try {
+    mkdirSync(detailDir, { recursive: true });
+  } catch {}
+
+  const list = [];
+  for (const slug of slugs) {
+    const raw = readMarkdownBySlug(contentDir, slug);
+    const fm = parseFrontmatter(raw);
+    const date = fm.date ? (typeof fm.date === "string" ? fm.date : String(fm.date)) : "";
+    const meta = {
+      _path: `/${routeBase}/${slug}`,
+      title: fm.title ?? slug,
+      date,
+      description: fm.description ?? undefined,
+      tags: fm.tags ?? undefined,
+      coverImage: rewriteAssetInMeta(fm.coverImage) ?? fm.coverImage,
+    };
+    list.push(meta);
+
+    const bodyMatch = raw.match(/^---\r?\n[\s\S]*?\r?\n---\r?\n([\s\S]*)/);
+    const bodyMd = bodyMatch ? bodyMatch[1].trim() : "";
+    let bodyHtml = marked.parse(bodyMd, { async: false });
+    bodyHtml = rewriteAssetPaths(typeof bodyHtml === "string" ? bodyHtml : String(bodyHtml));
+    const article = { ...meta, body: bodyHtml };
+    mkdirSync(dirname(join(detailDir, `${slug}.json`)), { recursive: true });
+    writeFileSync(join(detailDir, `${slug}.json`), JSON.stringify(article), "utf-8");
+  }
+
+  list.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+  writeFileSync(join(publicDir, listName), JSON.stringify(list), "utf-8");
+  console.log("[generate-blog-list] wrote", list.length, `posts to ${listName} and ${routeBase}/<slug>.json`);
+}
+
+function generateAiFictionSet() {
+  const contentDir = join(__dirname, "..", "content", "ai-fiction");
+  const slugs = collectMarkdownSlugs(contentDir);
+  try {
+    mkdirSync(fictionJsonDir, { recursive: true });
+  } catch {}
+
+  const chapters = [];
+  const summariesByNovel = new Map();
+
+  for (const slug of slugs) {
+    const raw = readMarkdownBySlug(contentDir, slug);
+    const fm = parseFrontmatter(raw);
+    const date = fm.date ? (typeof fm.date === "string" ? fm.date : String(fm.date)) : "";
+    const bodyMd = extractBodyMarkdown(raw);
+    let bodyHtml = marked.parse(bodyMd, { async: false });
+    bodyHtml = rewriteAssetPaths(typeof bodyHtml === "string" ? bodyHtml : String(bodyHtml));
+
+    const isSummary = /(^|\/)summary$/.test(slug);
+    const novelSlug = slug.includes("/") ? slug.slice(0, slug.lastIndexOf("/")) : slug;
+    const novelName = novelSlug.split("/").pop() || novelSlug;
+
+    if (isSummary) {
+      summariesByNovel.set(novelSlug, {
+        novelSlug,
+        novelName,
+        title: fm.novelTitle ?? fm.title ?? novelName,
+        description: fm.description ?? "",
+        coverImage: rewriteAssetInMeta(fm.coverImage) ?? fm.coverImage,
+        tags: fm.tags ?? undefined,
+        summaryBody: bodyHtml,
+      });
+      continue;
+    }
+
+    const chapterFile = slug.split("/").pop() || slug;
+    const title = fm.title ?? (firstNonEmptyLine(bodyMd) || chapterFile);
+
+    const meta = {
+      _path: `/ai-fiction/${slug}`,
+      title,
+      date,
+      description: fm.description ?? undefined,
+      tags: fm.tags ?? undefined,
+      coverImage: rewriteAssetInMeta(fm.coverImage) ?? fm.coverImage,
+      novelSlug,
+      novelName,
+      chapterFile,
+    };
+    chapters.push(meta);
+    const article = { ...meta, body: bodyHtml };
+    mkdirSync(dirname(join(fictionJsonDir, `${slug}.json`)), { recursive: true });
+    writeFileSync(join(fictionJsonDir, `${slug}.json`), JSON.stringify(article), "utf-8");
+  }
+
+  chapters.sort((a, b) => {
+    const novelCmp = a.novelSlug.localeCompare(b.novelSlug, "zh-CN");
+    if (novelCmp !== 0) return novelCmp;
+    return compareChapterFileName(a.chapterFile, b.chapterFile);
+  });
+  writeFileSync(join(publicDir, "ai-fiction-list.json"), JSON.stringify(chapters), "utf-8");
+
+  const chaptersByNovel = new Map();
+  for (const chapter of chapters) {
+    const list = chaptersByNovel.get(chapter.novelSlug) || [];
+    list.push(chapter);
+    chaptersByNovel.set(chapter.novelSlug, list);
+  }
+
+  const series = Array.from(chaptersByNovel.entries()).map(([novelSlug, list]) => {
+    const summary = summariesByNovel.get(novelSlug);
+    const sorted = [...list].sort((a, b) => compareChapterFileName(a.chapterFile, b.chapterFile));
+    const first = sorted[0];
+    const latest = sorted[sorted.length - 1];
+    return {
+      novelSlug,
+      novelName: summary?.title ?? first.novelName,
+      indexPath: `/ai-fiction/${novelSlug}`,
+      description: summary?.description ?? "",
+      coverImage: summary?.coverImage ?? first.coverImage,
+      tags: summary?.tags ?? undefined,
+      summaryBody: summary?.summaryBody ?? "",
+      chapterCount: sorted.length,
+      chapters: sorted.map((c) => ({
+        _path: c._path,
+        title: c.title,
+        date: c.date,
+        chapterFile: c.chapterFile,
+      })),
+      firstChapterPath: first._path,
+      latestChapterPath: latest._path,
+      latestChapterTitle: latest.title,
+      latestChapterDate: latest.date,
+    };
+  });
+  series.sort((a, b) => (b.latestChapterDate || "").localeCompare(a.latestChapterDate || ""));
+  writeFileSync(join(publicDir, "ai-fiction-series.json"), JSON.stringify(series), "utf-8");
+
+  console.log(
+    "[generate-blog-list] wrote",
+    chapters.length,
+    "chapters to ai-fiction-list.json and ai-fiction/<slug>.json,",
+    series.length,
+    "series to ai-fiction-series.json",
+  );
+}
+
+generateArticleSet({
+  contentFolder: "blog",
+  routeBase: "blog",
+  listName: "blog-list.json",
+  detailDir: blogJsonDir,
+});
+
+generateAiFictionSet();
 
 // 快照列表 + 快照详情静态 JSON（静态站 snapshots 列表/详情页客户端回退）
 const snapshotsDir = join(__dirname, "..", "content", "snapshots");

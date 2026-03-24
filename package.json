@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "daily:digest": "node scripts/daily-digest.mjs",
     "test:unit": "vitest run",
     "dev": "node scripts/generate-blog-list.mjs && nuxt dev",
     "build": "node scripts/generate-blog-list.mjs && nuxt build",
@@ -21,6 +22,7 @@
     "@vueuse/core": "^14.1.0",
     "@vueuse/nuxt": "^14.1.0",
     "autoprefixer": "^10.4.17",
+    "cheerio": "^1.2.0",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-vue": "^9.24.0",

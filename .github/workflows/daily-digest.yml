@@ -1,0 +1,42 @@
+name: Daily Digest Posts
+
+on:
+  schedule:
+    # 每天 UTC 01:00（北京时间 09:00）
+    - cron: "0 1 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate daily digest posts
+        env:
+          JUEJIN_COOKIE: ${{ secrets.JUEJIN_COOKIE }}
+        run: pnpm daily:digest
+
+      - name: Refresh static blog index JSON
+        run: node scripts/generate-blog-list.mjs
+
+      - name: Commit and push if changed
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore(content): add daily finance and tech digests"
+          file_pattern: "content/blog/*.md public/blog-list.json public/blog/*.json"

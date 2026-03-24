@@ -12,11 +12,57 @@
           保持阅读专注。
         </p>
       </div>
-      <div class="text-white/50 text-sm">{{ posts?.length ?? 0 }} 篇文章</div>
+      <div class="text-white/50 text-sm">
+        {{ activeTab === "ai-fiction" ? `${fictionSeries.length} 本小说` : `${activePosts.length} 篇内容` }}
+      </div>
     </div>
-    <div v-if="featured" class="mb-10">
+    <div class="mb-8 inline-flex items-center rounded-full border border-white/10 bg-white/5 p-1">
+      <button
+        v-for="tab in tabs"
+        :key="tab.key"
+        type="button"
+        class="rounded-full px-5 py-2 text-sm transition"
+        :class="activeTab === tab.key ? 'bg-white/15 text-white' : 'text-white/70 hover:text-white'"
+        @click="setTab(tab.key)"
+      >
+        {{ tab.label }}
+      </button>
+    </div>
+    <div v-if="activeTab === 'ai-fiction' && fictionSeries.length > 0" class="mb-10 space-y-4">
       <NuxtLink
-        :to="articlePath(featured._path)"
+        v-for="series in fictionSeries"
+        :key="series.novelSlug"
+        :to="series.indexPath"
+        class="block rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl overflow-hidden hover:bg-white/10 transition"
+      >
+        <div class="grid gap-0 md:grid-cols-[200px_1fr]">
+          <div class="h-full min-h-[130px] bg-black/20">
+            <img
+              v-if="series.coverImage"
+              :src="series.coverImage"
+              :alt="series.novelName"
+              class="h-full w-full object-cover"
+              loading="lazy"
+            />
+          </div>
+          <div class="p-4 md:p-5 space-y-2.5">
+            <div class="text-xs uppercase tracking-[0.3em] text-white/45">Novel</div>
+            <h3 class="text-xl md:text-2xl font-semibold text-white">{{ series.novelName }}</h3>
+            <p v-if="series.description" class="text-sm text-white/75 line-clamp-2">{{ series.description }}</p>
+            <div class="text-xs md:text-sm text-white/55">
+              共 {{ series.chapterCount }} 章
+            </div>
+            <span class="inline-flex items-center rounded-full border border-white/20 px-3.5 py-1.5 text-xs md:text-sm text-white/90">
+              查看目录 →
+            </span>
+          </div>
+        </div>
+      </NuxtLink>
+    </div>
+
+    <div v-if="featured && activeTab !== 'ai-fiction'" class="mb-10">
+      <NuxtLink
+        :to="featured._path"
         class="group grid gap-6 md:grid-cols-[1.1fr_1fr] rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl overflow-hidden hover:bg-white/10 transition"
       >
         <div class="max-h-[220px] min-h-[52px]">
@@ -54,13 +100,13 @@
     </div>
 
     <!-- 两列瀑布流：使用 CSS 多列布局，每张卡片 break-inside-avoid 保证不被打断 -->
-    <div class="columns-1 md:columns-2 [column-gap:1.5rem]">
+    <div v-if="activeTab !== 'ai-fiction'" class="columns-1 md:columns-2 [column-gap:1.5rem]">
       <article
         v-for="post in rest"
         :key="post._path"
         class="group p-5 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md hover:bg-white/10 transition-all duration-300 shadow-[0_0_0_rgba(0,0,0,0)] hover:shadow-[0_20px_60px_rgba(0,0,0,0.35)] break-inside-avoid mb-6"
       >
-        <NuxtLink :to="articlePath(post._path)" class="block space-y-3">
+        <NuxtLink :to="post._path" class="block space-y-3">
           <div class="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-white/40">
             <span>Article</span>
             <span class="text-white/30">→</span>
@@ -87,6 +133,37 @@ definePageMeta({
 const config = useRuntimeConfig();
 const base = (config.public.baseUrl as string) || "/";
 const basePath = base.replace(/\/$/, "");
+const route = useRoute();
+const router = useRouter();
+
+const tabs = [
+  { key: "podcast", label: "博客" },
+  { key: "ai-fiction", label: "AI 小说" },
+] as const;
+type TabKey = (typeof tabs)[number]["key"];
+
+const initialTab = computed<TabKey>(() =>
+  route.query.tab === "ai-fiction" ? "ai-fiction" : "podcast",
+);
+const activeTab = ref<TabKey>(initialTab.value);
+
+watch(
+  () => route.query.tab,
+  (tab) => {
+    activeTab.value = tab === "ai-fiction" ? "ai-fiction" : "podcast";
+  },
+);
+
+function setTab(tab: TabKey) {
+  activeTab.value = tab;
+  const query = { ...route.query };
+  if (tab === "podcast") {
+    delete query.tab;
+  } else {
+    query.tab = tab;
+  }
+  router.replace({ query });
+}
 
 const { data: posts } = await useAsyncData(
   "blog",
@@ -108,19 +185,41 @@ const { data: posts } = await useAsyncData(
   { getCachedData: () => (import.meta.dev ? null : undefined) },
 );
 
-const featured = computed(() => posts.value?.[0] ?? null);
-const rest = computed(() => posts.value?.slice(1) ?? []);
+const { data: fictionSeriesData } = await useAsyncData(
+  "ai-fiction-series",
+  () => $fetch<unknown[]>(`${basePath}/ai-fiction-series.json`).catch(() => []),
+  { getCachedData: () => undefined },
+);
 
-const route = useRoute();
+const fictionSeries = computed(
+  () =>
+    (fictionSeriesData.value ?? []) as Array<{
+      novelSlug: string;
+      novelName: string;
+      indexPath: string;
+      description?: string;
+      coverImage?: string;
+      chapterCount: number;
+    }>,
+);
+
+const activePosts = computed(
+  () =>
+    (posts.value ?? []) as Array<{
+      _path: string;
+      title: string;
+      date: string | Date;
+      description?: string;
+      coverImage?: string;
+    }>,
+);
+const featured = computed(() => activePosts.value?.[0] ?? null);
+const rest = computed(() => activePosts.value?.slice(1) ?? []);
+
 usePageStats(route.path);
 
 function formatDate(date: string | Date) {
   return useDateFormat(date, "YYYY-MM-DD").value;
-}
-
-/** 文章页路径：在 base /blog/ 下为 /blog/:slug，故应用内用 /:slug */
-function articlePath(contentPath: string) {
-  return contentPath.replace(/^\/blog\//, "/") || "/";
 }
 </script>
 

@@ -77,10 +77,27 @@ const slug = Array.isArray(route.params.slug)
   ? route.params.slug.join("/")
   : route.params.slug;
 const contentPath = `/blog/${slug}`;
+const config = useRuntimeConfig();
+const base = (config.public.baseUrl as string) || "/";
+const basePath = base.replace(/\/$/, "");
 
 const { data: post, pending } = await useAsyncData(
   `blog-post-${contentPath}`,
-  () => queryContent(contentPath).findOne(),
+  async () => {
+    if (import.meta.server) {
+      return await queryContent(contentPath).findOne();
+    }
+    const cached = useNuxtData(`blog-post-${contentPath}`).data.value;
+    if (cached) return cached;
+    try {
+      return await queryContent(contentPath).findOne();
+    } catch {
+      const fallback = await $fetch<{ body?: string; title?: string; date?: string; tags?: string[] }>(
+        `${basePath}/blog/${slug}.json`,
+      ).catch(() => null);
+      return fallback ?? null;
+    }
+  },
   { getCachedData: import.meta.dev ? () => undefined : undefined, lazy: true },
 );
 

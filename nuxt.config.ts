@@ -5,12 +5,20 @@ import { defineNuxtConfig } from "nuxt/config";
 const collectRoutes = (dir: string, base: string): string[] => {
   try {
     const entries = readdirSync(dir, { withFileTypes: true });
-    return entries
-      .filter((entry) => entry.isFile())
-      .map((entry) => entry.name)
-      .filter((name) => name.endsWith(".md") || name.endsWith(".json"))
-      .map((name) => name.replace(/\.(md|json)$/, ""))
-      .map((slug) => `${base}/${slug}`);
+    const routes: string[] = [];
+    for (const entry of entries) {
+      if (entry.isDirectory()) {
+        routes.push(...collectRoutes(join(dir, entry.name), `${base}/${entry.name}`));
+        continue;
+      }
+      if (!entry.isFile()) continue;
+      if (!entry.name.endsWith(".md") && !entry.name.endsWith(".mdx") && !entry.name.endsWith(".json")) {
+        continue;
+      }
+      const slug = entry.name.replace(/\.(md|mdx|json)$/, "");
+      routes.push(`${base}/${slug}`);
+    }
+    return routes;
   } catch {
     return [];
   }
@@ -24,6 +32,21 @@ const snapshotRoutes = collectRoutes(
   join(process.cwd(), "content", "snapshots"),
   "/snapshots",
 );
+const aiFictionRoutes = collectRoutes(
+  join(process.cwd(), "content", "ai-fiction"),
+  "/ai-fiction",
+);
+/** 每本小说目录页 /ai-fiction/<小说文件夹名> */
+const aiFictionNovelIndexRoutes = (() => {
+  const dir = join(process.cwd(), "content", "ai-fiction");
+  try {
+    return readdirSync(dir, { withFileTypes: true })
+      .filter((e) => e.isDirectory())
+      .map((e) => `/ai-fiction/${e.name}`);
+  } catch {
+    return [];
+  }
+})();
 // 顶层文章路由 /:slug，使 GitHub Pages base /blog/ 下文章 URL 为 /blog/:slug
 const articleSlugRoutes = collectRoutes(
   join(process.cwd(), "content", "blog"),
@@ -36,10 +59,13 @@ const normalizedBase = appBase.endsWith("/") ? appBase : `${appBase}/`;
 const baseRoutes = [
   "/",
   "/blog",
+  "/ai-fiction",
   "/snapshots",
   "/stats",
   ...articleSlugRoutes,
   ...blogRoutes,
+  ...aiFictionRoutes,
+  ...aiFictionNovelIndexRoutes,
   ...snapshotRoutes,
 ];
 const withTrailingSlash = (route: string) =>
