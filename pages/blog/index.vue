@@ -146,9 +146,19 @@ const tabs = [
 ] as const;
 type TabKey = (typeof tabs)[number]["key"];
 
-const activeTab = computed<TabKey>(() =>
-  route.query.tab === "ai-fiction" ? "ai-fiction" : "podcast",
-);
+function resolveTab(value: unknown): TabKey {
+  const raw = Array.isArray(value) ? value[0] : value;
+  return raw === "ai-fiction" ? "ai-fiction" : "podcast";
+}
+
+const activeTab = computed<TabKey>(() => {
+  // 静态部署首次 hydration 可能拿不到 route.query，优先读取真实 URL 查询参数兜底
+  if (import.meta.client) {
+    const tabFromUrl = new URL(window.location.href).searchParams.get("tab");
+    if (tabFromUrl === "ai-fiction") return "ai-fiction";
+  }
+  return resolveTab(route.query.tab);
+});
 
 function setTab(tab: TabKey) {
   const query = { ...route.query };
