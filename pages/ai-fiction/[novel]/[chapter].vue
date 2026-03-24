@@ -134,6 +134,7 @@ const stableKey = computed(() => `chapter::${route.path.replace(/\/$/, "")}`);
 const config = useRuntimeConfig();
 const base = (config.public.baseUrl as string) || "/";
 const basePath = base.replace(/\/$/, "");
+const jsonBase = import.meta.server ? "" : basePath;
 const fullPath = basePath + route.path;
 const { views } = usePageStats(fullPath);
 const { count: commentCount } = useCommentCount(fullPath);
@@ -160,7 +161,7 @@ const { data: chapterNavList } = await useAsyncData(
     // 主路径：requestFetch 在 SSR/client 均正确补全 URL
     try {
       const list = await requestFetch<Array<{ novelSlug: string; chapters?: ChapterNavItem[] }>>(
-        `${basePath}/ai-fiction-series.json`,
+        `${jsonBase}/ai-fiction-series.json`,
       );
       if (Array.isArray(list)) {
         const s = list.find((x) => normalizeSegment(x.novelSlug) === n);
@@ -219,7 +220,7 @@ const { data: post, pending } = await useAsyncData(
     let canonicalPath: string | undefined;
     try {
       const indexRows = await requestFetch<Array<{ _path?: string; chapterFile?: string }>>(
-        `${basePath}/ai-fiction-list.json`,
+        `${jsonBase}/ai-fiction-list.json`,
       );
       if (Array.isArray(indexRows)) {
         canonicalPath = indexRows.find((row) => {
@@ -236,7 +237,7 @@ const { data: post, pending } = await useAsyncData(
       const rel = String(pathLike).replace(/^\/ai-fiction\//, "");
       const segs = rel.split("/");
       if (segs.length < 2) return null;
-      const jsonUrl = `${basePath}/ai-fiction/${encodeURIComponent(segs[0]!)}/${encodeURIComponent(segs[1]!)}.json`;
+      const jsonUrl = `${jsonBase}/ai-fiction/${encodeURIComponent(segs[0]!)}/${encodeURIComponent(segs[1]!)}.json`;
       try {
         return await requestFetch<{ body?: string; title?: string; date?: string; tags?: string[] }>(jsonUrl);
       } catch {

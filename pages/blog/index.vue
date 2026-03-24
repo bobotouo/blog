@@ -136,6 +136,7 @@ definePageMeta({
 const config = useRuntimeConfig();
 const base = (config.public.baseUrl as string) || "/";
 const basePath = base.replace(/\/$/, "");
+const jsonBase = import.meta.server ? "" : basePath;
 const route = useRoute();
 const router = useRouter();
 
@@ -145,16 +146,14 @@ const tabs = [
 ] as const;
 type TabKey = (typeof tabs)[number]["key"];
 
-const initialTab = computed<TabKey>(() =>
-  route.query.tab === "ai-fiction" ? "ai-fiction" : "podcast",
-);
-const activeTab = ref<TabKey>(initialTab.value);
+const activeTab = ref<TabKey>(route.query.tab === "ai-fiction" ? "ai-fiction" : "podcast");
 
 watch(
   () => route.query.tab,
   (tab) => {
     activeTab.value = tab === "ai-fiction" ? "ai-fiction" : "podcast";
   },
+  { immediate: true },
 );
 
 function setTab(tab: TabKey) {
@@ -183,14 +182,14 @@ const { data: posts } = await useAsyncData(
         /* fallback */
       }
     }
-    return await $fetch<unknown[]>(`${basePath}/blog-list.json`).catch(() => []);
+    return await $fetch<unknown[]>(`${jsonBase}/blog-list.json`).catch(() => []);
   },
   { getCachedData: () => (import.meta.dev ? null : undefined) },
 );
 
 const { data: fictionSeriesData } = await useAsyncData(
   "ai-fiction-series",
-  () => $fetch<unknown[]>(`${basePath}/ai-fiction-series.json`).catch(() => []),
+  () => $fetch<unknown[]>(`${jsonBase}/ai-fiction-series.json`).catch(() => []),
   { getCachedData: () => undefined },
 );
 

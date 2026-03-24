@@ -79,6 +79,7 @@ const router = useRouter();
 const config = useRuntimeConfig();
 const base = (config.public.baseUrl as string) || "/";
 const basePath = base.replace(/\/$/, "");
+const jsonBase = import.meta.server ? "" : basePath;
 
 const novelParam = computed(() => normalizeSegment(String(route.params.novel ?? "")));
 
@@ -117,7 +118,7 @@ const { data: bundle, pending } = await useAsyncData<Bundle | null>(
 
     // ── 主路径：静态 JSON（server/client 均走此路） ──────────────────────────
     try {
-      const list = await requestFetch<Bundle[]>(`${basePath}/ai-fiction-series.json`);
+      const list = await requestFetch<Bundle[]>(`${jsonBase}/ai-fiction-series.json`);
       if (Array.isArray(list)) {
         const match = list.find((x) => normalizeSegment(x.novelSlug) === n);
         if (match) {

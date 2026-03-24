@@ -82,13 +82,14 @@ const contentPath = `/blog/${slug}`;
 const config = useRuntimeConfig();
 const base = (config.public.baseUrl as string) || "/";
 const basePath = base.replace(/\/$/, "");
+const jsonBase = import.meta.server ? "" : basePath;
 
 const { data: post, pending } = await useAsyncData(
   `blog-post-${contentPath}`,
   async () => {
     const loadJson = () =>
       $fetch<{ body?: string; title?: string; date?: string; tags?: string[] }>(
-        `${basePath}/blog/${slug}.json`,
+        `${jsonBase}/blog/${slug}.json`,
       ).catch(() => null);
 
     const load = async () => {

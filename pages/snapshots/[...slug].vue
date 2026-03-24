@@ -110,13 +110,14 @@ const slug = Array.isArray(route.params.slug)
   : route.params.slug;
 const contentPath = `/snapshots/${slug}`;
 const basePath = base.replace(/\/$/, "");
+const jsonBase = import.meta.server ? "" : basePath;
 
 const { data: snapshot, pending } = await useAsyncData(
   `snapshot-${contentPath}`,
   async () => {
     const loadJson = () =>
       $fetch<{ body?: string; title?: string; date?: string }>(
-        `${basePath}/snapshots/${slug}.json`,
+        `${jsonBase}/snapshots/${slug}.json`,
       ).catch(() => null);
 
     const load = async () => {

@@ -82,13 +82,14 @@ const { count: commentCount } = useCommentCount(fullPath);
 
 const contentPath = `/blog/${slug}`;
 const basePath = base.replace(/\/$/, "");
+const jsonBase = import.meta.server ? "" : basePath;
 
 const { data: post } = await useAsyncData(
   `blog-post-${contentPath}`,
   async () => {
     const loadJson = () =>
       $fetch<{ body?: string; title?: string; date?: string; tags?: string[] }>(
-        `${basePath}/blog/${slug}.json`,
+        `${jsonBase}/blog/${slug}.json`,
       ).catch(() => null);
 
     const load = async () => {

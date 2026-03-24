@@ -64,8 +64,7 @@ const baseRoutes = [
   "/stats",
   ...articleSlugRoutes,
   ...blogRoutes,
-  ...aiFictionRoutes,
-  ...aiFictionNovelIndexRoutes,
+  // AI 小说正文/章节文本量大，不做预渲染，统一走运行时加载（JSON/SSR）
   ...snapshotRoutes,
 ];
 const withTrailingSlash = (route: string) =>
@@ -76,6 +75,15 @@ const prerenderRoutes = Array.from(
     ...baseRoutes.map(withTrailingSlash),
   ]),
 );
+// GitHub Pages 最终有 404.html 兜底 SPA 路由，不需要把所有详情页都预渲染；
+// 只保留入口页可以显著降低 generate 内存峰值，避免 CI OOM。
+const ghPrerenderRoutes = [
+  "/",
+  "/blog",
+  "/ai-fiction",
+  "/snapshots",
+  "/stats",
+];
 
 export default defineNuxtConfig({
   compatibilityDate: "2026-01-30",
@@ -125,6 +133,13 @@ export default defineNuxtConfig({
     "@vueuse/nuxt",
   ],
 
+  // 排除未使用的重量级组件（FloatingLines 引入 three.js 37MB+），避免拖慢构建
+  components: {
+    dirs: [
+      { path: "~/components", ignore: ["FloatingLines.vue"] },
+    ],
+  },
+
   // Content module config
   content: {
     // files are placed under the `content/` directory
@@ -133,7 +148,7 @@ export default defineNuxtConfig({
       baseURL: isGhPages ? `${normalizedBase}api/_content` : "/api/_content",
     },
     experimental: {
-      clientDB: true,
+      clientDB: false,
     },
   },
 
@@ -162,18 +177,28 @@ export default defineNuxtConfig({
           crawlLinks: false,
           failOnError: false,
           concurrency: 2,
-          routes: prerenderRoutes,
+          ignore: [
+            "/api/_content/**",
+            "/_content/**",
+          ],
+          routes: ghPrerenderRoutes,
         }
       : {
           // Netlify 有 SSR 函数，只预渲染少量关键页面加速首屏，其余由函数动态渲染
           crawlLinks: false,
           failOnError: false,
           concurrency: 2,
+          ignore: [
+            "/api/_content/**",
+            "/_content/**",
+          ],
           routes: ["/", "/blog", "/ai-fiction", "/snapshots"],
         },
     // 确保 API 路由不被预渲染，由 server 函数处理
     routeRules: {
       "/api/**": { ssr: false, headers: { "Cache-Control": "public, max-age=0, must-revalidate" } },
+      "/api/_content/**": { prerender: false },
+      "/_content/**": { prerender: false },
     },
   },
 

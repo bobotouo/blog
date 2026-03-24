@@ -69,6 +69,7 @@ definePageMeta({
 const config = useRuntimeConfig();
 const base = (config.public.baseUrl as string) || "/";
 const basePath = base.replace(/\/$/, "");
+const jsonBase = import.meta.server ? "" : basePath;
 
 type SeriesItem = {
   novelSlug: string;
@@ -109,7 +110,7 @@ async function loadSeriesFromQuery(): Promise<SeriesItem[]> {
 const { data: fictionSeriesData } = await useAsyncData(
   "ai-fiction-landing",
   async () => {
-    const fromJson = await $fetch<SeriesItem[]>(`${basePath}/ai-fiction-series.json`).catch(
+    const fromJson = await $fetch<SeriesItem[]>(`${jsonBase}/ai-fiction-series.json`).catch(
       () => [] as SeriesItem[],
     );
     if (Array.isArray(fromJson) && fromJson.length > 0) return fromJson;

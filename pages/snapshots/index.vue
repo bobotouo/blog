@@ -80,6 +80,7 @@ definePageMeta({
 const config = useRuntimeConfig();
 const base = (config.public.baseUrl as string) || "/";
 const basePath = base.replace(/\/$/, "");
+const jsonBase = import.meta.server ? "" : basePath;
 
 const { data: snapshots } = await useAsyncData(
   "snapshots",
@@ -96,7 +97,7 @@ const { data: snapshots } = await useAsyncData(
         /* fallback */
       }
     }
-    return await $fetch<unknown[]>(`${basePath}/snapshots-list.json`).catch(() => []);
+    return await $fetch<unknown[]>(`${jsonBase}/snapshots-list.json`).catch(() => []);
   },
   { getCachedData: () => (import.meta.dev ? null : undefined) },
 );

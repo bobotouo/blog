@@ -78,6 +78,7 @@ import HomeSnapshotCard from "~/components/HomeSnapshotCard.vue";
 
 const config = useRuntimeConfig();
 const basePath = ((config.public.baseUrl as string) || "/").replace(/\/$/, "");
+const jsonBase = import.meta.server ? "" : basePath;
 
 const { data: snapshots, pending } = await useAsyncData(
   "home-latest-snapshot",
@@ -94,7 +95,7 @@ const { data: snapshots, pending } = await useAsyncData(
         /* fallback */
       }
     }
-    const jsonPath = basePath ? `${basePath}/snapshots-list.json` : "/snapshots-list.json";
+    const jsonPath = basePath ? `${jsonBase}/snapshots-list.json` : "/snapshots-list.json";
     return await $fetch<unknown[]>(jsonPath).catch(() => []);
   },
   { getCachedData: () => (import.meta.dev ? null : undefined), lazy: true },
@@ -106,7 +107,7 @@ onMounted(async () => {
     import.meta.client &&
     (!snapshots.value || !Array.isArray(snapshots.value) || snapshots.value.length === 0)
   ) {
-    const jsonPath = basePath ? `${basePath}/snapshots-list.json` : "/snapshots-list.json";
+    const jsonPath = basePath ? `${jsonBase}/snapshots-list.json` : "/snapshots-list.json";
     const list = await $fetch<unknown[]>(jsonPath).catch(() => []);
     if (Array.isArray(list) && list.length > 0) {
       snapshots.value = list;
