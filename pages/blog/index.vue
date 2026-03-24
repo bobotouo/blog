@@ -146,18 +146,11 @@ const tabs = [
 ] as const;
 type TabKey = (typeof tabs)[number]["key"];
 
-const activeTab = ref<TabKey>(route.query.tab === "ai-fiction" ? "ai-fiction" : "podcast");
-
-watch(
-  () => route.query.tab,
-  (tab) => {
-    activeTab.value = tab === "ai-fiction" ? "ai-fiction" : "podcast";
-  },
-  { immediate: true },
+const activeTab = computed<TabKey>(() =>
+  route.query.tab === "ai-fiction" ? "ai-fiction" : "podcast",
 );
 
 function setTab(tab: TabKey) {
-  activeTab.value = tab;
   const query = { ...route.query };
   if (tab === "podcast") {
     delete query.tab;
