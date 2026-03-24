@@ -5,6 +5,7 @@
 
 [build.environment]
   NODE_VERSION = "20"
+  NODE_OPTIONS = "--max-old-space-size=4096"
   NITRO_PRESET = "netlify"
   NUXT_PUBLIC_COMMENTS_API_BASE = "https://blog.bobotou112.dpdns.org"
 
