@@ -32,7 +32,7 @@
       <NuxtLink
         v-for="series in fictionSeries"
         :key="series.novelSlug"
-        :to="series.indexPath"
+        :to="nuxtLinkToFromContentPath(series.indexPath, base)"
         class="block rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl overflow-hidden hover:bg-white/10 transition"
       >
         <div class="grid gap-0 md:grid-cols-[200px_1fr]">
@@ -62,7 +62,7 @@
 
     <div v-if="featured && activeTab !== 'ai-fiction'" class="mb-10">
       <NuxtLink
-        :to="featured._path"
+        :to="nuxtLinkToFromContentPath(featured._path, base)"
         class="group grid gap-6 md:grid-cols-[1.1fr_1fr] rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl overflow-hidden hover:bg-white/10 transition"
       >
         <div class="max-h-[220px] min-h-[52px]">
@@ -88,7 +88,7 @@
           <h2 class="text-2xl md:text-3xl font-semibold text-white group-hover:text-[color:var(--accent)] transition">
             {{ featured.title }}
           </h2>
-          <p class="text-sm text-white/60">{{ formatDate(featured.date) }}</p>
+          <p class="text-sm text-white/60">{{ formatDateYmd(featured.date) }}</p>
           <p class="text-white/80" v-if="featured.description">
             {{ featured.description }}
           </p>
@@ -106,7 +106,7 @@
         :key="post._path"
         class="group p-5 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md hover:bg-white/10 transition-all duration-300 shadow-[0_0_0_rgba(0,0,0,0)] hover:shadow-[0_20px_60px_rgba(0,0,0,0.35)] break-inside-avoid mb-6"
       >
-        <NuxtLink :to="post._path" class="block space-y-3">
+        <NuxtLink :to="nuxtLinkToFromContentPath(post._path, base)" class="block space-y-3">
           <div class="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-white/40">
             <span>Article</span>
             <span class="text-white/30">→</span>
@@ -114,7 +114,7 @@
           <h2 class="text-2xl font-semibold text-white group-hover:text-[color:var(--accent)] transition">
             {{ post.title }}
           </h2>
-          <p class="text-sm text-white/60">{{ formatDate(post.date) }}</p>
+          <p class="text-sm text-white/60">{{ formatDateYmd(post.date) }}</p>
           <p class="text-white/80" v-if="post.description">
             {{ post.description }}
           </p>
@@ -126,6 +126,9 @@
 </template>
 
 <script setup lang="ts">
+import { formatDateYmd } from "~/utils/format-date";
+import { nuxtLinkToFromContentPath } from "~/utils/route-from-content-path";
+
 definePageMeta({
   layout: "blog",
 });
@@ -217,10 +220,6 @@ const featured = computed(() => activePosts.value?.[0] ?? null);
 const rest = computed(() => activePosts.value?.slice(1) ?? []);
 
 usePageStats(route.path);
-
-function formatDate(date: string | Date) {
-  return useDateFormat(date, "YYYY-MM-DD").value;
-}
 </script>
 
 <style scoped></style>

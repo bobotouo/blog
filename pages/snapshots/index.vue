@@ -24,11 +24,11 @@
         <div class="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.35em] text-white/40">
           <span>Snapshot</span>
           <span class="text-white/20">·</span>
-          <span>{{ formatDate(item.date) }}</span>
+          <span>{{ formatDateYmd(item.date) }}</span>
           <span v-if="item.location" class="text-white/30">· {{ item.location }}</span>
         </div>
 
-        <NuxtLink :to="item._path" class="block mt-4">
+        <NuxtLink :to="nuxtLinkToFromContentPath(item._path, base)" class="block mt-4">
           <h2 class="text-2xl md:text-3xl font-semibold text-white hover:text-[color:var(--accent)] transition">
             {{ item.title }}
           </h2>
@@ -70,12 +70,16 @@
 </template>
 
 <script setup lang="ts">
+import { formatDateYmd } from "~/utils/format-date";
+import { nuxtLinkToFromContentPath } from "~/utils/route-from-content-path";
+
 definePageMeta({
   layout: "blog",
 });
 
 const config = useRuntimeConfig();
-const basePath = ((config.public.baseUrl as string) || "/").replace(/\/$/, "");
+const base = (config.public.baseUrl as string) || "/";
+const basePath = base.replace(/\/$/, "");
 
 const { data: snapshots } = await useAsyncData(
   "snapshots",
@@ -96,8 +100,4 @@ const { data: snapshots } = await useAsyncData(
   },
   { getCachedData: () => (import.meta.dev ? null : undefined) },
 );
-
-function formatDate(date: string | Date) {
-  return useDateFormat(date, "YYYY-MM-DD").value;
-}
 </script>

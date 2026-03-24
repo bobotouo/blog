@@ -79,6 +79,19 @@ const prerenderRoutes = Array.from(
 
 export default defineNuxtConfig({
   compatibilityDate: "2026-01-30",
+
+  // 显式挂载项目 public/，否则 static 预渲染阶段 $fetch 读不到 generate-blog-list 写出的 JSON（根因不是 .gitignore）。
+  hooks: {
+    "nitro:config"(nitroConfig) {
+      nitroConfig.publicAssets ??= [];
+      nitroConfig.publicAssets.unshift({
+        baseURL: "/",
+        dir: join(process.cwd(), "public"),
+        maxAge: 0,
+      });
+    },
+  },
+
   // Global page headers
   app: {
     head: {

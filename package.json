@@ -11,6 +11,7 @@
     "build:netlify-dist": "node scripts/copy-output-to-dist.mjs",
     "generate": "node scripts/generate-blog-list.mjs && nuxt generate",
     "pregenerate": "node scripts/generate-blog-list.mjs",
+    "postgenerate": "node scripts/sync-static-json-to-output.mjs",
     "start": "nuxt start",
     "lint": "eslint --ext .js,.ts,.vue .",
     "format": "prettier --write ."

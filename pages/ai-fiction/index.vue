@@ -22,7 +22,7 @@
       <NuxtLink
         v-for="series in fictionSeries"
         :key="series.novelSlug"
-        :to="series.indexPath"
+        :to="nuxtLinkToFromContentPath(series.indexPath, base)"
         class="block rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl overflow-hidden hover:bg-white/10 transition"
       >
         <div class="grid gap-0 md:grid-cols-[200px_1fr]">
@@ -60,6 +60,8 @@
 </template>
 
 <script setup lang="ts">
+import { nuxtLinkToFromContentPath } from "~/utils/route-from-content-path";
+
 definePageMeta({
   layout: "blog",
 });

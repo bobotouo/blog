@@ -13,11 +13,5 @@ yarn-debug.log*
 yarn-error.log*
 *.log
 
-# 构建时生成的静态数据，不提交
-public/blog-list.json
-public/blog/
-public/ai-fiction-list.json
-public/ai-fiction-series.json
-public/ai-fiction/
-public/snapshots-list.json
-public/snapshots/
+# 注意：勿将 public 下由 generate-blog-list 生成的 JSON 再列入 ignore。
+# Vite 复制 public 到产物时会跳过 .gitignore 中的路径，导致静态站预渲染拿不到数据（500/404）。

@@ -29,6 +29,7 @@ jobs:
 
       - name: Generate static site
         env:
+          NODE_OPTIONS: --max-old-space-size=8192
           NUXT_APP_BASE_URL: /blog/
           NUXT_APP_CDN_URL: /blog/
           NITRO_PRESET: static

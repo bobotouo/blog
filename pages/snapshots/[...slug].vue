@@ -28,7 +28,7 @@
           {{ snapshot.title }}
         </h1>
         <div class="text-sm text-white/60 mb-6 flex flex-wrap items-center gap-4">
-          <span>{{ formatDate(snapshot.date) }}</span>
+          <span>{{ formatDateYmd(snapshot.date) }}</span>
           <span v-if="snapshot.location" class="text-white/40">· {{ snapshot.location }}</span>
           <span v-if="views !== null" class="text-white/40">· {{ views }} 次浏览</span>
           <span v-if="commentCount !== null" class="text-white/40">
@@ -84,6 +84,8 @@
 </template>
 
 <script setup lang="ts">
+import { formatDateYmd } from "~/utils/format-date";
+
 definePageMeta({
   layout: "blog",
 });
@@ -112,18 +114,26 @@ const basePath = base.replace(/\/$/, "");
 const { data: snapshot, pending } = await useAsyncData(
   `snapshot-${contentPath}`,
   async () => {
+    const loadJson = () =>
+      $fetch<{ body?: string; title?: string; date?: string }>(
+        `${basePath}/snapshots/${slug}.json`,
+      ).catch(() => null);
+
+    const load = async () => {
+      const fromQuery = await queryContent(contentPath).findOne();
+      if (fromQuery) return fromQuery;
+      return await loadJson();
+    };
+
     if (import.meta.server) {
-      return await queryContent(contentPath).findOne();
+      return await load();
     }
     const cached = useNuxtData(`snapshot-${contentPath}`).data.value;
     if (cached) return cached;
     try {
-      return await queryContent(contentPath).findOne();
+      return await load();
     } catch {
-      const fallback = await $fetch<{ body?: string; title?: string; date?: string }>(
-        `${basePath}/snapshots/${slug}.json`,
-      ).catch(() => null);
-      return fallback ?? null;
+      return await loadJson();
     }
   },
   { getCachedData: () => (import.meta.dev ? null : undefined), lazy: true },
@@ -146,10 +156,6 @@ const staticBody = computed(() => {
   return typeof b === "string" ? b : null;
 });
 
-function formatDate(date: string | Date | undefined) {
-  if (!date) return "";
-  return useDateFormat(date, "YYYY-MM-DD").value;
-}
 </script>
 
 <style scoped>

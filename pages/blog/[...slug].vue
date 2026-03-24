@@ -25,7 +25,7 @@
           {{ post.title }}
         </h1>
         <div class="text-sm text-white/60 mb-6 flex flex-wrap items-center gap-4">
-          <span>{{ formatDate(post.date) }}</span>
+          <span>{{ formatDateYmd(post.date) }}</span>
           <span v-if="views !== null" class="text-white/40">· {{ views }} 次阅读</span>
           <span v-if="commentCount !== null" class="text-white/40">
             · {{ commentCount }} 条评论
@@ -57,6 +57,8 @@
 </template>
 
 <script setup lang="ts">
+import { formatDateYmd } from "~/utils/format-date";
+
 definePageMeta({
   layout: "blog",
 });
@@ -84,18 +86,26 @@ const basePath = base.replace(/\/$/, "");
 const { data: post, pending } = await useAsyncData(
   `blog-post-${contentPath}`,
   async () => {
+    const loadJson = () =>
+      $fetch<{ body?: string; title?: string; date?: string; tags?: string[] }>(
+        `${basePath}/blog/${slug}.json`,
+      ).catch(() => null);
+
+    const load = async () => {
+      const fromQuery = await queryContent(contentPath).findOne();
+      if (fromQuery) return fromQuery;
+      return await loadJson();
+    };
+
     if (import.meta.server) {
-      return await queryContent(contentPath).findOne();
+      return await load();
     }
     const cached = useNuxtData(`blog-post-${contentPath}`).data.value;
     if (cached) return cached;
     try {
-      return await queryContent(contentPath).findOne();
+      return await load();
     } catch {
-      const fallback = await $fetch<{ body?: string; title?: string; date?: string; tags?: string[] }>(
-        `${basePath}/blog/${slug}.json`,
-      ).catch(() => null);
-      return fallback ?? null;
+      return await loadJson();
     }
   },
   { getCachedData: import.meta.dev ? () => undefined : undefined, lazy: true },
@@ -111,10 +121,6 @@ watch(
   { immediate: true },
 );
 
-function formatDate(date: string | Date | undefined) {
-  if (!date) return "";
-  return useDateFormat(date, "YYYY-MM-DD").value;
-}
 </script>
 
 <style scoped>

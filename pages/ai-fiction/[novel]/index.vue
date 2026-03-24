@@ -46,7 +46,7 @@
         <h2 class="text-sm uppercase tracking-[0.35em] text-white/50 mb-4">章节目录</h2>
         <ol class="space-y-2">
           <li
-            v-for="(ch, idx) in bundle.chapters"
+            v-for="(ch, idx) in bundle.chapters ?? []"
             :key="ch._path"
             class="rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition"
           >
@@ -56,7 +56,7 @@
             >
               <span class="text-white/40 text-sm w-8 shrink-0">{{ idx + 1 }}</span>
               <span class="flex-1 font-medium">{{ ch.title }}</span>
-              <span v-if="ch.date" class="text-white/45 text-sm shrink-0">{{ formatDate(ch.date) }}</span>
+              <span v-if="ch.date" class="text-white/45 text-sm shrink-0">{{ formatDateYmd(ch.date) }}</span>
             </NuxtLink>
           </li>
         </ol>
@@ -67,6 +67,8 @@
 
 <script setup lang="ts">
 import { normalizeSegment } from "~/utils/ai-fiction-slug";
+import { formatDateYmd } from "~/utils/format-date";
+import { nuxtLinkToFromContentPath } from "~/utils/route-from-content-path";
 
 definePageMeta({
   layout: "blog",
@@ -90,7 +92,7 @@ function cmpChapterPath(a: string, b: string) {
 }
 
 function chapterLink(ch: { _path: string }) {
-  return ch._path;
+  return nuxtLinkToFromContentPath(ch._path, base);
 }
 
 type Bundle = {
@@ -103,69 +105,77 @@ type Bundle = {
   chapters: Array<{ _path: string; title: string; date?: string; chapterFile?: string }>;
 };
 
+// useRequestFetch 在 SSR 里自动把相对路径补成 http://localhost:PORT/...
+// 避免 queryContent + clientDB:true 在 _payload.json 请求时抛未捕获异常
+const requestFetch = useRequestFetch();
+
 const { data: bundle, pending } = await useAsyncData<Bundle | null>(
   `novel::${route.path.replace(/\/$/, "")}`,
   async () => {
     const n = novelParam.value;
     if (!n) return null;
 
-    // 1. 优先读 JSON（server/client 完全一致，无 Unicode 问题）
-    const jsonUrl = `${basePath}/ai-fiction-series.json`;
-    const list = await $fetch<Bundle[]>(jsonUrl).catch(() => [] as Bundle[]);
-    const match = list.find(
-      (x) => normalizeSegment(x.novelSlug) === n,
-    );
-    if (match) return match;
-
-    // 2. JSON 找不到时用 queryContent 兜底（开发环境未跑脚本时）
+    // ── 主路径：静态 JSON（server/client 均走此路） ──────────────────────────
     try {
-      const prefix = `/ai-fiction/`;
-      const all = await queryContent("ai-fiction").find();
-      const chapter = all.find(
-        (r) =>
-          String(r._path).startsWith(prefix) &&
-          normalizeSegment(String(r._path).replace(prefix, "").split("/")[0] ?? "") === n &&
-          !String(r._path).endsWith("/summary"),
-      );
-      const summary = all.find(
-        (r) =>
-          String(r._path).startsWith(prefix) &&
-          normalizeSegment(String(r._path).replace(prefix, "").split("/")[0] ?? "") === n &&
-          String(r._path).endsWith("/summary"),
-      );
-
-      const canonicalSlug = summary
-        ? (String(summary._path).replace(prefix, "").replace(/\/summary$/, ""))
-        : chapter
-          ? (String(chapter._path).replace(prefix, "").split("/")[0] ?? n)
-          : n;
-
-      const chapterRows = all.filter(
-        (r) =>
-          String(r._path).startsWith(`${prefix}${canonicalSlug}/`) &&
-          !String(r._path).endsWith("/summary"),
-      );
-      chapterRows.sort((a, b) =>
-        cmpChapterPath(String(a._path), String(b._path)),
-      );
-      const fm = summary as { title?: string; description?: string; coverImage?: string; tags?: string[] } | undefined;
-      return {
-        novelSlug: canonicalSlug,
-        novelName: (fm?.title ?? n) as string,
-        description: (fm?.description ?? "") as string,
-        coverImage: fm?.coverImage as string | undefined,
-        tags: fm?.tags as string[] | undefined,
-        summaryBody: "",
-        chapters: chapterRows.map((r) => ({
-          _path: String(r._path),
-          title: ((r as { title?: string }).title ?? String(r._path).split("/").pop()) as string,
-          date: (r as { date?: string }).date,
-          chapterFile: String(r._path).split("/").pop(),
-        })),
-      };
+      const list = await requestFetch<Bundle[]>(`${basePath}/ai-fiction-series.json`);
+      if (Array.isArray(list)) {
+        const match = list.find((x) => normalizeSegment(x.novelSlug) === n);
+        if (match) {
+          return {
+            ...match,
+            chapters: Array.isArray(match.chapters) ? match.chapters : [],
+            summaryBody: typeof match.summaryBody === "string" ? match.summaryBody : "",
+          };
+        }
+      }
     } catch {
-      return null;
+      /* silent */
     }
+
+    // ── 客户端兜底：queryContent（clientDB 仅在客户端可靠） ─────────────────
+    if (import.meta.client) {
+      try {
+        const prefix = `/ai-fiction/`;
+        const all = await queryContent("ai-fiction").find();
+        const summary = all.find(
+          (r) =>
+            String(r._path).startsWith(prefix) &&
+            normalizeSegment(String(r._path).replace(prefix, "").split("/")[0] ?? "") === n &&
+            String(r._path).endsWith("/summary"),
+        );
+        const chapterRows = all.filter(
+          (r) =>
+            String(r._path).startsWith(prefix) &&
+            normalizeSegment(String(r._path).replace(prefix, "").split("/")[0] ?? "") === n &&
+            !String(r._path).endsWith("/summary"),
+        );
+        chapterRows.sort((a, b) => cmpChapterPath(String(a._path), String(b._path)));
+        const canonicalSlug = summary
+          ? String(summary._path).replace(prefix, "").replace(/\/summary$/, "")
+          : chapterRows[0]
+            ? (String(chapterRows[0]._path).replace(prefix, "").split("/")[0] ?? n)
+            : n;
+        const fm = summary as { title?: string; description?: string; coverImage?: string; tags?: string[] } | undefined;
+        return {
+          novelSlug: canonicalSlug,
+          novelName: (fm?.title ?? n) as string,
+          description: (fm?.description ?? "") as string,
+          coverImage: fm?.coverImage as string | undefined,
+          tags: fm?.tags as string[] | undefined,
+          summaryBody: "",
+          chapters: chapterRows.map((r) => ({
+            _path: String(r._path),
+            title: ((r as { title?: string }).title ?? String(r._path).split("/").pop()) as string,
+            date: (r as { date?: string }).date,
+            chapterFile: String(r._path).split("/").pop(),
+          })),
+        };
+      } catch {
+        /* silent */
+      }
+    }
+
+    return null;
   },
 );
 
@@ -177,10 +187,6 @@ function goBack() {
   }
 }
 
-function formatDate(date: string | Date | undefined) {
-  if (!date) return "";
-  return useDateFormat(date, "YYYY-MM-DD").value;
-}
 </script>
 
 <style scoped>
