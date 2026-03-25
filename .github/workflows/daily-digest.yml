@@ -45,7 +45,7 @@ jobs:
           DAILY_DIGEST_LLM_MODEL: ${{ secrets.DAILY_DIGEST_LLM_MODEL }}
           DAILY_DIGEST_LLM_BASE_URL: ${{ secrets.DAILY_DIGEST_LLM_BASE_URL }}
           # 2 分钟超时，避免 CI 网络抖动导致 LLM 回退模板
-          DAILY_DIGEST_HTTP_TIMEOUT_MS: "120000"
+          DAILY_DIGEST_HTTP_TIMEOUT_MS: "300000"
         run: pnpm daily:digest
 
       - name: Refresh static blog index JSON
