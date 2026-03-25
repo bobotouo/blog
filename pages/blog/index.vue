@@ -151,31 +151,26 @@ function resolveTab(value: unknown): TabKey {
   return raw === "ai-fiction" ? "ai-fiction" : "podcast";
 }
 
-/** 以地址栏 ?tab= 为准（静态站预渲染 HTML 无 query，route.query 常与真实 URL 不一致） */
-function tabFromLocationSearch(): TabKey | null {
-  if (typeof window === "undefined") return null;
-  const q = new URLSearchParams(window.location.search).get("tab");
-  if (q === "ai-fiction") return "ai-fiction";
-  if (q === null) return null;
-  return "podcast";
+/** 默认与静态预渲染一致；真实 tab 在客户端 onMounted 里按地址栏同步 */
+const activeTab = ref<TabKey>("podcast");
+
+function applyTabFromAddressBar() {
+  if (typeof window === "undefined") return;
+  const tab = new URLSearchParams(window.location.search).get("tab");
+  activeTab.value = tab === "ai-fiction" ? "ai-fiction" : "podcast";
 }
 
-function syncActiveTabFromUrl() {
-  const fromSearch = tabFromLocationSearch();
-  activeTab.value = fromSearch ?? resolveTab(route.query.tab);
-}
+onMounted(() => {
+  applyTabFromAddressBar();
+});
 
-// 必须在任何 await 之前同步读 window，否则首屏会一直用预渲染的「博客」
-const activeTab = ref<TabKey>(
-  tabFromLocationSearch() ?? resolveTab(route.query.tab),
+watch(
+  () => route.fullPath,
+  () => {
+    if (import.meta.client) applyTabFromAddressBar();
+    else activeTab.value = resolveTab(route.query.tab);
+  },
 );
-
-watch(() => route.fullPath, syncActiveTabFromUrl, { immediate: true });
-if (import.meta.client) {
-  onMounted(syncActiveTabFromUrl);
-  window.addEventListener("popstate", syncActiveTabFromUrl);
-  onBeforeUnmount(() => window.removeEventListener("popstate", syncActiveTabFromUrl));
-}
 
 function setTab(tab: TabKey) {
   activeTab.value = tab;
