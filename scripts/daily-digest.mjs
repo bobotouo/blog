@@ -1,6 +1,38 @@
-import { mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import * as cheerio from "cheerio";
+
+/** 本地调试：项目根目录 `.env.local` / `.env`（已被 .gitignore），不覆盖已有环境变量 */
+function loadLocalEnvFiles() {
+  for (const name of [".env.local", ".env"]) {
+    const p = join(process.cwd(), name);
+    if (!existsSync(p)) continue;
+    const text = readFileSync(p, "utf-8");
+    for (const line of text.split(/\r?\n/)) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith("#")) continue;
+      const eq = trimmed.indexOf("=");
+      if (eq === -1) continue;
+      const key = trimmed.slice(0, eq).trim();
+      let val = trimmed.slice(eq + 1).trim();
+      if (
+        (val.startsWith('"') && val.endsWith('"')) ||
+        (val.startsWith("'") && val.endsWith("'"))
+      ) {
+        val = val.slice(1, -1);
+      }
+      if (process.env[key] === undefined) process.env[key] = val;
+    }
+  }
+}
+loadLocalEnvFiles();
+
+/** OpenAI 兼容：base 为 `https://api.openai.com` 或已含 `/v1` 的 DashScope 等 */
+function resolveChatCompletionsUrl(baseUrl) {
+  const b = baseUrl.replace(/\/$/, "");
+  if (b.endsWith("/v1")) return `${b}/chat/completions`;
+  return `${b}/v1/chat/completions`;
+}
 
 const BLOG_DIR = join(process.cwd(), "content", "blog");
 const JIN10_URL = "https://www.jin10.com/";
@@ -9,6 +41,7 @@ const JUEJIN_FOLLOWING_URL = "https://juejin.cn/following";
 const JUEJIN_RECOMMENDED_NEWEST_URL = "https://juejin.cn/recommended?sort=newest";
 const USER_AGENT =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36";
+const HTTP_TIMEOUT_MS = Number(process.env.DAILY_DIGEST_HTTP_TIMEOUT_MS || 30000);
 
 function nowDateParts() {
   const now = new Date();
@@ -40,14 +73,15 @@ async function fetchHtml(url, headers = {}) {
   return res.text();
 }
 
-async function fetchJin10FlashPage(maxTime = "", cookie = "") {
+async function fetchJin10FlashPage(maxTime = "", cookie = "", vip = "1") {
   const params = new URLSearchParams({
     channel: "-8200",
-    vip: "1",
+    vip,
   });
   if (maxTime) params.set("max_time", maxTime);
 
   const res = await fetch(`${JIN10_FLASH_API}?${params.toString()}`, {
+    signal: AbortSignal.timeout(HTTP_TIMEOUT_MS),
     headers: {
       "user-agent": USER_AGENT,
       accept: "application/json, text/plain, */*",
@@ -66,27 +100,39 @@ async function fetchJin10FlashPage(maxTime = "", cookie = "") {
 
 async function fetchJin10FlashByLoadMore(times = 12, cookie = "") {
   const all = [];
-  let maxTime = "";
   let pagesFetched = 0;
-  for (let i = 0; i < times; i += 1) {
-    const page = await fetchJin10FlashPage(maxTime, cookie);
-    if (!page.length) break;
-    pagesFetched += 1;
-    all.push(...page);
-    maxTime = page[page.length - 1]?.time || "";
-    if (!maxTime) break;
+  for (const vip of ["1", "0"]) {
+    let maxTime = "";
+    for (let i = 0; i < times; i += 1) {
+      const page = await fetchJin10FlashPage(maxTime, cookie, vip);
+      if (!page.length) break;
+      pagesFetched += 1;
+      all.push(...page);
+      maxTime = page[page.length - 1]?.time || "";
+      if (!maxTime) break;
+    }
   }
-  const firstTime = all[0]?.time || "";
-  const lastTime = all[all.length - 1]?.time || "";
+  const uniqueRows = [];
+  const seen = new Set();
+  for (const row of all) {
+    const data = row?.data || {};
+    const text = String(data.title || data.vip_title || data.content || "").replace(/\s+/g, " ").trim();
+    const key = `${row?.id || ""}|${row?.time || ""}|${text}`;
+    if (!text || seen.has(key)) continue;
+    seen.add(key);
+    uniqueRows.push(row);
+  }
+  const firstTime = uniqueRows[0]?.time || "";
+  const lastTime = uniqueRows[uniqueRows.length - 1]?.time || "";
   return {
-    rows: all,
+    rows: uniqueRows,
     pagesFetched,
-    totalRows: all.length,
+    totalRows: uniqueRows.length,
     timeRange: firstTime && lastTime ? `${firstTime} -> ${lastTime}` : "",
   };
 }
 
-async function fetchJuejinFollowFeed(cookie, limit = 20) {
+async function fetchJuejinFollowFeed(cookie, limit = 20, cursor = "0") {
   if (!cookie) {
     throw new Error("缺少 JUEJIN_COOKIE，无法抓取掘金关注流。");
   }
@@ -95,6 +141,7 @@ async function fetchJuejinFollowFeed(cookie, limit = 20) {
     "https://api.juejin.cn/recommend_api/v1/article/recommend_follow_feed",
     {
       method: "POST",
+      signal: AbortSignal.timeout(HTTP_TIMEOUT_MS),
       headers: {
         "user-agent": USER_AGENT,
         "content-type": "application/json",
@@ -106,7 +153,7 @@ async function fetchJuejinFollowFeed(cookie, limit = 20) {
       body: JSON.stringify({
         id_type: 2,
         sort_type: 200,
-        cursor: "0",
+        cursor,
         limit,
       }),
     },
@@ -120,14 +167,19 @@ async function fetchJuejinFollowFeed(cookie, limit = 20) {
   if (json?.err_no !== 0) {
     throw new Error(`掘金接口返回异常: ${json?.err_msg || "unknown error"}`);
   }
-  return Array.isArray(json?.data) ? json.data : [];
+  return {
+    data: Array.isArray(json?.data) ? json.data : [],
+    cursor: String(json?.cursor || ""),
+    hasMore: Boolean(json?.has_more),
+  };
 }
 
-async function fetchJuejinNewestFeed(limit = 10) {
+async function fetchJuejinNewestFeed(limit = 10, cursor = "0") {
   const res = await fetch(
     "https://api.juejin.cn/recommend_api/v1/article/recommend_all_feed",
     {
       method: "POST",
+      signal: AbortSignal.timeout(HTTP_TIMEOUT_MS),
       headers: {
         "user-agent": USER_AGENT,
         "content-type": "application/json",
@@ -138,7 +190,7 @@ async function fetchJuejinNewestFeed(limit = 10) {
       body: JSON.stringify({
         id_type: 2,
         sort_type: 300, // newest
-        cursor: "0",
+        cursor,
         limit,
       }),
     },
@@ -150,11 +202,43 @@ async function fetchJuejinNewestFeed(limit = 10) {
   if (json?.err_no !== 0) {
     throw new Error(`掘金最新接口返回异常: ${json?.err_msg || "unknown error"}`);
   }
-  return Array.isArray(json?.data) ? json.data : [];
+  return {
+    data: Array.isArray(json?.data) ? json.data : [],
+    cursor: String(json?.cursor || ""),
+    hasMore: Boolean(json?.has_more),
+  };
+}
+
+async function fetchJuejinNewestFeedPaged(pageLimit = 20, pages = 3) {
+  const all = [];
+  let cursor = "0";
+  for (let i = 0; i < pages; i += 1) {
+    const res = await fetchJuejinNewestFeed(pageLimit, cursor);
+    if (!res.data.length) break;
+    all.push(...res.data);
+    cursor = res.cursor || cursor;
+    if (!res.hasMore) break;
+  }
+  return all;
+}
+
+async function fetchJuejinFollowFeedPaged(cookie, pageLimit = 20, pages = 3) {
+  if (!cookie) return [];
+  const all = [];
+  let cursor = "0";
+  for (let i = 0; i < pages; i += 1) {
+    const res = await fetchJuejinFollowFeed(cookie, pageLimit, cursor);
+    if (!res.data.length) break;
+    all.push(...res.data);
+    cursor = res.cursor || cursor;
+    if (!res.hasMore) break;
+  }
+  return all;
 }
 
 async function fetchJuejinPostSummary(articleId, cookie = "") {
   const res = await fetch(`https://juejin.cn/post/${articleId}`, {
+    signal: AbortSignal.timeout(HTTP_TIMEOUT_MS),
     headers: {
       "user-agent": USER_AGENT,
       accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
@@ -397,15 +481,110 @@ ${
 `;
 }
 
-function ensureUniqueFilename(baseName) {
-  const files = new Set(readdirSync(BLOG_DIR));
-  let name = `${baseName}.md`;
-  let i = 1;
-  while (files.has(name)) {
-    name = `${baseName}-${i}.md`;
-    i += 1;
+function dailyFilename(baseName) {
+  return join(BLOG_DIR, `${baseName}.md`);
+}
+
+function cleanupSameDayVariants(compact) {
+  const files = readdirSync(BLOG_DIR);
+  const variantPattern = new RegExp(`^${compact}-(finance|tech)-digest-\\d+\\.md$`);
+  for (const name of files) {
+    if (!variantPattern.test(name)) continue;
+    try {
+      unlinkSync(join(BLOG_DIR, name));
+    } catch (_) {
+      // 忽略清理失败，避免影响主流程
+    }
   }
-  return join(BLOG_DIR, name);
+}
+
+function stripMarkdownFence(text) {
+  const s = String(text || "").trim();
+  const wrapped = s.match(/^```(?:markdown|md)?\s*([\s\S]*?)\s*```$/i);
+  return wrapped ? wrapped[1].trim() : s;
+}
+
+function buildFinanceLlmPrompt(dateTime, lines, stats) {
+  return `请基于下面金融快讯，生成一篇中文 Markdown 日报，要求：
+1) 必须输出完整 Markdown，包含 frontmatter（title/date/description/tags）。
+2) 结构包含：今日结论、关键驱动、风险提示、重点快讯摘录。
+3) 语气专业、克制，不夸张，不编造数据；如果信息不足要明确说明。
+4) 在“重点快讯摘录”中保留原始时间与要点，控制在 20-40 条重点。
+5) 不要输出与 Markdown 无关的解释文本。
+
+生成时间：${dateTime}
+抓取统计：${stats.pagesFetched} 页 / ${stats.totalRows} 条，时间区间 ${stats.timeRange}
+来源：${JIN10_URL}
+
+快讯列表：
+${lines.map((x, i) => `${i + 1}. ${x}`).join("\n")}
+`;
+}
+
+function buildTechLlmPrompt(dateTime, newest, following, usedCookie) {
+  return `请基于下面技术文章信息，生成一篇中文 Markdown 日报，要求：
+1) 必须输出完整 Markdown，包含 frontmatter（title/date/description/tags）。
+2) 结构包含：今日结论、技术主题、推荐阅读（按优先级排序）、可落地方向。
+3) 每条推荐阅读给出：标题、链接、一句话价值说明。
+4) 语气偏工程实践，避免空话，不编造未提供的事实。
+5) 不要输出与 Markdown 无关的解释文本。
+
+生成时间：${dateTime}
+数据源：${JUEJIN_FOLLOWING_URL}
+参考源：${JUEJIN_RECOMMENDED_NEWEST_URL}
+抓取方式：${usedCookie ? "使用 JUEJIN_COOKIE 抓取关注页 + 综合最新" : "仅综合最新"}
+
+综合最新：
+${newest.length ? newest.map((x, i) => `${i + 1}. ${x.title}\n链接: ${x.link}\n摘要: ${x.summary}`).join("\n\n") : "无"}
+
+关注补充：
+${following.length ? following.map((x, i) => `${i + 1}. ${x.title}\n链接: ${x.link}\n摘要: ${x.summary}`).join("\n\n") : "无"}
+`;
+}
+
+async function generateMarkdownByLlm(systemPrompt, userPrompt, fallbackMarkdown) {
+  const apiKey = process.env.OPENAI_API_KEY || "";
+  const enabled = (process.env.DAILY_DIGEST_ENABLE_LLM || "").toLowerCase() === "true";
+  if (!enabled || !apiKey) return fallbackMarkdown;
+
+  const model = process.env.DAILY_DIGEST_LLM_MODEL || "gpt-4o-mini";
+  const llmBaseUrl = (process.env.DAILY_DIGEST_LLM_BASE_URL || "https://api.openai.com").replace(/\/$/, "");
+  const chatUrl = resolveChatCompletionsUrl(llmBaseUrl);
+  console.log(`[daily-digest] LLM enabled, model=${model}, base=${llmBaseUrl}`);
+
+  try {
+    const res = await fetch(chatUrl, {
+      method: "POST",
+      signal: AbortSignal.timeout(HTTP_TIMEOUT_MS),
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model,
+        temperature: 0.4,
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+      }),
+    });
+
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      console.warn(`[daily-digest] LLM 生成失败(${res.status})，回退模板。${text ? ` ${text.slice(0, 200)}` : ""}`);
+      return fallbackMarkdown;
+    }
+
+    const json = await res.json();
+    const out = json?.choices?.[0]?.message?.content;
+    const cleaned = stripMarkdownFence(out);
+    if (cleaned) return cleaned;
+    return fallbackMarkdown;
+  } catch (err) {
+    console.warn("[daily-digest] LLM 调用异常，回退模板：", err?.message || err);
+    return fallbackMarkdown;
+  }
 }
 
 async function run() {
@@ -421,7 +600,7 @@ async function run() {
 
   const juejinCookie = process.env.JUEJIN_COOKIE || "";
   const usedIds = collectUsedJuejinArticleIds();
-  const newestFeed = await fetchJuejinNewestFeed(10);
+  const newestFeed = await fetchJuejinNewestFeedPaged(20, 3);
   const newestTop10 = uniqueByArticleId(newestFeed.map(normalizeJuejinFeedItem).filter(Boolean)).slice(
     0,
     10,
@@ -433,7 +612,7 @@ async function run() {
 
   let followingSelected = [];
   if (juejinCookie) {
-    const followFeed = await fetchJuejinFollowFeed(juejinCookie, 30);
+    const followFeed = await fetchJuejinFollowFeedPaged(juejinCookie, 20, 3);
     const now = Date.now();
     const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
     const candidates = uniqueByArticleId(followFeed.map(normalizeJuejinFeedItem).filter(Boolean))
@@ -452,15 +631,25 @@ async function run() {
     throw new Error("未筛选到可用的掘金文章（AI/Flutter 或关注新增）。");
   }
 
-  const financePath = ensureUniqueFilename(`${compact}-finance-digest`);
-  const techPath = ensureUniqueFilename(`${compact}-tech-digest`);
+  const financePath = dailyFilename(`${compact}-finance-digest`);
+  const techPath = dailyFilename(`${compact}-tech-digest`);
 
-  writeFileSync(financePath, buildFinanceMarkdown(dateTime, financeLines, jin10Result), "utf-8");
-  writeFileSync(
-    techPath,
-    buildTechMarkdown(dateTime, newestSelected, followingSelected, Boolean(juejinCookie)),
-    "utf-8",
+  const financeFallback = buildFinanceMarkdown(dateTime, financeLines, jin10Result);
+  const techFallback = buildTechMarkdown(dateTime, newestSelected, followingSelected, Boolean(juejinCookie));
+  const financeFinal = await generateMarkdownByLlm(
+    "你是资深金融编辑，负责将快讯整理成可发布的每日简报。",
+    buildFinanceLlmPrompt(dateTime, financeLines.slice(0, 120), jin10Result),
+    financeFallback,
   );
+  const techFinal = await generateMarkdownByLlm(
+    "你是资深技术内容编辑，负责把文章素材整理为可发布的技术日报。",
+    buildTechLlmPrompt(dateTime, newestSelected, followingSelected, Boolean(juejinCookie)),
+    techFallback,
+  );
+
+  cleanupSameDayVariants(compact);
+  writeFileSync(financePath, financeFinal, "utf-8");
+  writeFileSync(techPath, techFinal, "utf-8");
 
   console.log("[daily-digest] 生成完成:");
   console.log(" -", financePath);

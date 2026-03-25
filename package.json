@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "daily:digest": "node scripts/daily-digest.mjs",
+    "daily:digest:local": "node scripts/daily-digest.mjs",
     "test:unit": "vitest run",
     "dev": "node scripts/generate-blog-list.mjs && nuxt dev",
     "build": "node scripts/generate-blog-list.mjs && nuxt build",

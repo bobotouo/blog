@@ -231,8 +231,27 @@ const activePosts = computed(
       coverImage?: string;
     }>,
 );
-const featured = computed(() => activePosts.value?.[0] ?? null);
-const rest = computed(() => activePosts.value?.slice(1) ?? []);
+const featured = computed(() => {
+  const list = activePosts.value ?? [];
+  if (!list.length) return null;
+  return (
+    list.find((p) => String(p._path).endsWith("/2024-01-01-welcome")) ??
+    list.find((p) => String(p.title).includes("欢迎")) ??
+    list[0] ??
+    null
+  );
+});
+const rest = computed(() => {
+  const list = activePosts.value ?? [];
+  const f = featured.value;
+  return list
+    .filter((p) => !f || p._path !== f._path)
+    .sort((a, b) => {
+      const ta = new Date(a.date as string | Date).getTime();
+      const tb = new Date(b.date as string | Date).getTime();
+      return tb - ta;
+    });
+});
 
 usePageStats(route.path);
 </script>
