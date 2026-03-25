@@ -1,1 +1,0 @@
-import"./DOA6f86j.js";function r(){return globalThis.$fetch}function o(t){let e=String(t??"").trim().replace(/\/$/,"");try{e=decodeURIComponent(e)}catch{}return e.normalize("NFC")}export{o as n,r as u};
