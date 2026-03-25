@@ -151,16 +151,34 @@ function resolveTab(value: unknown): TabKey {
   return raw === "ai-fiction" ? "ai-fiction" : "podcast";
 }
 
-const activeTab = computed<TabKey>(() => {
-  // 静态部署首次 hydration 可能拿不到 route.query，优先读取真实 URL 查询参数兜底
-  if (import.meta.client) {
-    const tabFromUrl = new URL(window.location.href).searchParams.get("tab");
-    if (tabFromUrl === "ai-fiction") return "ai-fiction";
-  }
-  return resolveTab(route.query.tab);
-});
+/** 以地址栏 ?tab= 为准（静态站预渲染 HTML 无 query，route.query 常与真实 URL 不一致） */
+function tabFromLocationSearch(): TabKey | null {
+  if (typeof window === "undefined") return null;
+  const q = new URLSearchParams(window.location.search).get("tab");
+  if (q === "ai-fiction") return "ai-fiction";
+  if (q === null) return null;
+  return "podcast";
+}
+
+function syncActiveTabFromUrl() {
+  const fromSearch = tabFromLocationSearch();
+  activeTab.value = fromSearch ?? resolveTab(route.query.tab);
+}
+
+// 必须在任何 await 之前同步读 window，否则首屏会一直用预渲染的「博客」
+const activeTab = ref<TabKey>(
+  tabFromLocationSearch() ?? resolveTab(route.query.tab),
+);
+
+watch(() => route.fullPath, syncActiveTabFromUrl, { immediate: true });
+if (import.meta.client) {
+  onMounted(syncActiveTabFromUrl);
+  window.addEventListener("popstate", syncActiveTabFromUrl);
+  onBeforeUnmount(() => window.removeEventListener("popstate", syncActiveTabFromUrl));
+}
 
 function setTab(tab: TabKey) {
+  activeTab.value = tab;
   const query = { ...route.query };
   if (tab === "podcast") {
     delete query.tab;
