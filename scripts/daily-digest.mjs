@@ -504,6 +504,24 @@ function stripMarkdownFence(text) {
   return wrapped ? wrapped[1].trim() : s;
 }
 
+/** 兼容部分推理模型输出的思考块，避免污染 Markdown 正文 */
+function stripThinkBlocks(text) {
+  const s = String(text || "");
+  return s
+    .replace(/<think>[\s\S]*?<\/think>/gi, "")
+    .replace(/```(?:thinking|reasoning)\s*[\s\S]*?```/gi, "")
+    .trim();
+}
+
+function hasValidFrontmatter(markdown) {
+  return /^---\r?\n[\s\S]*?\r?\n---\r?\n/.test(String(markdown || ""));
+}
+
+function includesAllSections(markdown, sectionTitles = []) {
+  const s = String(markdown || "");
+  return sectionTitles.every((title) => s.includes(`## ${title}`));
+}
+
 function buildFinanceLlmPrompt(dateTime, lines, stats) {
   return `请基于下面金融快讯，生成一篇中文 Markdown 日报，要求：
 1) 必须输出完整 Markdown，包含 frontmatter（title/date/description/tags）。
@@ -542,7 +560,7 @@ ${following.length ? following.map((x, i) => `${i + 1}. ${x.title}\n链接: ${x.
 `;
 }
 
-async function generateMarkdownByLlm(systemPrompt, userPrompt, fallbackMarkdown) {
+async function generateMarkdownByLlm(systemPrompt, userPrompt, fallbackMarkdown, requiredSections = []) {
   const apiKey = process.env.OPENAI_API_KEY || "";
   const enabled = (process.env.DAILY_DIGEST_ENABLE_LLM || "").toLowerCase() === "true";
   if (!enabled || !apiKey) return fallbackMarkdown;
@@ -564,7 +582,16 @@ async function generateMarkdownByLlm(systemPrompt, userPrompt, fallbackMarkdown)
         model,
         temperature: 0.4,
         messages: [
-          { role: "system", content: systemPrompt },
+          {
+            role: "system",
+            content: [
+              "你是日报写作助手，只输出可直接发布的中文 Markdown。",
+              "禁止输出思考过程、解释、说明、致歉、代码块围栏。",
+              "禁止输出 <think>...</think> 或任何推理痕迹。",
+              "输出必须以 frontmatter 开头，并严格遵循用户给定结构。",
+              systemPrompt,
+            ].join("\n"),
+          },
           { role: "user", content: userPrompt },
         ],
       }),
@@ -578,9 +605,21 @@ async function generateMarkdownByLlm(systemPrompt, userPrompt, fallbackMarkdown)
 
     const json = await res.json();
     const out = json?.choices?.[0]?.message?.content;
-    const cleaned = stripMarkdownFence(out);
-    if (cleaned) return cleaned;
-    return fallbackMarkdown;
+    const cleaned = stripMarkdownFence(stripThinkBlocks(out));
+    if (!cleaned) return fallbackMarkdown;
+    if (!hasValidFrontmatter(cleaned)) {
+      console.warn("[daily-digest] LLM 输出缺少 frontmatter，回退模板。");
+      return fallbackMarkdown;
+    }
+    if (!includesAllSections(cleaned, requiredSections)) {
+      console.warn("[daily-digest] LLM 输出缺少必需章节，回退模板。");
+      return fallbackMarkdown;
+    }
+    if (cleaned.includes("<think>")) {
+      console.warn("[daily-digest] LLM 输出包含 think 标签，回退模板。");
+      return fallbackMarkdown;
+    }
+    return cleaned;
   } catch (err) {
     console.warn("[daily-digest] LLM 调用异常，回退模板：", err?.message || err);
     return fallbackMarkdown;
@@ -640,11 +679,13 @@ async function run() {
     "你是资深金融编辑，负责将快讯整理成可发布的每日简报。",
     buildFinanceLlmPrompt(dateTime, financeLines.slice(0, 120), jin10Result),
     financeFallback,
+    ["今日结论", "关键驱动", "风险提示", "重点快讯摘录"],
   );
   const techFinal = await generateMarkdownByLlm(
     "你是资深技术内容编辑，负责把文章素材整理为可发布的技术日报。",
     buildTechLlmPrompt(dateTime, newestSelected, followingSelected, Boolean(juejinCookie)),
     techFallback,
+    ["今日结论", "技术主题", "推荐阅读", "可落地方向"],
   );
 
   cleanupSameDayVariants(compact);
