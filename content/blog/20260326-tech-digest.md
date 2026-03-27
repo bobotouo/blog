@@ -1,0 +1,49 @@
+---
+title: 技术日报 2026-03-26
+date: 2026-03-26
+description: 聚焦 AI 成本优化、RAG 工程化落地及移动端跨平台新动态。
+tags: [AI, RAG, Flutter, Android, ReactNative, 工程实践]
+---
+
+## 今日结论
+
+AI 应用从实验走向生产，成本管控与 ETL 流程规范化成为核心挑战；移动端开发工具链迎来显著更新，Android Studio 正式集成 AI 项目生成，跨平台框架（Flutter/RN）在鸿蒙适配与构建性能上均有新进展。建议团队重点关注 AI 调用成本审计及生产级 RAG 管道建设，同时评估新工具链对开发效率的提升。
+
+## 技术主题
+
+- **AI 工程化与成本**：Token 账单优化、RAG 生产级 ETL 流程、模型中转渠道质量分析。
+- **移动端生态演进**：Android Studio AI 化、鸿蒙跨平台适配成本、Flutter 构建性能优化、Compose 热重载方案。
+
+## 推荐阅读
+
+1. **[深入 RAG：从理论到实践的 ETL 核心流程](https://juejin.cn/post/7621107967534284819)**
+   价值：详解生产级 RAG 系统超越简单“文档 - 向量 - 检索”的核心 ETL 流程，基于 Spring AI 实践。
+
+2. **[你每个月花多少钱在 AI 上，有没有省钱妙招啊😭 | 沸点周刊 3.26](https://juejin.cn/post/7621210336354795535)**
+   价值：针对算力价格上涨背景，探讨 AI 模型调用频繁下的 Token 账单优化与省钱策略。
+
+3. **[Android Studio Panda 2，支持 AI 用 Vibe Coding 创建项目](https://juejin.cn/post/7620721486387068947)**
+   价值：介绍 Android Studio 正式支持 Gemini 创建项目，标志官方不再维护 XML 布局，转向 AI 驱动开发。
+
+4. **[React Native 鸿蒙 2026 路线发布，为什么它的适配成本那么高？](https://juejin.cn/post/7621107967534301203)**
+   价值：分析 React Native OpenHarmony 社区版本的适配现状，评估跨平台方案在鸿蒙生态的落地成本。
+
+5. **[为什么中转渠道的顶级模型会不好用？这是一个技术问题](https://juejin.cn/post/7619522038567616546)**
+   价值：揭示中转渠道模型体验差异的技术根源，避免在集成 Claude/Gemini 等模型时踩坑。
+
+6. **[Flutter 的 build_runner 已经今非昔比，看看 build_runner 2.13 有什么特别？](https://juejin.cn/post/7619990292558348340)**
+   价值：解析 build_runner 2.13 版本在性能与稳定性上的改进，改善 Flutter 代码生成体验。
+
+7. **[2026，Android Compose 终于支持 Hot Reload 了，但是收费](https://juejin.cn/post/7619754867242975284)**
+   价值：介绍个人开发者实现的 Compose Hot Reload 方案，注意其非官方出品及收费模式。
+
+8. **[Flutter ListView Physics 滚动物理效果详解](https://juejin.cn/post/7621140573429317683)**
+   价值：深入分析 Flutter ListView 核心属性与 ScrollPhysics 内置效果，优化列表滚动体验。
+
+## 可落地方向
+
+- **AI 成本审计**：统计团队当前 AI 模型调用账单，参考省钱妙招优化 Prompt 或切换性价比更高的模型渠道。
+- **RAG 流程重构**：检查现有 RAG 系统的 ETL 环节，参照生产级标准优化文档处理与向量检索流程。
+- **工具链升级评估**：测试 Android Studio Panda 2 的 AI 项目创建功能，评估 Flutter build_runner 2.13 升级对构建速度的影响。
+- **跨平台策略复盘**：若涉及鸿蒙适配，重新评估 React Native 与 Flutter 的适配成本与路线。
+- **开发体验优化**：调研 Compose Hot Reload 第三方方案的可行性，或优化 Flutter 列表滚动物理效果以提升用户体验。

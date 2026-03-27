@@ -1,45 +1,34 @@
 ---
-title: 每日技术文章速览（2026-03-25）
-date: 2026-03-25 07:54:09
-description: 自动抓取掘金关注页并生成的每日技术摘要
-tags:
-  - 技术
-  - 掘金
-  - 每日速览
+title: 技术日报 2026-03-25
+date: 2026-03-25
+description: 聚焦 LangChain.js 入门与 Nuxt 3 SSR 上下文问题，附带 Kotlin 近期特性汇总。
+tags: [LLM, LangChain, Nuxt3, Kotlin, SSR, 前端]
 ---
-> 数据来源：https://juejin.cn/following
-> 参考来源：https://juejin.cn/recommended?sort=newest
-> 生成时间：2026-03-25 07:54:09
-> 抓取方式：使用 JUEJIN_COOKIE 抓取关注页
 
-## 今日技术主题
-- AI 与智能开发：相关信号 3 条
-- 前端工程化：相关信号 1 条
-- Flutter 生态：相关信号 1 条
+# 技术日报 2026-03-25
 
-## 综合-最新（前10，筛 AI/Flutter）
-- 2-使用LLM链和Prompt模板（https://juejin.cn/post/7620712495218376714）
-  - 摘要：已打开详情页，但未提取到可靠摘要。
-- 1-认识langchain.js（https://juejin.cn/post/7621026569315188762）
-  - 摘要：已打开详情页，但未提取到可靠摘要。
-- Nuxt 3 异步上下文指南：useNuxtApp() 与 await 的使用规范（https://juejin.cn/post/7620769530688454690）
-  - 摘要：已打开详情页，但未提取到可靠摘要。
-- WorkBuddy 从入门到精通：一句话让 AI 帮你搞定所有繁琐工作（https://juejin.cn/post/7620801241318506537）
-  - 摘要：已打开详情页，但未提取到可靠摘要。
+## 今日结论
+LangChain.js 入门链路清晰，适合快速构建 LLM 应用；Nuxt 3 在 SSR 场景下需特别注意异步边界后的上下文丢失问题；Kotlin 近两年版本迭代密集，建议存量项目评估特性升级收益。
 
-## 关注补充（未使用且不过旧）
-- Android Studio Panda 2 ，支持 AI 用 Vibe Coding 创建项目（https://juejin.cn/post/7620721486387068947）
-  - 摘要：已打开详情页，但未提取到可靠摘要。
-- Flutter 的 build_runner 已经今非昔比，看看 build_runner 2.13 有什么特别？（https://juejin.cn/post/7619990292558348340）
-  - 摘要：已打开详情页，但未提取到可靠摘要。
-- 2026，Android Compose 终于支持 Hot Reload 了，但是收费（https://juejin.cn/post/7619754867242975284）
-  - 摘要：已打开详情页，但未提取到可靠摘要。
-- 为什么中转渠道的顶级模型会不好用？这是一个技术问题（https://juejin.cn/post/7619522038567616546）
-  - 摘要：已打开详情页，但未提取到可靠摘要。
-- Android 禁止侧载将正式实施，需要等待 24 小时冷静期（https://juejin.cn/post/7618858438484901942）
-  - 摘要：已打开详情页，但未提取到可靠摘要。
+## 技术主题
+AI 工程化 / 前端 SSR 架构 / 语言特性演进
 
-## 学习建议
-- 先选择 1 篇偏“原理”与 1 篇偏“实战”的文章做组合学习。
-- 阅读时同步记录可迁移到当前项目的实践点（如构建优化、组件抽象、测试策略）。
-- 将今天的关键结论整理为团队可复用的 checklist 或脚手架模板。
+## 推荐阅读
+
+1. **[1-认识 langchain.js](https://juejin.cn/post/7621026569315188762)**
+   提供 LangChain.js 项目初始化及核心包、OpenAI 适配器安装的具体步骤。
+
+2. **[2-使用 LLM 链和 Prompt 模板](https://juejin.cn/post/7620712495218376714)**
+   讲解如何通过 Prompt 模板控制模型响应类型及对话流程，增强对 LLM 输出的可控性。
+
+3. **[Nuxt 3 异步上下文指南：useNuxtApp() 与 await 的使用规范](https://juejin.cn/post/7620769530688454690)**
+   分析 SSR 项目中 useNuxtApp() 在异步边界后丢失上下文的根因与修复方案。
+
+4. **[Kotlin 在 2.0 - 2.3 都更新了什么特性，一口气带你看完这两年 Kotlin 更新](https://juejin.cn/post/7618764794955628607)**
+   汇总 Kotlin 2.0 至 2.3 版本期间发布的新特性与语法更新，适合快速回顾。
+
+## 可落地方向
+
+1. **AI 应用原型验证**：参照 LangChain.js 指南初始化项目，尝试配置 Prompt 模板以规范输出格式。
+2. **SSR 隐患排查**：检查 Nuxt 3 项目中是否存在 `await` 后调用 `useNuxtApp()` 或访问 Pinia Store 的代码，避免上下文丢失。
+3. **技术栈评估**：回顾 Kotlin 近期特性，评估后端或 Android 项目升级版本以获得新语法支持的可行性。
