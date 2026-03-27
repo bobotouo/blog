@@ -392,6 +392,7 @@ function pickJin10HeadlinesFromRows(rows) {
 }
 
 function buildFinanceMarkdown(dateTime, lines, stats = {}) {
+  const date = dateTime.slice(0, 10);
   const themes = summarizeByKeywords(lines, [
     { label: "地缘与外交风险", words: ["伊朗", "以色列", "外交", "军事", "冲突", "通牒"] },
     { label: "能源价格波动", words: ["原油", "布伦特", "WTI", "天然气"] },
@@ -401,7 +402,7 @@ function buildFinanceMarkdown(dateTime, lines, stats = {}) {
   ]);
 
   return `---
-title: 每日金融局势简报（${dateTime.slice(0, 10)}）
+title: 金融日报 ${date}
 date: ${dateTime}
 description: 自动抓取金十数据快讯并生成的每日金融局势摘要
 tags:
@@ -428,6 +429,7 @@ ${lines.map((x) => `- ${x}`).join("\n")}
 }
 
 function buildTechMarkdown(dateTime, selectedFromNewest, selectedFromFollowing, usedCookie) {
+  const date = dateTime.slice(0, 10);
   const lines = [...selectedFromNewest, ...selectedFromFollowing].map(
     (x) => `${x.title} ${x.summary}`,
   );
@@ -440,7 +442,7 @@ function buildTechMarkdown(dateTime, selectedFromNewest, selectedFromFollowing, 
   ]);
 
   return `---
-title: 每日技术文章速览（${dateTime.slice(0, 10)}）
+title: 技术日报 ${date}
 date: ${dateTime}
 description: 自动抓取掘金关注页并生成的每日技术摘要
 tags:
@@ -522,9 +524,26 @@ function includesAllSections(markdown, sectionTitles = []) {
   return sectionTitles.every((title) => s.includes(`## ${title}`));
 }
 
+function extractFrontmatterTitle(markdown) {
+  const m = String(markdown || "").match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  if (!m) return "";
+  const titleLine = m[1]
+    .split(/\r?\n/)
+    .find((line) => line.trim().toLowerCase().startsWith("title:"));
+  if (!titleLine) return "";
+  return titleLine
+    .split(":")
+    .slice(1)
+    .join(":")
+    .trim()
+    .replace(/^["']|["']$/g, "");
+}
+
 function buildFinanceLlmPrompt(dateTime, lines, stats) {
+  const date = dateTime.slice(0, 10);
   return `请基于下面金融快讯，生成一篇中文 Markdown 日报，要求：
 1) 必须输出完整 Markdown，包含 frontmatter（title/date/description/tags）。
+1.1) frontmatter 的 title 必须严格为：金融日报 ${date}
 2) 结构包含：今日结论、关键驱动、风险提示、重点快讯摘录。
 3) 语气专业、克制，不夸张，不编造数据；如果信息不足要明确说明。
 4) 在“重点快讯摘录”中保留原始时间与要点，控制在 20-40 条重点。
@@ -540,8 +559,10 @@ ${lines.map((x, i) => `${i + 1}. ${x}`).join("\n")}
 }
 
 function buildTechLlmPrompt(dateTime, newest, following, usedCookie) {
+  const date = dateTime.slice(0, 10);
   return `请基于下面技术文章信息，生成一篇中文 Markdown 日报，要求：
 1) 必须输出完整 Markdown，包含 frontmatter（title/date/description/tags）。
+1.1) frontmatter 的 title 必须严格为：技术日报 ${date}
 2) 结构包含：今日结论、技术主题、推荐阅读（按优先级排序）、可落地方向。
 3) 每条推荐阅读给出：标题、链接、一句话价值说明。
 4) 语气偏工程实践，避免空话，不编造未提供的事实。
@@ -560,7 +581,13 @@ ${following.length ? following.map((x, i) => `${i + 1}. ${x.title}\n链接: ${x.
 `;
 }
 
-async function generateMarkdownByLlm(systemPrompt, userPrompt, fallbackMarkdown, requiredSections = []) {
+async function generateMarkdownByLlm(
+  systemPrompt,
+  userPrompt,
+  fallbackMarkdown,
+  requiredSections = [],
+  expectedTitle = "",
+) {
   const apiKey = process.env.OPENAI_API_KEY || "";
   const enabled = (process.env.DAILY_DIGEST_ENABLE_LLM || "").toLowerCase() === "true";
   if (!enabled || !apiKey) return fallbackMarkdown;
@@ -613,6 +640,10 @@ async function generateMarkdownByLlm(systemPrompt, userPrompt, fallbackMarkdown,
     }
     if (!includesAllSections(cleaned, requiredSections)) {
       console.warn("[daily-digest] LLM 输出缺少必需章节，回退模板。");
+      return fallbackMarkdown;
+    }
+    if (expectedTitle && extractFrontmatterTitle(cleaned) !== expectedTitle) {
+      console.warn(`[daily-digest] LLM 输出标题不符合要求(期望: ${expectedTitle})，回退模板。`);
       return fallbackMarkdown;
     }
     if (cleaned.includes("<think>")) {
@@ -680,12 +711,14 @@ async function run() {
     buildFinanceLlmPrompt(dateTime, financeLines.slice(0, 120), jin10Result),
     financeFallback,
     ["今日结论", "关键驱动", "风险提示", "重点快讯摘录"],
+    `金融日报 ${dateTime.slice(0, 10)}`,
   );
   const techFinal = await generateMarkdownByLlm(
     "你是资深技术内容编辑，负责把文章素材整理为可发布的技术日报。",
     buildTechLlmPrompt(dateTime, newestSelected, followingSelected, Boolean(juejinCookie)),
     techFallback,
     ["今日结论", "技术主题", "推荐阅读", "可落地方向"],
+    `技术日报 ${dateTime.slice(0, 10)}`,
   );
 
   cleanupSameDayVariants(compact);
