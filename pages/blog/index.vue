@@ -46,7 +46,10 @@
             />
           </div>
           <div class="p-4 md:p-5 space-y-2.5">
-            <div class="text-xs uppercase tracking-[0.3em] text-white/45">Novel</div>
+            <div class="flex flex-wrap items-center gap-2">
+              <div class="text-xs uppercase tracking-[0.3em] text-white/45">Novel</div>
+              <FictionStatusBadge :status="series.status" />
+            </div>
             <h3 class="text-xl md:text-2xl font-semibold text-white">{{ series.novelName }}</h3>
             <p v-if="series.description" class="text-sm text-white/75 line-clamp-2">{{ series.description }}</p>
             <div class="text-xs md:text-sm text-white/55">
@@ -218,6 +221,7 @@ const fictionSeries = computed(
       description?: string;
       coverImage?: string;
       chapterCount: number;
+      status?: string;
     }>,
 );
 

@@ -25,7 +25,10 @@
             />
           </div>
           <div class="p-4 md:p-5 space-y-2">
-            <p class="text-[10px] uppercase tracking-[0.3em] text-white/40">Novel</p>
+            <div class="flex flex-wrap items-center gap-2">
+              <p class="text-[10px] uppercase tracking-[0.3em] text-white/40">Novel</p>
+              <FictionStatusBadge :status="bundle.status" />
+            </div>
             <h1 class="text-xl md:text-2xl font-semibold text-white leading-snug">
               {{ bundle.novelName }}
             </h1>
@@ -103,6 +106,7 @@ type Bundle = {
   coverImage?: string;
   tags?: string[];
   summaryBody: string;
+  status?: string;
   chapters: Array<{ _path: string; title: string; date?: string; chapterFile?: string }>;
 };
 
@@ -156,7 +160,13 @@ const { data: bundle, pending } = await useAsyncData<Bundle | null>(
           : chapterRows[0]
             ? (String(chapterRows[0]._path).replace(prefix, "").split("/")[0] ?? n)
             : n;
-        const fm = summary as { title?: string; description?: string; coverImage?: string; tags?: string[] } | undefined;
+        const fm = summary as {
+          title?: string;
+          description?: string;
+          coverImage?: string;
+          tags?: string[];
+          status?: string;
+        } | undefined;
         return {
           novelSlug: canonicalSlug,
           novelName: (fm?.title ?? n) as string,
@@ -164,6 +174,7 @@ const { data: bundle, pending } = await useAsyncData<Bundle | null>(
           coverImage: fm?.coverImage as string | undefined,
           tags: fm?.tags as string[] | undefined,
           summaryBody: "",
+          status: fm?.status,
           chapters: chapterRows.map((r) => ({
             _path: String(r._path),
             title: ((r as { title?: string }).title ?? String(r._path).split("/").pop()) as string,

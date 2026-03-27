@@ -166,6 +166,13 @@ function generateArticleSet({ contentFolder, routeBase, listName, detailDir }) {
   console.log("[generate-blog-list] wrote", list.length, `posts to ${listName} and ${routeBase}/<slug>.json`);
 }
 
+/** 与 utils/fiction-status.ts 的 trimFictionStatus 一致：手填文案，仅 trim */
+function trimFictionStatus(raw) {
+  if (raw == null || raw === "") return undefined;
+  const t = String(raw).trim();
+  return t.length > 0 ? t : undefined;
+}
+
 function generateAiFictionSet() {
   const contentDir = join(__dirname, "..", "content", "ai-fiction");
   const slugs = collectMarkdownSlugs(contentDir);
@@ -197,6 +204,7 @@ function generateAiFictionSet() {
         coverImage: rewriteAssetInMeta(fm.coverImage) ?? fm.coverImage,
         tags: fm.tags ?? undefined,
         summaryBody: bodyHtml,
+        status: trimFictionStatus(fm.status),
       });
       continue;
     }
@@ -248,6 +256,7 @@ function generateAiFictionSet() {
       coverImage: summary?.coverImage ?? first.coverImage,
       tags: summary?.tags ?? undefined,
       summaryBody: summary?.summaryBody ?? "",
+      status: summary?.status,
       chapterCount: sorted.length,
       chapters: sorted.map((c) => ({
         _path: c._path,
