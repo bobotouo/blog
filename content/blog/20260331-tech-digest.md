@@ -1,45 +1,44 @@
 ---
 title: 技术日报 2026-03-31
 date: 2026-03-31
-description: AI 工程化实践成为近期关注重点，涉及可观测性、桌面应用开发和 RAG 架构等技术方向
-tags: [AI Agent, 可观测性, OpenTelemetry, RAG, 隐私安全]
+description: 聚焦 Claude Code 源码泄露事件、Kiro 的 AIDLC 转型实践与 Agent 工具协议层
+tags: [AI, Agent, Claude, Kiro, AIDLC]
 ---
 
 ## 今日结论
 
-AI 应用开发正在从模型能力竞赛转向工程实践落地。本期关注的四个方向覆盖了 AI Agent 的生产级监控、Web 开发者的桌面端破局、RAG 系统的向量数据库选型，以及容易被忽视的蓝牙设备隐私风险。建议团队在推进 AI 项目时，将可观测性基础设施与模型能力同步规划。
+今日技术社区的核心热点集中在 AI 开发工具链的演进与安全事件：Claude Code 源码泄露引发对 AI Coding Agent 架构的深度讨论；CI&T 展示从传统 SDLC 到 AIDLC 的 10 倍效能提升路径；Function Calling 作为 Agent 连接外部工具的核心协议值得关注。
 
 ## 技术主题
 
-**AI Agent 可观测性**：生产环境中 AI Agent 的性能监控和调试是工程落地的关键挑战，涉及 token 消耗、响应延迟、行为追踪等多维度指标。
+### 1. Claude Code 源码泄露与架构分析
 
-**AI 辅助桌面开发**：Web 开发者借助 AI 工具可快速突破前端技术栈边界，三天内完成首个 Windows 桌面应用，展现 AI 辅助编码的生产力提升路径。
+3 月 31 日下午，@Fried_rice 在推特曝光 Claude Code 完整源码泄露，瞬间引爆开发者社区。这是目前被视为最强的 AI Coding Agent，其架构设计值得深入研究。
 
-**RAG 系统向量数据库**：Milvus 作为企业级 RAG 方案的核心组件，提供向量存储和检索能力，是构建知识库问答系统的基础设施。
+### 2. AIDLC 转型实践：Kiro + OpenClaw
 
-**设备隐私安全**：蓝牙设备 MAC 地址暴露带来的追踪风险已在实际攻击场景中被利用，需重视物联网安全。
+亚马逊云科技转载的 CI&T 案例展示：传统 SDLC（Software Development Lifecycle）向 AIDLC（AI-Driven Development Lifecycle）的转型，借助 Kiro 工具实现从 2x 到 20x 的效能跃升。
+
+### 3. Agent 工具协议层：Function Calling
+
+Function Calling 是 LLM 厂商提供的核心能力，让模型能够表达调用外部函数的意图。这是 Agent 连接世界的关键协议层。
 
 ## 推荐阅读
 
-1. **使用 OTel、 OpenLit 和 Elastic 的 AI agent 可观测性与监控**
-   链接: https://juejin.cn/post/7622973948288843795
-   价值：详细讲解如何基于 OpenTelemetry 和 OpenLit 构建 AI Agent 监控体系，识别性能瓶颈和 token 消耗，适合生产环境落地参考。
+1. [Claude Code 源码泄露？我把这个最强 AI Coding Agent 的架构扒干净了](https://juejin.cn/post/7623242804392902665)  
+   完整解析 Claude Code 架构设计，了解当前最强 AI Coding Agent 的技术实现
 
-2. **《一个Web开发者的"越狱"：我用AI三天做出了第一个Windows桌面软件》**
-   链接: https://juejin.cn/post/7623216361871999016
-   价值：真实记录 Web 开发者使用 AI 工具完成桌面端开发的技术路径，提供 AI 辅助桌面应用开发的实践参考。
+2. [SDLC 过时了？从 2x 到 20x 效能的 AIDLC 转型实践](https://juejin.cn/post/7623212907396923438)  
+   亚马逊云科技官方转载的 CI&T 真实案例，参考 AIDLC 转型路径与 Kiro 工具应用
 
-3. **Spring AI + 大模型全栈实战学习手册系列 · 专题二：Milvus 向量数据库**
-   链接: https://juejin.cn/post/7623216361871622184
-   价值：系统讲解 Milvus 向量数据库的搭建流程和 RAG 系统集成方法，适合构建企业知识库系统时参考。
+3. [工具与协议层——Agent 如何连接世界](https://juejin.cn/post/7623253445006147610)  
+   深入理解 Function Calling 机制，掌握 Agent 与外部工具交互的核心协议
 
-4. **你的蓝牙设备可能正在泄漏你的隐私？Bluehood 如何追踪附近设备**
-   链接: https://juejin.cn/post/7623243953068998675
-   价值：揭示蓝牙设备 MAC 地址暴露的隐私风险，提供设备安全防护的工程视角思考。
+4. [这份AI报告，把美股干崩了](https://juejin.cn/post/7623251356006285348)  
+   Citrini Research 发布《2028全球智能危机》报告，探讨 AI 发展对全球经济的深远影响
 
 ## 可落地方向
 
-- **AI Agent 监控体系**：评估团队现有 AI 项目的可观测性水平，引入 OpenTelemetry 收集 Agent 行为数据
-- **桌面应用 AI 辅助开发**：探索 AI 工具在跨平台桌面应用开发中的效率提升空间
-- **RAG 知识库构建**：评估 Milvus 向量数据库在团队知识库系统中的适用性
-- **IoT 安全审计**：审视产品中蓝牙通信的隐私保护机制
+- **探索 Kiro 在团队落地可能性**：CI&T 案例验证了显著效能提升，可评估 Kiro/OpenClaw 在现有开发流程中的集成点
+- **构建 Agent 工具协议规范**：基于 Function Calling 机制，设计团队内部的 Agent 工具调用标准，提升 AI 辅助开发效率
+- **关注 Claude Code 架构演进**：虽然源码泄露事件尚无定论，但其架构设计思路对自研 AI Coding 工具具有参考价值
