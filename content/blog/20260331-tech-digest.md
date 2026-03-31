@@ -1,44 +1,53 @@
 ---
 title: 技术日报 2026-03-31
 date: 2026-03-31
-description: 聚焦 Claude Code 源码泄露事件、Kiro 的 AIDLC 转型实践与 Agent 工具协议层
-tags: [AI, Agent, Claude, Kiro, AIDLC]
+description: 聚焦 AI 驱动的开发流程转型、Agent 工具协议层架构、Claude Code 源码泄露事件及蓝牙隐私安全问题
+tags: [AI, 开发流程, Agent, 隐私安全]
 ---
 
 ## 今日结论
 
-今日技术社区的核心热点集中在 AI 开发工具链的演进与安全事件：Claude Code 源码泄露引发对 AI Coding Agent 架构的深度讨论；CI&T 展示从传统 SDLC 到 AIDLC 的 10 倍效能提升路径；Function Calling 作为 Agent 连接外部工具的核心协议值得关注。
+AI 驱动的开发生命周期（AIDLC）正在从概念走向落地，Kiro 等工具已帮助企业实现 10 倍效能提升；Agent 作为连接大模型与真实世界的桥梁，其协议层设计（Function Calling 等）将成为基础设施关键；同时需关注蓝牙等物联网设备带来的隐私泄露风险。
 
 ## 技术主题
 
-### 1. Claude Code 源码泄露与架构分析
+### 1. AI 驱动的开发流程升级
+传统 SDLC（Software Development Life Cycle）正向 AIDLC 演进，核心在于将 AI 能力深度嵌入需求分析、编码、测试、部署全流程。
 
-3 月 31 日下午，@Fried_rice 在推特曝光 Claude Code 完整源码泄露，瞬间引爆开发者社区。这是目前被视为最强的 AI Coding Agent，其架构设计值得深入研究。
+### 2. Agent 工具链与协议层
+Agent 需要通过标准化的协议（Function Calling、MCP 等）连接外部世界，实现工具调用与任务编排。
 
-### 2. AIDLC 转型实践：Kiro + OpenClaw
+### 3. 源码安全与 AI  coding 辅助
+Claude Code 等 AI coding agent 的架构设计引发关注，源码泄露事件再次敲响安全警钟。
 
-亚马逊云科技转载的 CI&T 案例展示：传统 SDLC（Software Development Lifecycle）向 AIDLC（AI-Driven Development Lifecycle）的转型，借助 Kiro 工具实现从 2x 到 20x 的效能跃升。
-
-### 3. Agent 工具协议层：Function Calling
-
-Function Calling 是 LLM 厂商提供的核心能力，让模型能够表达调用外部函数的意图。这是 Agent 连接世界的关键协议层。
+### 4. 隐私保护与物联网安全
+蓝牙设备定位追踪等隐私分析工具的出现，揭示了物联网时代的安全挑战。
 
 ## 推荐阅读
 
-1. [Claude Code 源码泄露？我把这个最强 AI Coding Agent 的架构扒干净了](https://juejin.cn/post/7623242804392902665)  
-   完整解析 Claude Code 架构设计，了解当前最强 AI Coding Agent 的技术实现
+### 1. SDLC 过时了？从 2x 到 20x 效能的 AIDLC 转型实践 | Kiro + OpenClaw 实战
+链接: https://juejin.cn/post/7623212907396923438
+价值说明：亚马逊云科技官博发布的实战案例，展示 CI&T 从传统 SDLC 到 AIDLC 的转型路径，提供 10 倍效能提升的具体方法论。
 
-2. [SDLC 过时了？从 2x 到 20x 效能的 AIDLC 转型实践](https://juejin.cn/post/7623212907396923438)  
-   亚马逊云科技官方转载的 CI&T 真实案例，参考 AIDLC 转型路径与 Kiro 工具应用
+### 2. 工具与协议层——Agent 如何连接世界
+链接: https://juejin.cn/post/7623253445006147610
+价值说明：系统梳理 Function Calling 的本质与实现机制，帮助理解 Agent 如何通过协议层调用外部工具。
 
-3. [工具与协议层——Agent 如何连接世界](https://juejin.cn/post/7623253445006147610)  
-   深入理解 Function Calling 机制，掌握 Agent 与外部工具交互的核心协议
+### 3. 💥 Claude Code 源码泄露？我把这个最强 AI Coding Agent 的架构扒干净了
+链接: https://juejin.cn/post/7623242804392902665
+价值说明：深度解析 Claude Code 的架构设计，可作为 AI coding agent 实现的参考模板。
 
-4. [这份AI报告，把美股干崩了](https://juejin.cn/post/7623251356006285348)  
-   Citrini Research 发布《2028全球智能危机》报告，探讨 AI 发展对全球经济的深远影响
+### 4. 你的蓝牙设备可能正在泄漏你的隐私？ Bluehood 如何追踪附近设备并做隐私分析
+链接: https://juejin.cn/post/7623243953068998675
+价值说明：揭示蓝牙设备隐私泄露的实际风险，提供隐私保护的技术思路。
+
+### 5. 这份AI报告，把美股干崩了
+链接: https://juejin.cn/post/7623251356006285348
+价值说明：分析 AI 产业对资本市场的影响，提供宏观视角的产业观察。
 
 ## 可落地方向
 
-- **探索 Kiro 在团队落地可能性**：CI&T 案例验证了显著效能提升，可评估 Kiro/OpenClaw 在现有开发流程中的集成点
-- **构建 Agent 工具协议规范**：基于 Function Calling 机制，设计团队内部的 Agent 工具调用标准，提升 AI 辅助开发效率
-- **关注 Claude Code 架构演进**：虽然源码泄露事件尚无定论，但其架构设计思路对自研 AI Coding 工具具有参考价值
+1. **AIDLC 转型评估**：结合 Kiro 方案评估团队开发流程改造可行性
+2. **Agent 协议层建设**：基于 Function Calling 规范构建统一的 Agent 工具调用框架
+3. **隐私安全审计**：对企业物联网设备（蓝牙、WiFi 等）进行隐私泄露风险排查
+4. **AI coding 工具选型**：评估 Claude Code 等工具在团队开发中的适配性
