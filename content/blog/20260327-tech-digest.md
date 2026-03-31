@@ -1,34 +1,48 @@
 ---
-title: "AI 开发中 Skill 与 Agent 概念辨析日报"
-date: "2026-03-27"
-description: "聚焦 AI 开发中 Skill 与 Agent 的核心区别，提供清晰的定义和实践指导"
-tags: ["AI", "Agent", "Skill", "技术概念"]
+title: 技术日报 2026-03-27
+date: 2026-03-27
+description: 聚焦 AI Agent 工程实践、Android 17 权限适配与 Flutter 状态管理最佳实践
+tags: [AI Agent, Android, Flutter, 工程实践]
 ---
 
 ## 今日结论
 
-**Agent 是具备自主推理和决策能力的主体，Skill 是 Agent 可调用的具体能力或工具。** 两者的关系如同大脑与手的关系：Agent 负责"想"，Skill 负责"做"。在 AI 应用开发中，Agent 是框架层，Skill 是能力层，开发者需要先明确 Agent 的职责边界，再为其配置合适的 Skill。
+AI Agent 工程化进入实际落地阶段，Trae-Agent 的 Patch 逻辑为代码修改场景提供了可参考的实现思路；Android 17 权限收紧是近期 Android 开发的重点适配方向；Flutter 社区对状态管理方案的选择趋于务实，flutter_bloc + GetIt 组合获得更多青睐。
 
 ## 技术主题
 
-### Skill 与 Agent 的核心区别
+**AI Agent 工程化**
 
-| 维度 | Agent | Skill |
-|------|-------|-------|
-| **定位** | 决策主体，会"思考"的大脑 | 执行单元，干活的"工具" |
-| **能力** | 推理、规划、任务分发 | 特定功能，如搜索、计算、调用 API |
-| **工作流** | 接收任务 → 分析 → 规划 → 调用 Skill → 接收结果 → 输出 | 被 Agent 调用 → 执行预设逻辑 → 返回结果 |
-| **代码结构** | 包含 LLM 调用、prompt 工程、状态管理 | 函数/API/插件形式，可独立测试 |
+AI 能力正在从"对话"向"执行"演进，Function Calling 机制让 AI 能够调用外部工具完成具体任务。这一转变对工程实现提出了新要求：如何设计 Agent 与工具的交互架构、如何处理执行结果的可控性、如何保障任务完成的可靠性。
 
-在实际项目中，Agent 负责理解用户意图并制定执行计划，Skill 则负责完成具体的原子操作。一个 Agent 可以调用多个 Skill，一个 Skill 也可被多个 Agent 复用。
+**移动端权限演进**
+
+Android 17 在权限管理上进一步收紧，对用户隐私的保护更加严格。开发者需要重新审视应用权限申请逻辑，确保权限使用场景的合理性与必要性。
+
+**Flutter 状态管理选型**
+
+GetX 在 Flutter 社区的使用占比依然较高，但更多项目开始转向 flutter_bloc + GetIt 组合，倾向于明确的状态流与依赖注入控制，以换取更好的可维护性与可测试性。
 
 ## 推荐阅读
 
-1. [Skill 与 Agent：AI 开发中两个最容易混淆的概念](https://juejin.cn/post/7621751110160384052)
-   - 价值：从比喻、代码结构、工作流程三个维度彻底讲清 Agent 与 Skill 的区别，搭配实际代码示例帮助理解
+1. **Trae-Agent的Patch逻辑**
+   链接: https://juejin.cn/post/7621542407538376754
+   价值说明：了解 AI Agent 在代码修改场景下的实现思路，适合探索工程化落地路径的开发者参考。
+
+2. **AI 终于能"干活"了——Function Calling 完全指南**
+   链接: https://juejin.cn/post/7621773386784407592
+   价值说明：系统讲解 Function Calling 机制，帮助理解 AI 如何与外部系统交互并执行具体任务。
+
+3. **说说我为什么放弃使用 GetX，转而使用 flutter_bloc + GetIt**
+   链接: https://juejin.cn/post/7621749424109273098
+   价值说明：来自一线的状态管理方案对比，提供了 flutter_bloc + GetIt 组合的实践依据与迁移考量。
+
+4. **Android 17 新适配要求，各大权限进一步收紧，适配难度提升**
+   链接: https://juejin.cn/post/7621551215504228395
+   价值说明：Android 17 权限变更的集中梳理，是近期 Android 开发者的必读适配指南。
 
 ## 可落地方向
 
-1. **项目架构设计**：在设计 AI 应用时，先定义 Agent 的角色和职责，再按功能拆分 Skill，避免将业务逻辑混在 Agent 层
-2. **技能库建设**：将高频复用的能力（如天气查询、文本生成、数据库查询）封装为可复用的 Skill，提升开发效率
-3. **测试策略分离**：Agent 测试关注对话理解和任务规划能力，Skill 测试关注功能正确性和性能，两者解耦便于独立迭代
+1. **探索 Function Calling 在业务场景的可行性与限制**，评估 AI Agent 替代或辅助人工操作的切入点
+2. **对照 Android 17 权限变更清单**，审计现有应用的权限申请逻辑，确保合规性
+3. **评估现有 Flutter 项目的状态管理方案**，若使用 GetX 且遇到可维护性瓶颈，可考虑分阶段迁移至 flutter_bloc + GetIt
