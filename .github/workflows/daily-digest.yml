@@ -43,11 +43,22 @@ jobs:
           DAILY_DIGEST_HTTP_TIMEOUT_MS: "400000"
         run: pnpm daily:digest
 
+      - name: Generate Twitter digest
+        env:
+          RAPIDAPI_KEY: ${{ secrets.RAPIDAPI_KEY }}
+          RAPIDAPI_TWITTER_HOST: ${{ secrets.RAPIDAPI_TWITTER_HOST }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          DAILY_DIGEST_ENABLE_LLM: ${{ secrets.DAILY_DIGEST_ENABLE_LLM }}
+          DAILY_DIGEST_LLM_MODEL: ${{ secrets.DAILY_DIGEST_LLM_MODEL }}
+          DAILY_DIGEST_LLM_BASE_URL: ${{ secrets.DAILY_DIGEST_LLM_BASE_URL }}
+          DAILY_DIGEST_HTTP_TIMEOUT_MS: "400000"
+        run: pnpm twitter:digest
+
       - name: Refresh static blog index JSON
         run: node scripts/generate-blog-list.mjs
 
       - name: Commit and push if changed
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "chore(content): add daily finance and tech digests"
+          commit_message: "chore(content): add daily finance, tech and twitter digests"
           file_pattern: "content/blog/*.md public/blog-list.json public/blog/*.json"
