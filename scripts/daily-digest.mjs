@@ -289,6 +289,14 @@ function normalizeJuejinFeedItem(item) {
   };
 }
 
+/**
+ * 判断是否属于值得收录的技术文章（比 isAiOrFlutter 范围宽）
+ * 优先级：AI/Flutter > 前端/后端/工具链 > 架构/性能/数据库 > 通用工程
+ */
+function isTechRelevant(title) {
+  return /(AI|AIGC|大模型|LLM|Agent|RAG|Flutter|Dart|前端|后端|架构|性能|优化|Vue|React|Next|Nuxt|Node|Go|Java|Python|Rust|TypeScript|JavaScript|CSS|数据库|MySQL|Redis|Kafka|微服务|云原生|Docker|K8s|Kubernetes|工程化|构建|部署|开源|源码|Vite|Webpack|Rollup|API|SDK|CLI|工具|效率|实战|面试|算法|设计模式|重构|测试)/i.test(title);
+}
+
 function isAiOrFlutter(title) {
   return /(AI|AIGC|大模型|LLM|Agent|RAG|Flutter|Dart)/i.test(title);
 }
@@ -515,8 +523,43 @@ function stripThinkBlocks(text) {
     .trim();
 }
 
+/**
+ * 从 LLM 输出提取干净的 Markdown。
+ * 处理 qwen 等模型在 frontmatter 之前混入思考内容的情况：
+ * 找到第一个独立的 "---" 行，截掉前面所有噪声。
+ */
+function extractMarkdown(text) {
+  let s = stripMarkdownFence(stripThinkBlocks(String(text || "")));
+  // 如果已经以 --- 开头，直接返回
+  if (/^---[\r\n]/.test(s)) return s;
+  // 找到第一个独立的 --- 行（前后都是换行或文本开头）
+  const idx = s.search(/(?:^|\n)---[\r\n]/);
+  if (idx !== -1) {
+    s = s.slice(idx).replace(/^\n/, "").trim();
+  }
+  return s;
+}
+
+/**
+ * 如果 LLM 输出内容正常但 frontmatter 格式不完整，尝试自动修复：
+ * 注入正确的 title / date，以避免白白回退。
+ */
+function repairFrontmatter(markdown, expectedTitle, dateTime) {
+  let s = String(markdown || "");
+  // 已有完整 frontmatter，无需修复
+  if (/^---[\r\n][\s\S]*?[\r\n]---/.test(s)) return s;
+
+  // 尝试在开头加 frontmatter
+  const date = dateTime.slice(0, 10);
+  const fm = `---\ntitle: ${expectedTitle}\ndate: ${dateTime}\ndescription: 每日自动生成摘要\ntags:\n  - 每日简报\n---\n`;
+  // 若内容本身以 ## 章节开头，直接拼接
+  if (/^#/.test(s.trimStart())) return fm + "\n" + s.trimStart();
+  return fm + "\n" + s;
+}
+
 function hasValidFrontmatter(markdown) {
-  return /^---\r?\n[\s\S]*?\r?\n---\r?\n/.test(String(markdown || ""));
+  const s = String(markdown || "");
+  return /^---[\r\n][\s\S]*?[\r\n]---/.test(s);
 }
 
 function includesAllSections(markdown, sectionTitles = []) {
@@ -525,7 +568,7 @@ function includesAllSections(markdown, sectionTitles = []) {
 }
 
 function extractFrontmatterTitle(markdown) {
-  const m = String(markdown || "").match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  const m = String(markdown || "").match(/^---[\r\n]([\s\S]*?)[\r\n]---/);
   if (!m) return "";
   const titleLine = m[1]
     .split(/\r?\n/)
@@ -560,27 +603,37 @@ ${lines.map((x, i) => `${i + 1}. ${x}`).join("\n")}
 
 function buildTechLlmPrompt(dateTime, newest, following, usedCookie) {
   const date = dateTime.slice(0, 10);
-  return `请基于下面技术文章信息，生成一篇中文 Markdown 日报，要求：
+  const total = newest.length + following.length;
+  return `请基于下面 ${total} 篇技术文章，生成一篇内容丰富的中文 Markdown 技术日报，要求：
 1) 必须输出完整 Markdown，包含 frontmatter（title/date/description/tags）。
-1.1) frontmatter 的 title 必须严格为：技术日报 ${date}
-2) 结构包含：今日结论、技术主题、推荐阅读（按优先级排序）、可落地方向。
-3) 每条推荐阅读给出：标题、链接、一句话价值说明。
-4) 语气偏工程实践，避免空话，不编造未提供的事实。
-5) 不要输出与 Markdown 无关的解释文本。
+   - title 必须严格为：技术日报 ${date}
+   - date：${dateTime}
+   - tags 包含文章涉及的主要技术方向（如 AI、Flutter、前端、后端等）
+2) 结构包含：今日结论、技术主题、推荐阅读、可落地方向。
+3) 今日结论：2-3 句话概括今天技术社区的整体动向。
+4) 技术主题：归纳 3-6 个主题，每个主题一句话说明（结合文章内容）。
+5) 推荐阅读：将所有文章按优先级排列，每篇给出：
+   - 标题（加粗，含链接）
+   - 一句话价值说明（说清楚"为什么读"，不超过 30 字）
+   - 适合人群（如"前端开发者"、"AI 工程师"）
+6) 可落地方向：给出 3-5 条具体可操作的实践建议。
+7) 语气专业但不晦涩，避免空话，不编造未提供的事实。
+8) 只输出 Markdown，不要任何额外解释文字。
 
 生成时间：${dateTime}
-数据源：${JUEJIN_FOLLOWING_URL}
-参考源：${JUEJIN_RECOMMENDED_NEWEST_URL}
-抓取方式：${usedCookie ? "使用 JUEJIN_COOKIE 抓取关注页 + 综合最新" : "仅综合最新"}
+数据源：掘金综合最新 + ${usedCookie ? "个人关注页" : "公开内容"}
 
-综合最新：
-${newest.length ? newest.map((x, i) => `${i + 1}. ${x.title}\n链接: ${x.link}\n摘要: ${x.summary}`).join("\n\n") : "无"}
+综合最新（${newest.length} 篇）：
+${newest.length ? newest.map((x, i) => `${i + 1}. ${x.title}\n   链接: ${x.link}\n   摘要: ${x.summary}`).join("\n\n") : "无"}
 
-关注补充：
-${following.length ? following.map((x, i) => `${i + 1}. ${x.title}\n链接: ${x.link}\n摘要: ${x.summary}`).join("\n\n") : "无"}
+关注补充（${following.length} 篇）：
+${following.length ? following.map((x, i) => `${i + 1}. ${x.title}\n   链接: ${x.link}\n   摘要: ${x.summary}`).join("\n\n") : "无"}
 `;
 }
 
+/**
+ * 调用 LLM 生成 Markdown，失败时自动修复格式或重试一次，尽量不回退模板。
+ */
 async function generateMarkdownByLlm(
   systemPrompt,
   userPrompt,
@@ -597,64 +650,99 @@ async function generateMarkdownByLlm(
   const chatUrl = resolveChatCompletionsUrl(llmBaseUrl);
   console.log(`[daily-digest] LLM enabled, model=${model}, base=${llmBaseUrl}`);
 
-  try {
-    const res = await fetch(chatUrl, {
-      method: "POST",
-      signal: AbortSignal.timeout(HTTP_TIMEOUT_MS),
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
+  const requestBody = JSON.stringify({
+    model,
+    temperature: 0.4,
+    messages: [
+      {
+        role: "system",
+        content: [
+          "你是日报写作助手，只输出可直接发布的中文 Markdown。",
+          "禁止输出思考过程、解释、说明、致歉、代码块围栏。",
+          "禁止输出 <think>...</think> 或任何推理痕迹。",
+          "输出必须以 frontmatter 开头，并严格遵循用户给定结构。",
+          systemPrompt,
+        ].join("\n"),
       },
-      body: JSON.stringify({
-        model,
-        temperature: 0.4,
-        messages: [
-          {
-            role: "system",
-            content: [
-              "你是日报写作助手，只输出可直接发布的中文 Markdown。",
-              "禁止输出思考过程、解释、说明、致歉、代码块围栏。",
-              "禁止输出 <think>...</think> 或任何推理痕迹。",
-              "输出必须以 frontmatter 开头，并严格遵循用户给定结构。",
-              systemPrompt,
-            ].join("\n"),
-          },
-          { role: "user", content: userPrompt },
-        ],
-      }),
-    });
+      { role: "user", content: userPrompt },
+    ],
+  });
 
-    if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      console.warn(`[daily-digest] LLM 生成失败(${res.status})，回退模板。${text ? ` ${text.slice(0, 200)}` : ""}`);
-      return fallbackMarkdown;
-    }
+  // 最多尝试 2 次（网络抖动时重试一次）
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      const res = await fetch(chatUrl, {
+        method: "POST",
+        signal: AbortSignal.timeout(HTTP_TIMEOUT_MS),
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: requestBody,
+      });
 
-    const json = await res.json();
-    const out = json?.choices?.[0]?.message?.content;
-    const cleaned = stripMarkdownFence(stripThinkBlocks(out));
-    if (!cleaned) return fallbackMarkdown;
-    if (!hasValidFrontmatter(cleaned)) {
-      console.warn("[daily-digest] LLM 输出缺少 frontmatter，回退模板。");
-      return fallbackMarkdown;
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        console.warn(`[daily-digest] LLM 请求失败(${res.status})${attempt < 2 ? "，1s 后重试" : "，回退模板"}。${text ? ` ${text.slice(0, 200)}` : ""}`);
+        if (attempt < 2) { await new Promise((r) => setTimeout(r, 1000)); continue; }
+        return fallbackMarkdown;
+      }
+
+      const json = await res.json();
+      const raw = json?.choices?.[0]?.message?.content;
+      if (!raw) {
+        console.warn("[daily-digest] LLM 返回内容为空，回退模板。");
+        return fallbackMarkdown;
+      }
+
+      // 1. 提取干净 Markdown（处理思考内容混入的情况）
+      let cleaned = extractMarkdown(raw);
+
+      // 2. 仍缺少 frontmatter → 尝试自动修复（注入标题/日期）
+      if (!hasValidFrontmatter(cleaned)) {
+        console.warn("[daily-digest] LLM 输出缺少 frontmatter，尝试自动修复...");
+        const nowStr = new Date().toISOString().slice(0, 19).replace("T", " ");
+        cleaned = repairFrontmatter(cleaned, expectedTitle || "每日日报", nowStr);
+        if (!hasValidFrontmatter(cleaned)) {
+          console.warn("[daily-digest] frontmatter 修复失败，回退模板。");
+          return fallbackMarkdown;
+        }
+        console.log("[daily-digest] frontmatter 修复成功，继续使用 LLM 内容。");
+      }
+
+      // 3. 检查缺失章节（仅警告，不回退）
+      const missingSections = requiredSections.filter((t) => !cleaned.includes(`## ${t}`));
+      if (missingSections.length > 0) {
+        console.warn(`[daily-digest] LLM 输出缺少章节：${missingSections.join("、")}（保留内容，不回退）。`);
+      }
+
+      // 4. 标题不匹配 → 直接修正 frontmatter 中的 title 字段
+      if (expectedTitle) {
+        const actualTitle = extractFrontmatterTitle(cleaned);
+        if (actualTitle !== expectedTitle) {
+          console.warn(`[daily-digest] 标题不符（期望: "${expectedTitle}"，实际: "${actualTitle}"），自动修正。`);
+          cleaned = cleaned.replace(
+            /^(---[\r\n][\s\S]*?title:\s*).*?([\r\n])/m,
+            `$1${expectedTitle}$2`,
+          );
+        }
+      }
+
+      // 5. 残留 think 标签 → 再次清理
+      if (cleaned.includes("<think>")) {
+        cleaned = stripThinkBlocks(cleaned);
+      }
+
+      console.log("[daily-digest] LLM 内容采用成功。");
+      return cleaned;
+
+    } catch (err) {
+      console.warn(`[daily-digest] LLM 调用异常(第${attempt}次)：${err?.message || err}${attempt < 2 ? "，1s 后重试" : "，回退模板"}`);
+      if (attempt < 2) { await new Promise((r) => setTimeout(r, 1000)); }
     }
-    if (!includesAllSections(cleaned, requiredSections)) {
-      console.warn("[daily-digest] LLM 输出缺少必需章节，回退模板。");
-      return fallbackMarkdown;
-    }
-    if (expectedTitle && extractFrontmatterTitle(cleaned) !== expectedTitle) {
-      console.warn(`[daily-digest] LLM 输出标题不符合要求(期望: ${expectedTitle})，回退模板。`);
-      return fallbackMarkdown;
-    }
-    if (cleaned.includes("<think>")) {
-      console.warn("[daily-digest] LLM 输出包含 think 标签，回退模板。");
-      return fallbackMarkdown;
-    }
-    return cleaned;
-  } catch (err) {
-    console.warn("[daily-digest] LLM 调用异常，回退模板：", err?.message || err);
-    return fallbackMarkdown;
   }
+
+  return fallbackMarkdown;
 }
 
 async function run() {
@@ -670,12 +758,19 @@ async function run() {
 
   const juejinCookie = process.env.JUEJIN_COOKIE || "";
   const usedIds = collectUsedJuejinArticleIds();
-  const newestFeed = await fetchJuejinNewestFeedPaged(20, 3);
-  const newestTop10 = uniqueByArticleId(newestFeed.map(normalizeJuejinFeedItem).filter(Boolean)).slice(
-    0,
-    10,
-  );
-  const newestSelected = newestTop10.filter((x) => isAiOrFlutter(x.title));
+
+  // 抓更多最新文章（30 条 × 3 页）
+  const newestFeed = await fetchJuejinNewestFeedPaged(30, 3);
+  const newestAll = uniqueByArticleId(newestFeed.map(normalizeJuejinFeedItem).filter(Boolean));
+
+  // 先优先筛 AI/Flutter，不够再补充其他技术文章，目标至少 8 篇
+  const newestAiFlutter = newestAll.filter((x) => isAiOrFlutter(x.title)).slice(0, 8);
+  const newestTech = newestAll
+    .filter((x) => !isAiOrFlutter(x.title) && isTechRelevant(x.title))
+    .filter((x) => !newestAiFlutter.some((a) => a.articleId === x.articleId))
+    .slice(0, Math.max(0, 10 - newestAiFlutter.length));
+  const newestSelected = [...newestAiFlutter, ...newestTech];
+
   for (const item of newestSelected) {
     item.summary = await fetchJuejinPostSummary(item.articleId, juejinCookie);
   }
@@ -689,7 +784,8 @@ async function run() {
       .filter((x) => !usedIds.has(x.articleId))
       .filter((x) => !newestSelected.some((n) => n.articleId === x.articleId))
       .filter((x) => (x.ctimeMs ? now - x.ctimeMs <= sevenDaysMs : true))
-      .slice(0, 5);
+      .filter((x) => isTechRelevant(x.title))  // 关注页也过滤无关内容
+      .slice(0, 10);  // 从 5 扩大到 10
 
     for (const item of candidates) {
       item.summary = await fetchJuejinPostSummary(item.articleId, juejinCookie);
@@ -698,8 +794,10 @@ async function run() {
   }
 
   if (newestSelected.length === 0 && followingSelected.length === 0) {
-    throw new Error("未筛选到可用的掘金文章（AI/Flutter 或关注新增）。");
+    throw new Error("未筛选到可用的掘金文章，请检查网络或 Cookie。");
   }
+
+  console.log(`[daily-digest] 技术文章：最新 ${newestSelected.length} 篇（AI/Flutter: ${newestAiFlutter.length}，其他技术: ${newestTech.length}），关注补充 ${followingSelected.length} 篇`)
 
   const financePath = dailyFilename(`${compact}-finance-digest`);
   const techPath = dailyFilename(`${compact}-tech-digest`);

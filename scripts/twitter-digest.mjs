@@ -333,22 +333,27 @@ function stripThinkBlocks(text) {
 /**
  * 从 LLM 输出中提取 Markdown：
  * 部分模型（如 qwen）会在正文前输出思考内容（无标签），
- * 通过寻找第一个 "---" 截断掉前置噪声。
+ * 通过寻找第一个独立的 "---" 行截断掉前置噪声。
  */
 function extractMarkdown(text) {
-  const s = stripMarkdownFence(stripThinkBlocks(String(text || "")));
-  // 找到第一个 frontmatter 开始位置
-  const idx = s.indexOf("\n---\n");
-  if (idx !== -1 && !s.startsWith("---")) {
-    return s.slice(idx + 1).trim(); // 截掉前面的思考内容
+  let s = stripMarkdownFence(stripThinkBlocks(String(text || "")));
+  if (/^---[\r\n]/.test(s)) return s;
+  const idx = s.search(/(?:^|\n)---[\r\n]/);
+  if (idx !== -1) {
+    s = s.slice(idx).replace(/^\n/, "").trim();
   }
   return s;
 }
 
+function repairFrontmatter(markdown, expectedTitle, dateTime) {
+  let s = String(markdown || "");
+  if (/^---[\r\n][\s\S]*?[\r\n]---/.test(s)) return s;
+  const fm = `---\ntitle: ${expectedTitle}\ndate: ${dateTime}\ndescription: X 平台每日热点速览\ntags:\n  - Twitter\n  - 热点\n  - 每日速览\n---\n`;
+  return fm + "\n" + s.trimStart();
+}
+
 function hasValidFrontmatter(markdown) {
-  const s = String(markdown || "");
-  if (/^---\r?\n[\s\S]*?\r?\n---/.test(s)) return true;
-  return /^---/.test(s) && /\ntitle:/.test(s);
+  return /^---[\r\n][\s\S]*?[\r\n]---/.test(String(markdown || ""));
 }
 
 function includesAllSections(markdown, sectionTitles = []) {
@@ -379,68 +384,98 @@ async function generateMarkdownByLlm(systemPrompt, userPrompt, fallbackMarkdown,
   const chatUrl = resolveChatCompletionsUrl(llmBaseUrl);
   console.log(`[twitter-digest] LLM enabled, model=${model}, base=${llmBaseUrl}`);
 
-  try {
-    const res = await fetch(chatUrl, {
-      method: "POST",
-      signal: AbortSignal.timeout(HTTP_TIMEOUT_MS),
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
+  const requestBody = JSON.stringify({
+    model,
+    temperature: 0.4,
+    messages: [
+      {
+        role: "system",
+        content: [
+          "你是日报写作助手，只输出可直接发布的中文 Markdown。",
+          "禁止输出思考过程、解释、说明、致歉、代码块围栏。",
+          "禁止输出 <think>...</think> 或任何推理痕迹。",
+          "输出必须以 frontmatter 开头，并严格遵循用户给定结构。",
+          systemPrompt,
+        ].join("\n"),
       },
-      body: JSON.stringify({
-        model,
-        temperature: 0.4,
-        messages: [
-          {
-            role: "system",
-            content: [
-              "你是日报写作助手，只输出可直接发布的中文 Markdown。",
-              "禁止输出思考过程、解释、说明、致歉、代码块围栏。",
-              "禁止输出 <think>...</think> 或任何推理痕迹。",
-              "输出必须以 frontmatter 开头，并严格遵循用户给定结构。",
-              systemPrompt,
-            ].join("\n"),
-          },
-          { role: "user", content: userPrompt },
-        ],
-      }),
-    });
+      { role: "user", content: userPrompt },
+    ],
+  });
 
-    if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      console.warn(`[twitter-digest] LLM 生成失败(${res.status})，回退模板。${text ? ` ${text.slice(0, 200)}` : ""}`);
-      return fallbackMarkdown;
-    }
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      const res = await fetch(chatUrl, {
+        method: "POST",
+        signal: AbortSignal.timeout(HTTP_TIMEOUT_MS),
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: requestBody,
+      });
 
-    const json = await res.json();
-    const out = json?.choices?.[0]?.message?.content;
-    const cleaned = extractMarkdown(out);
-    if (!cleaned) {
-      console.warn("[twitter-digest] LLM 输出为空，回退模板。");
-      return fallbackMarkdown;
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        console.warn(`[twitter-digest] LLM 请求失败(${res.status})${attempt < 2 ? "，1s 后重试" : "，回退模板"}。${text ? ` ${text.slice(0, 200)}` : ""}`);
+        if (attempt < 2) { await new Promise((r) => setTimeout(r, 1000)); continue; }
+        return fallbackMarkdown;
+      }
+
+      const json = await res.json();
+      const out = json?.choices?.[0]?.message?.content;
+      if (!out) {
+        console.warn("[twitter-digest] LLM 返回内容为空，回退模板。");
+        return fallbackMarkdown;
+      }
+
+      let cleaned = extractMarkdown(out);
+      console.log("[twitter-digest] LLM 输出前 200 字符:", cleaned.slice(0, 200).replace(/\n/g, "\\n"));
+
+      // frontmatter 缺失 → 自动修复
+      if (!hasValidFrontmatter(cleaned)) {
+        console.warn("[twitter-digest] LLM 输出缺少 frontmatter，尝试自动修复...");
+        const nowStr = new Date().toISOString().slice(0, 19).replace("T", " ");
+        cleaned = repairFrontmatter(cleaned, expectedTitle || "X 热点", nowStr);
+        if (!hasValidFrontmatter(cleaned)) {
+          console.warn("[twitter-digest] frontmatter 修复失败，回退模板。");
+          return fallbackMarkdown;
+        }
+        console.log("[twitter-digest] frontmatter 修复成功。");
+      }
+
+      // 章节缺失 → 仅警告，不回退
+      const missingSections = requiredSections.filter((t) => !cleaned.includes(`## ${t}`));
+      if (missingSections.length > 0) {
+        console.warn(`[twitter-digest] 缺少章节：${missingSections.join("、")}（保留 LLM 内容，不回退）。`);
+      }
+
+      // 标题不匹配 → 自动修正
+      if (expectedTitle) {
+        const actualTitle = extractFrontmatterTitle(cleaned);
+        if (actualTitle !== expectedTitle) {
+          console.warn(`[twitter-digest] 标题不符（期望: "${expectedTitle}"，实际: "${actualTitle}"），自动修正。`);
+          cleaned = cleaned.replace(
+            /^(---[\r\n][\s\S]*?title:\s*).*?([\r\n])/m,
+            `$1${expectedTitle}$2`,
+          );
+        }
+      }
+
+      // 残留 think 标签 → 再次清理
+      if (cleaned.includes("<think>")) {
+        cleaned = stripThinkBlocks(cleaned);
+      }
+
+      console.log("[twitter-digest] LLM 内容采用成功。");
+      return cleaned;
+
+    } catch (err) {
+      console.warn(`[twitter-digest] LLM 调用异常(第${attempt}次)：${err?.message || err}${attempt < 2 ? "，1s 后重试" : "，回退模板"}`);
+      if (attempt < 2) { await new Promise((r) => setTimeout(r, 1000)); }
     }
-    console.log("[twitter-digest] LLM 输出前 200 字符:", cleaned.slice(0, 200).replace(/\n/g, "\\n"));
-    if (!hasValidFrontmatter(cleaned)) {
-      console.warn("[twitter-digest] LLM 输出缺少 frontmatter，回退模板。");
-      return fallbackMarkdown;
-    }
-    if (!includesAllSections(cleaned, requiredSections)) {
-      console.warn("[twitter-digest] LLM 输出缺少必需章节，回退模板。");
-      return fallbackMarkdown;
-    }
-    if (expectedTitle && extractFrontmatterTitle(cleaned) !== expectedTitle) {
-      console.warn(`[twitter-digest] LLM 输出标题不符合要求(期望: ${expectedTitle})，回退模板。`);
-      return fallbackMarkdown;
-    }
-    if (cleaned.includes("<think>")) {
-      console.warn("[twitter-digest] LLM 输出包含 think 标签，回退模板。");
-      return fallbackMarkdown;
-    }
-    return cleaned;
-  } catch (err) {
-    console.warn("[twitter-digest] LLM 调用异常，回退模板：", err?.message || err);
-    return fallbackMarkdown;
   }
+
+  return fallbackMarkdown;
 }
 
 // ---------------------------------------------------------------------------
