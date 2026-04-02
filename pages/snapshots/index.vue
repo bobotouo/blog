@@ -46,7 +46,7 @@
             <div class="inline-block max-w-full overflow-hidden rounded-2xl border border-white/15">
               <img
                 :src="img"
-                alt="snapshot"
+                :alt="`${item.title} 图片 ${idx + 1}`"
                 loading="lazy"
                 decoding="async"
                 class="block h-auto w-auto max-h-[20rem] max-w-full md:max-w-[28rem] object-contain"

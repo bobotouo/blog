@@ -16,12 +16,31 @@
         <NuxtLink to="/" class="text-lg tracking-[0.2em] uppercase text-white/90">
           NOVA BLOG
         </NuxtLink>
-        <nav class="flex items-center gap-6 text-sm text-white/70">
-          <NuxtLink to="/" class="hover:text-white transition">首页</NuxtLink>
-          <NuxtLink to="/blog" class="hover:text-white transition">文章</NuxtLink>
-          <NuxtLink to="/snapshots" class="hover:text-white transition">
-            快照
-          </NuxtLink>
+        <nav class="flex items-center gap-6 text-sm text-white/70" aria-label="主导航">
+          <NuxtLink
+            to="/"
+            class="transition hover:text-white"
+            :class="$route.path === '/' ? 'text-white' : ''"
+            :aria-current="$route.path === '/' ? 'page' : undefined"
+          >首页</NuxtLink>
+          <NuxtLink
+            to="/blog"
+            class="transition hover:text-white"
+            :class="$route.path.startsWith('/blog') ? 'text-white' : ''"
+            :aria-current="$route.path.startsWith('/blog') ? 'page' : undefined"
+          >文章</NuxtLink>
+          <NuxtLink
+            to="/ai-fiction"
+            class="transition hover:text-white"
+            :class="$route.path.startsWith('/ai-fiction') ? 'text-white' : ''"
+            :aria-current="$route.path.startsWith('/ai-fiction') ? 'page' : undefined"
+          >AI 小说</NuxtLink>
+          <NuxtLink
+            to="/snapshots"
+            class="transition hover:text-white"
+            :class="$route.path.startsWith('/snapshots') ? 'text-white' : ''"
+            :aria-current="$route.path.startsWith('/snapshots') ? 'page' : undefined"
+          >快照</NuxtLink>
         </nav>
       </header>
       <slot />

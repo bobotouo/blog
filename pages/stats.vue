@@ -8,9 +8,7 @@
       <p class="text-sm text-white/50">仅后台查看，不对外展示</p>
     </div>
 
-    <div
-      class="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-6"
-    >
+    <div class="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-6">
       <div class="flex items-center justify-between gap-4 mb-4">
         <span class="text-white/50 text-sm">数据来源：当前站点 API</span>
         <button

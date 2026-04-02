@@ -32,21 +32,6 @@ const snapshotRoutes = collectRoutes(
   join(process.cwd(), "content", "snapshots"),
   "/snapshots",
 );
-const aiFictionRoutes = collectRoutes(
-  join(process.cwd(), "content", "ai-fiction"),
-  "/ai-fiction",
-);
-/** 每本小说目录页 /ai-fiction/<小说文件夹名> */
-const aiFictionNovelIndexRoutes = (() => {
-  const dir = join(process.cwd(), "content", "ai-fiction");
-  try {
-    return readdirSync(dir, { withFileTypes: true })
-      .filter((e) => e.isDirectory())
-      .map((e) => `/ai-fiction/${e.name}`);
-  } catch {
-    return [];
-  }
-})();
 // 顶层文章路由 /:slug，使 GitHub Pages base /blog/ 下文章 URL 为 /blog/:slug
 const articleSlugRoutes = collectRoutes(
   join(process.cwd(), "content", "blog"),

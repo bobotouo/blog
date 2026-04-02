@@ -18,38 +18,18 @@
       </div>
     </div>
 
-    <div v-if="fictionSeries.length > 0" class="space-y-4">
-      <NuxtLink
+    <div v-if="fictionSeries.length > 0" class="space-y-5">
+      <FictionSeriesCard
         v-for="series in fictionSeries"
         :key="series.novelSlug"
+        :novel-name="series.novelName"
+        :description="series.description"
+        :cover-image="series.coverImage"
+        :chapter-count="series.chapterCount"
+        :status="series.status"
         :to="nuxtLinkToFromContentPath(series.indexPath, base)"
-        class="block rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl overflow-hidden hover:bg-white/10 transition"
-      >
-        <div class="grid gap-0 md:grid-cols-[200px_1fr]">
-          <div class="h-full min-h-[130px] bg-black/20">
-            <img
-              v-if="series.coverImage"
-              :src="series.coverImage"
-              :alt="series.novelName"
-              class="h-full w-full object-cover"
-              loading="lazy"
-            />
-          </div>
-          <div class="p-4 md:p-5 space-y-2.5">
-            <div class="text-xs uppercase tracking-[0.3em] text-white/45">Novel</div>
-            <h2 class="text-xl md:text-2xl font-semibold text-white">{{ series.novelName }}</h2>
-            <p v-if="series.description" class="text-sm text-white/75 line-clamp-2">
-              {{ series.description }}
-            </p>
-            <div class="text-xs md:text-sm text-white/55">
-              共 {{ series.chapterCount }} 章
-            </div>
-            <span class="inline-flex items-center rounded-full border border-white/20 px-3.5 py-1.5 text-xs md:text-sm text-white/90">
-              查看目录 →
-            </span>
-          </div>
-        </div>
-      </NuxtLink>
+        :comment-path="`${basePath}${series.indexPath}`"
+      />
     </div>
 
     <p v-else class="text-white/50 text-sm">
@@ -78,6 +58,7 @@ type SeriesItem = {
   description?: string;
   coverImage?: string;
   chapterCount: number;
+  status?: string;
 };
 
 async function loadSeriesFromQuery(): Promise<SeriesItem[]> {
@@ -93,13 +74,14 @@ async function loadSeriesFromQuery(): Promise<SeriesItem[]> {
         String(r._path).startsWith(`/ai-fiction/${novelSlug}/`) &&
         !String(r._path).endsWith("/summary"),
     );
-    const fm = s as { title?: string; description?: string; coverImage?: string };
+    const fm = s as { title?: string; description?: string; coverImage?: string; status?: string };
     out.push({
       novelSlug,
       novelName: fm.title ?? novelSlug,
       indexPath: `/ai-fiction/${novelSlug}`,
       description: fm.description,
       coverImage: fm.coverImage as string | undefined,
+      status: fm.status,
       chapterCount: chapters.length,
     });
   }

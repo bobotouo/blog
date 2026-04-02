@@ -28,39 +28,18 @@
         {{ tab.label }}
       </button>
     </div>
-    <div v-if="activeTab === 'ai-fiction' && fictionSeries.length > 0" class="mb-10 space-y-4">
-      <NuxtLink
+    <div v-if="activeTab === 'ai-fiction' && fictionSeries.length > 0" class="mb-10 space-y-5">
+      <FictionSeriesCard
         v-for="series in fictionSeries"
         :key="series.novelSlug"
+        :novel-name="series.novelName"
+        :description="series.description"
+        :cover-image="series.coverImage"
+        :chapter-count="series.chapterCount"
+        :status="series.status"
         :to="nuxtLinkToFromContentPath(series.indexPath, base)"
-        class="block rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl overflow-hidden hover:bg-white/10 transition"
-      >
-        <div class="grid gap-0 md:grid-cols-[200px_1fr]">
-          <div class="h-full min-h-[130px] bg-black/20">
-            <img
-              v-if="series.coverImage"
-              :src="series.coverImage"
-              :alt="series.novelName"
-              class="h-full w-full object-cover"
-              loading="lazy"
-            />
-          </div>
-          <div class="p-4 md:p-5 space-y-2.5">
-            <div class="flex flex-wrap items-center gap-2">
-              <div class="text-xs uppercase tracking-[0.3em] text-white/45">Novel</div>
-              <FictionStatusBadge :status="series.status" />
-            </div>
-            <h3 class="text-xl md:text-2xl font-semibold text-white">{{ series.novelName }}</h3>
-            <p v-if="series.description" class="text-sm text-white/75 line-clamp-2">{{ series.description }}</p>
-            <div class="text-xs md:text-sm text-white/55">
-              共 {{ series.chapterCount }} 章
-            </div>
-            <span class="inline-flex items-center rounded-full border border-white/20 px-3.5 py-1.5 text-xs md:text-sm text-white/90">
-              查看目录 →
-            </span>
-          </div>
-        </div>
-      </NuxtLink>
+        :comment-path="`${basePath}${series.indexPath}`"
+      />
     </div>
 
     <div v-if="featured && activeTab !== 'ai-fiction'" class="mb-10">
@@ -72,7 +51,7 @@
           <img
             v-if="featured.coverImage"
             :src="featured.coverImage"
-            alt="cover"
+            :alt="featured.title"
             loading="eager"
             fetchpriority="high"
             decoding="async"

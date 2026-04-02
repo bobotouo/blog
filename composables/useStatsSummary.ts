@@ -23,7 +23,7 @@ export function useStatsSummary(): {
   const config = useRuntimeConfig();
   const statsBase = (config.public.statsBase as string) || "";
   const summaryUrl = statsBase
-    ? `${statsBase.replace(/\/$/, "")}/stats/summary`
+    ? `${statsBase.replace(/\/$/, "")}/api/stats/summary`
     : "/api/stats/summary";
 
   const summary = ref<StatsSummary | null>(null);
@@ -33,7 +33,7 @@ export function useStatsSummary(): {
     if (!import.meta.client) return;
     pending.value = true;
     try {
-      const data = await $fetch<StatsSummary>(summaryUrl, { credentials: "same-origin" });
+      const data = await $fetch<StatsSummary>(summaryUrl);
       summary.value = data;
     } catch {
       summary.value = null;

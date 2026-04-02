@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "novel:import": "node scripts/import-novel.mjs --dest 登棋仙途",
     "daily:digest": "node scripts/daily-digest.mjs",
     "daily:digest:local": "node scripts/daily-digest.mjs",
-    "test:unit": "vitest run",
     "dev": "node scripts/generate-blog-list.mjs && nuxt dev",
     "build": "node scripts/generate-blog-list.mjs && nuxt build",
     "build:netlify-dist": "node scripts/copy-output-to-dist.mjs",

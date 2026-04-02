@@ -52,8 +52,9 @@ export default defineEventHandler(async (event) => {
     }
   `;
 
+  const escapedPath = path.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
   const variables = {
-    query: `repo:${owner}/${name} in:title \"${path}\"`,
+    query: `repo:${owner}/${name} in:title "${escapedPath}"`,
   };
 
   try {

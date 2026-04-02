@@ -13,56 +13,167 @@
       <div class="h-32 rounded-2xl bg-white/5" />
     </div>
 
+    <div v-else-if="!bundle" class="mt-20 flex flex-col items-center gap-4 text-center">
+      <p class="text-5xl font-semibold text-white/10">404</p>
+      <p class="text-white/50">找不到这本小说</p>
+      <button
+        type="button"
+        class="mt-2 rounded-full border border-white/15 px-5 py-2 text-sm text-white/60 transition hover:text-white/90 hover:border-white/30"
+        @click="goBack"
+      >
+        返回小说列表
+      </button>
+    </div>
+
     <template v-else-if="bundle">
-      <div class="mt-8 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl overflow-hidden">
-        <div class="grid gap-0 md:grid-cols-[min(160px,32%)_1fr]">
-          <div class="min-h-[120px] md:min-h-[140px] bg-black/20">
+      <!-- 桌面：左右两栏；移动：上下堆叠 -->
+      <div class="mt-8 lg:grid lg:grid-cols-[240px_1fr] lg:gap-8 lg:items-start">
+
+        <!-- ── 左栏：封面 + 信息卡（桌面 sticky） ── -->
+        <div class="lg:sticky lg:top-8">
+          <!-- 封面 -->
+          <div class="relative w-full rounded-2xl overflow-hidden bg-black/30 aspect-[3/4] max-h-[340px] lg:max-h-none lg:aspect-[2/3]">
+            <div class="absolute inset-0 bg-[linear-gradient(160deg,rgba(34,211,238,0.1),transparent_55%,rgba(249,115,22,0.08))] pointer-events-none z-[1]" />
             <img
               v-if="bundle.coverImage"
               :src="bundle.coverImage"
               :alt="bundle.novelName"
-              class="h-full w-full object-cover"
+              class="relative z-0 h-full w-full object-cover"
             />
+            <div v-else class="flex h-full w-full items-end p-4">
+              <span class="text-[10px] uppercase tracking-[0.35em] text-white/20">Novel</span>
+            </div>
           </div>
-          <div class="p-4 md:p-5 space-y-2">
+
+          <!-- 信息区 -->
+          <div class="mt-4 space-y-2.5">
             <div class="flex flex-wrap items-center gap-2">
-              <p class="text-[10px] uppercase tracking-[0.3em] text-white/40">Novel</p>
+              <span class="text-[10px] uppercase tracking-[0.32em] text-[color:var(--accent)]/70">AI Fiction</span>
               <FictionStatusBadge :status="bundle.status" />
             </div>
-            <h1 class="text-xl md:text-2xl font-semibold text-white leading-snug">
+            <h1 class="text-xl font-semibold text-white leading-snug">
               {{ bundle.novelName }}
             </h1>
-            <p v-if="bundle.description" class="text-sm text-white/70 leading-relaxed line-clamp-3">
+            <p v-if="bundle.description" class="text-sm text-white/60 leading-relaxed">
               {{ bundle.description }}
             </p>
             <div
               v-if="typeof bundle.summaryBody === 'string' && bundle.summaryBody.length > 0"
-              class="prose prose-invert prose-sm max-w-none text-white/75 border-t border-white/10 pt-3 mt-2"
+              class="prose prose-invert prose-sm max-w-none text-white/60 border-t border-white/10 pt-3"
             >
               <div v-html="bundle.summaryBody" />
             </div>
+            <div class="flex flex-wrap items-center gap-3 pt-1 text-xs text-white/40 border-t border-white/[0.07]">
+              <span>{{ bundle.chapters?.length ?? 0 }} 章</span>
+              <span v-if="commentCount !== null">{{ commentCount }} 条评论</span>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="mt-10">
-        <h2 class="text-sm uppercase tracking-[0.35em] text-white/50 mb-4">章节目录</h2>
-        <ol class="space-y-2">
-          <li
-            v-for="(ch, idx) in bundle.chapters ?? []"
-            :key="ch._path"
-            class="rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition"
-          >
-            <NuxtLink
-              :to="chapterLink(ch)"
-              class="flex items-center gap-4 px-4 py-3 text-white/90"
+        <!-- ── 右栏：章节目录 + 评论 ── -->
+        <div class="mt-8 lg:mt-0 space-y-10">
+
+          <!-- 章节目录 -->
+          <div ref="tocRef">
+            <!-- 目录头部 -->
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+              <h2 class="text-sm uppercase tracking-[0.35em] text-white/50">章节目录</h2>
+              <button
+                v-if="lastReadPath"
+                type="button"
+                class="inline-flex items-center gap-1.5 rounded-full border border-[color:var(--accent)]/25 bg-[color:var(--accent)]/10 px-3.5 py-1.5 text-xs text-[color:var(--accent)]/90 transition hover:bg-[color:var(--accent)]/20"
+                @click="jumpToLastRead"
+              >
+                <span>继续阅读</span>
+                <span class="max-w-[8rem] truncate opacity-70">{{ lastReadTitle }}</span>
+                <span aria-hidden="true">→</span>
+              </button>
+            </div>
+
+            <!-- 分卷导航 -->
+            <div v-if="arcGroups.length > 1" class="mb-4 flex flex-wrap gap-2">
+              <button
+                v-for="(arc, ai) in arcGroups"
+                :key="ai"
+                type="button"
+                class="rounded-full border px-3 py-1 text-xs transition"
+                :class="
+                  activeArc === ai
+                    ? 'border-white/25 bg-white/10 text-white'
+                    : 'border-white/10 bg-transparent text-white/50 hover:text-white/80 hover:border-white/20'
+                "
+                @click="selectArc(ai)"
+              >
+                {{ arc.label }}
+              </button>
+            </div>
+
+            <!-- 章节列表：两列 -->
+            <ol class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <li
+                v-for="(ch, localIdx) in visibleChapters"
+                :key="ch._path"
+                class="group rounded-xl border transition"
+                :class="
+                  ch._path === lastReadPath
+                    ? 'border-[color:var(--accent)]/30 bg-[color:var(--accent)]/[0.08]'
+                    : 'border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/[0.14]'
+                "
+              >
+                <NuxtLink :to="chapterLink(ch)" class="flex items-center gap-3 px-4 py-3.5 h-full">
+                  <span class="w-8 shrink-0 text-right text-xs tabular-nums text-white/30 font-mono">
+                    {{ arcGroups.length > 1 ? arcGroups[activeArc]!.start + localIdx + 1 : localIdx + 1 }}
+                  </span>
+                  <span
+                    class="flex-1 min-w-0 text-sm leading-snug transition"
+                    :class="ch._path === lastReadPath ? 'text-[color:var(--accent)]/90 font-medium' : 'text-white/75 group-hover:text-white'"
+                  >
+                    {{ ch.title }}
+                  </span>
+                  <span
+                    v-if="ch._path === lastReadPath"
+                    class="shrink-0 text-[10px] text-[color:var(--accent)]/60"
+                  >
+                    续
+                  </span>
+                </NuxtLink>
+              </li>
+            </ol>
+
+            <!-- 加载更多 / 收起 -->
+            <div
+              v-if="arcGroups.length === 1 && (bundle.chapters?.length ?? 0) > PAGE_SIZE"
+              class="mt-4 flex items-center gap-4"
             >
-              <span class="text-white/40 text-sm w-8 shrink-0">{{ idx + 1 }}</span>
-              <span class="flex-1 font-medium">{{ ch.title }}</span>
-              <span v-if="ch.date" class="text-white/45 text-sm shrink-0">{{ formatDateYmd(ch.date) }}</span>
-            </NuxtLink>
-          </li>
-        </ol>
+              <button
+                v-if="showCount < (bundle.chapters?.length ?? 0)"
+                type="button"
+                class="rounded-full border border-white/15 px-5 py-2 text-sm text-white/55 transition hover:border-white/25 hover:text-white/90"
+                @click="showCount = Math.min(showCount + PAGE_SIZE, bundle.chapters?.length ?? 0)"
+              >
+                加载更多（剩余 {{ (bundle.chapters?.length ?? 0) - showCount }} 章）
+              </button>
+              <button
+                v-if="showCount > PAGE_SIZE"
+                type="button"
+                class="text-xs text-white/35 transition hover:text-white/60"
+                @click="showCount = PAGE_SIZE; scrollToToc()"
+              >
+                收起
+              </button>
+            </div>
+          </div>
+
+          <!-- 评论区 -->
+          <div>
+            <div class="text-xs uppercase tracking-[0.35em] text-white/50 mb-4">Comments</div>
+            <p v-if="commentCount !== null" class="text-sm text-white/40 mb-4">
+              {{ commentCount }} 条讨论 · 使用 GitHub 账号留言
+            </p>
+            <Comments />
+          </div>
+
+        </div>
       </div>
     </template>
   </section>
@@ -70,7 +181,6 @@
 
 <script setup lang="ts">
 import { normalizeSegment } from "~/utils/ai-fiction-slug";
-import { formatDateYmd } from "~/utils/format-date";
 import { nuxtLinkToFromContentPath } from "~/utils/route-from-content-path";
 
 definePageMeta({
@@ -83,6 +193,8 @@ const config = useRuntimeConfig();
 const base = (config.public.baseUrl as string) || "/";
 const basePath = base.replace(/\/$/, "");
 const jsonBase = import.meta.server ? "" : basePath;
+const fullPath = basePath + route.path;
+const { count: commentCount } = useCommentCount(fullPath);
 
 const novelParam = computed(() => normalizeSegment(String(route.params.novel ?? "")));
 
@@ -120,7 +232,23 @@ const { data: bundle, pending } = await useAsyncData<Bundle | null>(
     const n = novelParam.value;
     if (!n) return null;
 
-    // ── 主路径：静态 JSON（server/client 均走此路） ──────────────────────────
+    // ── 主路径：per-novel bundle.json（体积小，仅含本书数据） ───────────────
+    try {
+      const bundle = await requestFetch<Bundle>(
+        `${jsonBase}/ai-fiction/${encodeURIComponent(n)}/bundle.json`,
+      );
+      if (bundle && bundle.novelSlug) {
+        return {
+          ...bundle,
+          chapters: Array.isArray(bundle.chapters) ? bundle.chapters : [],
+          summaryBody: typeof bundle.summaryBody === "string" ? bundle.summaryBody : "",
+        };
+      }
+    } catch {
+      /* silent */
+    }
+
+    // ── 兜底：全量 series.json（兼容旧版静态部署）───────────────────────────
     try {
       const list = await requestFetch<Bundle[]>(`${jsonBase}/ai-fiction-series.json`);
       if (Array.isArray(list)) {
@@ -128,8 +256,8 @@ const { data: bundle, pending } = await useAsyncData<Bundle | null>(
         if (match) {
           return {
             ...match,
-            chapters: Array.isArray(match.chapters) ? match.chapters : [],
-            summaryBody: typeof match.summaryBody === "string" ? match.summaryBody : "",
+            chapters: Array.isArray((match as Bundle & { chapters?: unknown[] }).chapters) ? (match as Bundle & { chapters: Bundle["chapters"] }).chapters : [],
+            summaryBody: typeof (match as Bundle & { summaryBody?: string }).summaryBody === "string" ? (match as Bundle & { summaryBody: string }).summaryBody : "",
           };
         }
       }
@@ -198,6 +326,87 @@ function goBack() {
     navigateTo("/blog?tab=ai-fiction");
   }
 }
+
+// ── 目录分页逻辑 ──────────────────────────────────────────────────────────
+const PAGE_SIZE = 50;
+const ARC_SIZE = 50;
+
+/** 当前展开的章数（单卷模式） */
+const showCount = ref(PAGE_SIZE);
+
+/** 「上次读到」的 _path（从 localStorage 读） */
+const lastReadPath = ref<string | null>(null);
+const lastReadTitle = computed(() => {
+  if (!lastReadPath.value || !bundle.value) return "";
+  const ch = bundle.value.chapters.find((c) => c._path === lastReadPath.value);
+  return ch?.title ?? "";
+});
+
+/** 分卷组（超过 ARC_SIZE 章时按 ARC_SIZE 切分） */
+const arcGroups = computed(() => {
+  const chapters = bundle.value?.chapters ?? [];
+  if (chapters.length <= ARC_SIZE) return [{ label: "全部", start: 0, end: chapters.length }];
+  const groups: Array<{ label: string; start: number; end: number }> = [];
+  for (let i = 0; i < chapters.length; i += ARC_SIZE) {
+    const end = Math.min(i + ARC_SIZE, chapters.length);
+    groups.push({ label: `${i + 1}–${end}`, start: i, end });
+  }
+  return groups;
+});
+
+const activeArc = ref(0);
+
+const visibleChapters = computed(() => {
+  const chapters = bundle.value?.chapters ?? [];
+  if (arcGroups.value.length > 1) {
+    const arc = arcGroups.value[activeArc.value]!;
+    return chapters.slice(arc.start, arc.end);
+  }
+  return chapters.slice(0, showCount.value);
+});
+
+function selectArc(idx: number) {
+  activeArc.value = idx;
+}
+
+const tocRef = ref<HTMLElement | null>(null);
+
+function scrollToToc() {
+  if (import.meta.client) {
+    tocRef.value?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+}
+
+/** 跳到「上次读到」的章节 */
+function jumpToLastRead() {
+  if (!lastReadPath.value || !bundle.value) return;
+  const link = nuxtLinkToFromContentPath(lastReadPath.value, base);
+  navigateTo(link);
+}
+
+/** 从 localStorage 恢复上次阅读记录 */
+onMounted(() => {
+  if (!bundle.value) return;
+  const novelSlug = bundle.value.novelSlug;
+  try {
+    const raw = window.localStorage.getItem(`fiction-last-read-v1`);
+    if (!raw) return;
+    const map = JSON.parse(raw) as Record<string, string>;
+    const savedPath = map[novelSlug];
+    if (savedPath && bundle.value.chapters.some((c) => c._path === savedPath)) {
+      lastReadPath.value = savedPath;
+      // 自动定位到对应分卷
+      const idx = bundle.value.chapters.findIndex((c) => c._path === savedPath);
+      if (idx >= 0 && arcGroups.value.length > 1) {
+        activeArc.value = Math.floor(idx / ARC_SIZE);
+      } else if (idx >= 0 && arcGroups.value.length === 1) {
+        showCount.value = Math.max(showCount.value, Math.ceil((idx + 1) / PAGE_SIZE) * PAGE_SIZE);
+      }
+    }
+  } catch {
+    // ignore
+  }
+});
 
 </script>
 

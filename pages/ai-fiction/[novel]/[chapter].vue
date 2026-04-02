@@ -158,7 +158,17 @@ const { data: chapterNavList } = await useAsyncData(
   async () => {
     const n = novel.value;
 
-    // 主路径：requestFetch 在 SSR/client 均正确补全 URL
+    // 主路径：per-novel bundle.json（仅含本书章节，体积更小）
+    try {
+      const bundle = await requestFetch<{ chapters?: ChapterNavItem[] }>(
+        `${jsonBase}/ai-fiction/${encodeURIComponent(n)}/bundle.json`,
+      );
+      if (bundle?.chapters?.length) return bundle.chapters as ChapterNavItem[];
+    } catch {
+      /* silent */
+    }
+
+    // 兜底：全量 series.json
     try {
       const list = await requestFetch<Array<{ novelSlug: string; chapters?: ChapterNavItem[] }>>(
         `${jsonBase}/ai-fiction-series.json`,
@@ -290,6 +300,38 @@ function goBack() {
     navigateTo(`/ai-fiction/${encodeURIComponent(novel.value)}`);
   }
 }
+
+/** 记录阅读进度：chapterNavList 就绪后写 localStorage（避免 onMounted 时数据未到的竞态） */
+function saveReadProgress(list: ChapterNavItem[] | null | undefined) {
+  if (!list?.length) return;
+  try {
+    const chapterPath = list.find((c) => {
+      const file = c.chapterFile ?? String(c._path).split("/").pop() ?? "";
+      return normalizeSegment(file) === chapter.value;
+    })?._path;
+    if (!chapterPath) return;
+    const raw = window.localStorage.getItem("fiction-last-read-v1");
+    const map: Record<string, string> = raw ? (JSON.parse(raw) as Record<string, string>) : {};
+    map[novel.value] = chapterPath;
+    window.localStorage.setItem("fiction-last-read-v1", JSON.stringify(map));
+  } catch {
+    // ignore
+  }
+}
+
+// 立即尝试一次（SSR hydration 后数据已就绪的场景）
+onMounted(() => {
+  if (chapterNavList.value?.length) {
+    saveReadProgress(chapterNavList.value);
+  }
+});
+
+// 数据异步到达时再写一次（避免 onMounted 时 chapterNavList 尚未加载的竞态）
+watch(chapterNavList, (list) => {
+  if (import.meta.client && list?.length) {
+    saveReadProgress(list);
+  }
+}, { once: true });
 
 </script>
 

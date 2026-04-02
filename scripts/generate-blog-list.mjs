@@ -116,7 +116,9 @@ function extractBodyMarkdown(raw) {
 
 function firstNonEmptyLine(text) {
   const line = text.split(/\r?\n/).find((l) => l.trim());
-  return line ? line.trim() : "";
+  if (!line) return "";
+  // 去掉 Markdown 标题标记（# ## ### 等）
+  return line.trim().replace(/^#{1,6}\s+/, "");
 }
 
 /** 同小说内章节排序：优先文件名前缀数字，否则中文 locale 自然序 */
@@ -248,7 +250,15 @@ function generateAiFictionSet() {
     const sorted = [...list].sort((a, b) => compareChapterFileName(a.chapterFile, b.chapterFile));
     const first = sorted[0];
     const latest = sorted[sorted.length - 1];
-    return {
+    const chapterList = sorted.map((c) => ({
+      _path: c._path,
+      title: c.title,
+      date: c.date,
+      chapterFile: c.chapterFile,
+    }));
+
+    // 完整 bundle：供小说详情页 / 章节导航使用（含 chapters + summaryBody）
+    const bundle = {
       novelSlug,
       novelName: summary?.title ?? first.novelName,
       indexPath: `/ai-fiction/${novelSlug}`,
@@ -258,16 +268,32 @@ function generateAiFictionSet() {
       summaryBody: summary?.summaryBody ?? "",
       status: summary?.status,
       chapterCount: sorted.length,
-      chapters: sorted.map((c) => ({
-        _path: c._path,
-        title: c.title,
-        date: c.date,
-        chapterFile: c.chapterFile,
-      })),
+      chapters: chapterList,
       firstChapterPath: first._path,
       latestChapterPath: latest._path,
       latestChapterTitle: latest.title,
       latestChapterDate: latest.date,
+    };
+
+    // 写 per-novel bundle 文件（按 novelSlug 路径存放）
+    const bundleDir = join(fictionJsonDir, novelSlug);
+    mkdirSync(bundleDir, { recursive: true });
+    writeFileSync(join(bundleDir, "bundle.json"), JSON.stringify(bundle), "utf-8");
+
+    // lite 版：供列表页使用，不含 chapters / summaryBody
+    return {
+      novelSlug: bundle.novelSlug,
+      novelName: bundle.novelName,
+      indexPath: bundle.indexPath,
+      description: bundle.description,
+      coverImage: bundle.coverImage,
+      tags: bundle.tags,
+      status: bundle.status,
+      chapterCount: bundle.chapterCount,
+      firstChapterPath: bundle.firstChapterPath,
+      latestChapterPath: bundle.latestChapterPath,
+      latestChapterTitle: bundle.latestChapterTitle,
+      latestChapterDate: bundle.latestChapterDate,
     };
   });
   series.sort((a, b) => (b.latestChapterDate || "").localeCompare(a.latestChapterDate || ""));
@@ -278,7 +304,7 @@ function generateAiFictionSet() {
     chapters.length,
     "chapters to ai-fiction-list.json and ai-fiction/<slug>.json,",
     series.length,
-    "series to ai-fiction-series.json",
+    "series to ai-fiction-series.json + per-novel bundle.json",
   );
 }
 
@@ -294,9 +320,15 @@ generateAiFictionSet();
 // 快照列表 + 快照详情静态 JSON（静态站 snapshots 列表/详情页客户端回退）
 const snapshotsDir = join(__dirname, "..", "content", "snapshots");
 const snapshotsJsonDir = join(publicDir, "snapshots");
-const snapshotFiles = readdirSync(snapshotsDir, { withFileTypes: true })
-  .filter((e) => e.isFile() && (e.name.endsWith(".md") || e.name.endsWith(".mdx")))
-  .map((e) => e.name);
+const snapshotFiles = (() => {
+  try {
+    return readdirSync(snapshotsDir, { withFileTypes: true })
+      .filter((e) => e.isFile() && (e.name.endsWith(".md") || e.name.endsWith(".mdx")))
+      .map((e) => e.name);
+  } catch {
+    return [];
+  }
+})();
 
 try {
   mkdirSync(snapshotsJsonDir, { recursive: true });
