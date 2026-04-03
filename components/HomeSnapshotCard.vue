@@ -148,7 +148,7 @@ const tiltY = ref(0);
 const activeSnapshot = computed(
   () => normalizedSnapshots.value[currentIndex.value] || normalizedSnapshots.value[0]
 );
-const baseRotate = computed(() => (isNarrow.value ? 0 : 4.6));
+const baseRotate = computed(() => (isNarrow.value ? 0 : 6));
 const cardTransformStyle = computed(() => ({
   transform: `perspective(680px) rotateX(${tiltX.value}deg) rotateY(${tiltY.value}deg) rotateZ(${baseRotate.value}deg)`
 }));

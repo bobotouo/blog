@@ -1,69 +1,121 @@
 <template>
   <div
-    class="relative w-full min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,_#16212f_0%,_#0a0f14_45%,_#05070b_100%)]"
+    class="relative w-full min-h-screen overflow-hidden"
+    style="background: #05070b"
+    @mousemove="onMouseMove"
   >
-    <div class="absolute inset-0 bg-grid opacity-[0.2]" aria-hidden />
-    <NebulaGlow />
+    <!-- 粒子背景 -->
+    <ClientOnly>
+      <ParticlesBg
+        :particle-count="300"
+        :particle-spread="10"
+        :speed="0.3"
+        :particle-colors="['#ffffff']"
+        :alpha-particles="false"
+        :particle-base-size="100"
+        :size-randomness="1"
+        :camera-distance="20"
+        :move-particles-on-hover="true"
+        :particle-hover-factor="1"
+        :disable-rotation="false"
+        :pixel-ratio="1"
+      />
+      <template #fallback><div /></template>
+    </ClientOnly>
 
-    <main class="relative z-10 min-h-screen flex flex-col justify-center px-6 py-16">
-      <div class="max-w-6xl mx-auto w-full flex flex-col md:flex-row md:items-center md:justify-between gap-12 md:gap-16">
-        <div class="flex-1 min-w-0">
-          <div class="flex items-center gap-3 text-xs uppercase tracking-[0.35em] text-white/60 mb-6">
-            <span class="h-[1px] w-8 bg-white/40" />
-            Nebula Journal
+    <!-- 鼠标跟随光晕 -->
+    <div
+      class="pointer-events-none absolute inset-0 z-[1] transition-[background] duration-75"
+      :style="`background: radial-gradient(700px circle at ${mouseX}px ${mouseY}px, rgba(34,211,238,0.05), transparent 55%)`"
+      aria-hidden
+    />
+
+
+    <main class="relative z-10 flex min-h-screen flex-col justify-center px-6 sm:px-12 py-20">
+      <div class="mx-auto w-full max-w-5xl">
+
+        <!-- 卡片 + 文案/导航 并排，整体居中，各列宽度固定不互相挤压 -->
+        <div class="flex flex-col items-center gap-10 lg:flex-row lg:items-center lg:justify-center lg:gap-24 lg:overflow-visible">
+
+          <!-- 左：眉标 + 文案 + 导航（左对齐，固定宽度） -->
+          <div class="flex w-[300px] flex-shrink-0 flex-col items-start overflow-visible text-left">
+
+            <!-- 眉标 -->
+            <div class="flex items-center gap-3">
+              <span class="h-px w-8 bg-gradient-to-r from-transparent to-cyan-400/50" />
+              <span class="font-mono text-[11px] uppercase tracking-[0.35em] text-white/30">
+                Nebula Journal
+              </span>
+            </div>
+
+            <ClientOnly>
+              <Motion
+                tag="h1"
+                :initial="{ y: 36, opacity: 0 }"
+                :animate="{ y: 0, opacity: 1 }"
+                :transition="{ duration: 0.9, ease: 'easeOut' }"
+                class="hero-title mt-10 text-[clamp(2rem,4.5vw,3.2rem)] font-bold leading-[1.1] tracking-tight"
+              >
+                <RotatingText
+                  :texts="['写点想法', '留点日常', '开心常在', '平安喜乐！🎉']"
+                  :auto="true"
+                  :stagger-duration="0.04"
+                  :rotation-interval="2800"
+                  element-level-class-name="inline-block"
+                />
+              </Motion>
+              <template #fallback>
+                <h1 class="hero-title mt-10 text-[clamp(2rem,4.5vw,3.2rem)] font-bold leading-[1.1] tracking-tight">
+                  写点想法
+                </h1>
+              </template>
+            </ClientOnly>
+            <ClientOnly>
+              <Motion
+                tag="div"
+                :initial="{ y: 14, opacity: 0 }"
+                :animate="{ y: 0, opacity: 1 }"
+                :transition="{ duration: 0.9, delay: 0.28, ease: 'easeOut' }"
+                class="mt-20 flex flex-wrap gap-3"
+              >
+                <NuxtLink to="/blog" class="nav-pill group">
+                  <span class="nav-dot bg-cyan-400 group-hover:shadow-[0_0_8px_3px_rgba(34,211,238,0.5)] transition-shadow duration-200" />
+                  博客文章
+                  <span class="nav-arrow">→</span>
+                </NuxtLink>
+                <NuxtLink to="/blog?tab=ai-fiction" class="nav-pill group">
+                  <span class="nav-dot bg-violet-400 group-hover:shadow-[0_0_8px_3px_rgba(167,139,250,0.5)] transition-shadow duration-200" />
+                  Ai 小说
+                  <span class="nav-arrow">→</span>
+                </NuxtLink>
+              </Motion>
+              <template #fallback>
+                <div class="mt-8 flex flex-wrap gap-3">
+                  <NuxtLink to="/blog" class="nav-pill">博客文章 →</NuxtLink>
+                </div>
+              </template>
+            </ClientOnly>
           </div>
 
+          <!-- 右：快照卡片 -->
           <ClientOnly>
             <Motion
-              tag="h1"
-              :initial="{ y: 28, opacity: 0 }"
-              :animate="{ y: 0, opacity: 1 }"
-              :transition="{ duration: 0.8, ease: 'easeOut' }"
-              class="text-4xl md:text-6xl font-semibold text-white text-shadow-soft leading-tight"
+              tag="div"
+              :initial="{ x: 32, opacity: 0 }"
+              :animate="{ x: 0, opacity: 1 }"
+              :transition="{ duration: 1, delay: 0.35, ease: 'easeOut' }"
+              class="w-full max-w-[280px] flex-shrink-0 lg:w-[260px]"
             >
-              <RotatingText
-                :texts="['随手记录', '日常碎片', '慢慢写作']"
-                :auto="true"
-                :stagger-duration="0.04"
-                :rotation-interval="2800"
-                element-level-class-name="inline-block"
+              <HomeSnapshotCard
+                :loading="pending"
+                :snapshots="homeSnapshots"
+                title="日常快照"
+                summary="像朋友圈一样记录生活片段，轻量、直接。"
               />
-              <span class="block mt-4 text-white/70 text-2xl md:text-3xl">
-                一个更私人的博客与快照墙
-              </span>
             </Motion>
-            <template #fallback>
-              <h1 class="text-4xl md:text-6xl font-semibold text-white text-shadow-soft leading-tight">
-                随手记录
-                <span class="block mt-4 text-white/70 text-2xl md:text-3xl">
-                  一个更私人的博客与快照墙
-                </span>
-              </h1>
-            </template>
+            <template #fallback><div class="w-[260px]" /></template>
           </ClientOnly>
 
-          <p class="mt-6 max-w-2xl text-base md:text-lg text-white/70">
-            写点想法，留点日常。
-          </p>
-
-          <div class="mt-10">
-            <NuxtLink
-              to="/blog"
-              class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-7 py-3 text-sm font-medium text-white backdrop-blur hover:bg-white/20 transition"
-            >
-              开始阅读
-              <span class="text-base">→</span>
-            </NuxtLink>
-          </div>
-        </div>
-
-        <div class="flex-shrink-0 w-full md:w-[320px] lg:w-[360px] min-h-[18rem] md:min-h-[20rem]">
-          <HomeSnapshotCard
-            :loading="pending"
-            :snapshots="homeSnapshots"
-            title="日常快照"
-            summary="像朋友圈一样记录生活片段，轻量、直接。"
-          />
         </div>
       </div>
     </main>
@@ -71,11 +123,21 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from "vue";
 import { Motion } from "motion-v";
 import RotatingText from "~/components/RotatingText.vue";
-import NebulaGlow from "~/components/NebulaGlow.vue";
 import HomeSnapshotCard from "~/components/HomeSnapshotCard.vue";
+import ParticlesBg from "~/components/ParticlesBg.vue";
 
+/* 鼠标跟随光晕 */
+const mouseX = ref(760);
+const mouseY = ref(400);
+const onMouseMove = (e: MouseEvent) => {
+  mouseX.value = e.clientX;
+  mouseY.value = e.clientY;
+};
+
+/* 数据获取 */
 const config = useRuntimeConfig();
 const basePath = ((config.public.baseUrl as string) || "/").replace(/\/$/, "");
 const jsonBase = import.meta.server ? "" : basePath;
@@ -101,7 +163,6 @@ const { data: snapshots, pending } = await useAsyncData(
   { getCachedData: () => (import.meta.dev ? null : undefined), lazy: true },
 );
 
-// 静态部署（GitHub Pages）首屏 payload 可能缺数据，客户端补拉 JSON
 onMounted(async () => {
   if (
     import.meta.client &&
@@ -115,7 +176,6 @@ onMounted(async () => {
   }
 });
 
-/** 重写资源路径：GitHub Pages 等有 base 时给 /uploads、/images 加前缀 */
 function withBasePath(path: string): string {
   const base = (config.public.baseUrl as string) || "/";
   if (!base || base === "/") return path;
@@ -139,4 +199,54 @@ const homeSnapshots = computed(() => {
 });
 </script>
 
-<style scoped></style>
+<style scoped>
+/* 大标题：白色文字 + 青色光晕 */
+.hero-title {
+  color: #ffffff;
+  filter: drop-shadow(0 0 32px rgba(34, 211, 238, 0.45))
+          drop-shadow(0 0 80px rgba(34, 211, 238, 0.18));
+}
+
+/* 导航药丸 */
+.nav-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.nav-pill:hover {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.92);
+  transform: translateY(-1px);
+}
+
+.nav-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.nav-arrow {
+  opacity: 0.35;
+  font-size: 0.7rem;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.nav-pill:hover .nav-arrow {
+  opacity: 0.75;
+  transform: translateX(2px);
+}
+
+</style>

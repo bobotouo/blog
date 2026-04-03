@@ -2,8 +2,8 @@
   "views": {
     "/snapshots/2026-02-12-second-snapshot": 2,
     "/snapshots/2026-02-10-first-snapshot": 7,
-    "/blog": 44,
-    "/blog/": 65,
+    "/blog": 46,
+    "/blog/": 66,
     "/2026-02-11-happy-day": 9,
     "/2024-01-01-welcome": 4,
     "/2022-11-01-black-macos": 4,
@@ -18,11 +18,11 @@
     "/blog/20260402-twitter-digest": 2
   },
   "byDevice": {
-    "desktop": 125,
+    "desktop": 128,
     "mobile": 50
   },
   "byCountry": {
-    "XX": 175
+    "XX": 178
   },
   "daily": {
     "2026-02-12": 21,
@@ -31,6 +31,7 @@
     "2026-03-26": 5,
     "2026-03-27": 5,
     "2026-04-01": 10,
-    "2026-04-02": 6
+    "2026-04-02": 6,
+    "2026-04-03": 3
   }
 }
