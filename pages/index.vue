@@ -1,120 +1,166 @@
 <template>
   <div
-    class="relative w-full min-h-screen overflow-hidden"
-    style="background: #05070b"
+    class="relative min-h-screen overflow-hidden"
+    style="background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(56, 189, 248, 0.1), rgba(56, 189, 248, 0.02) 40%, transparent 60%), radial-gradient(ellipse 60% 40% at 80% 80%, rgba(245, 158, 11, 0.06), transparent 50%), radial-gradient(ellipse 50% 30% at 20% 80%, rgba(251, 113, 133, 0.05), transparent 50%), #0a0f14"
     @mousemove="onMouseMove"
   >
-    <!-- 粒子背景 -->
-    <ClientOnly>
-      <ParticlesBg
-        :particle-count="300"
-        :particle-spread="10"
-        :speed="0.3"
-        :particle-colors="['#ffffff']"
-        :alpha-particles="false"
-        :particle-base-size="100"
-        :size-randomness="1"
-        :camera-distance="20"
-        :move-particles-on-hover="true"
-        :particle-hover-factor="1"
-        :disable-rotation="false"
-        :pixel-ratio="1"
-      />
-      <template #fallback><div /></template>
-    </ClientOnly>
+    <!-- 背景网格 -->
+    <div class="absolute inset-0 bg-grid" aria-hidden />
+
+    <!-- 噪点纹理 -->
+    <div class="absolute inset-0 bg-grain pointer-events-none" aria-hidden />
+
+    <!-- 装饰性光晕 -->
+    <div class="absolute top-32 left-20 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl" aria-hidden />
+    <div class="absolute bottom-32 right-20 w-[32rem] h-[32rem] bg-amber-500/10 rounded-full blur-3xl" aria-hidden />
+    <div class="absolute top-48 right-48 w-64 h-64 bg-pink-500/5 rounded-full blur-3xl" aria-hidden />
+
+    <!-- 浮动装饰粒子 -->
+    <div class="absolute top-1/4 left-10 w-3 h-3 bg-cyan-400/60 rounded-full animate-float-slow" aria-hidden />
+    <div class="absolute top-1/3 right-1/4 w-2 h-2 bg-amber-400/60 rounded-full animate-float-reverse" aria-hidden />
+    <div class="absolute bottom-1/3 left-1/4 w-4 h-4 bg-pink-400/40 rounded-full animate-float-fast" aria-hidden />
 
     <!-- 鼠标跟随光晕 -->
     <div
-      class="pointer-events-none absolute inset-0 z-[1] transition-[background] duration-75"
-      :style="`background: radial-gradient(700px circle at ${mouseX}px ${mouseY}px, rgba(34,211,238,0.05), transparent 55%)`"
+      class="pointer-events-none absolute inset-0 z-[1] transition-[background] duration-200"
+      :style="`background: radial-gradient(700px circle at ${mouseX}px ${mouseY}px, rgba(56, 189, 248, 0.1), transparent 60%)`"
       aria-hidden
     />
 
-
     <main class="relative z-10 flex min-h-screen flex-col justify-center px-6 sm:px-12 py-20">
-      <div class="mx-auto w-full max-w-5xl">
+      <div class="mx-auto w-full max-w-6xl">
 
-        <!-- 卡片 + 文案/导航 并排，整体居中，各列宽度固定不互相挤压 -->
-        <div class="flex flex-col items-center gap-10 lg:flex-row lg:items-center lg:justify-center lg:gap-24 lg:overflow-visible">
+        <!-- 卡片 + 文案/导航 并排布局 -->
+        <div class="flex flex-col lg:flex-row items-center gap-12 lg:gap-24">
 
-          <!-- 左：眉标 + 文案 + 导航（左对齐，固定宽度） -->
-          <div class="flex w-[300px] flex-shrink-0 flex-col items-start overflow-visible text-left">
+          <!-- 左侧：眉标 + 文案 + 导航 -->
+          <div class="flex w-full lg:w-[400px] flex-shrink-0 flex-col items-start text-left">
 
             <!-- 眉标 -->
-            <div class="flex items-center gap-3">
-              <span class="h-px w-8 bg-gradient-to-r from-transparent to-cyan-400/50" />
-              <span class="font-mono text-[11px] uppercase tracking-[0.35em] text-white/30">
-                Nebula Journal
+            <div class="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-white/[0.06] border border-white/[0.08] backdrop-blur-md mb-6 shadow-[0_8px_32px_rgba(0,0,0,0.3)] group hover:bg-white/[0.08] hover:border-white/[0.12] transition-all duration-300">
+              <span class="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 group-hover:animate-pulse"></span>
+              <span class="font-mono text-[11px] uppercase tracking-[0.4em] text-white/40 font-medium">
+                Nova Journal
               </span>
+              <span class="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-pink-400 to-amber-400 animate-pulse" style="animation-delay: 0.5s;"></span>
             </div>
 
+            <!-- 标题 -->
             <ClientOnly>
               <Motion
                 tag="h1"
-                :initial="{ y: 36, opacity: 0 }"
+                :initial="{ y: 40, opacity: 0 }"
                 :animate="{ y: 0, opacity: 1 }"
                 :transition="{ duration: 0.9, ease: 'easeOut' }"
-                class="hero-title mt-10 text-[clamp(2rem,4.5vw,3.2rem)] font-bold leading-[1.1] tracking-tight"
+                class="mb-4"
               >
-                <RotatingText
-                  :texts="['写点想法', '留点日常', '开心常在', '平安喜乐！🎉']"
-                  :auto="true"
-                  :stagger-duration="0.04"
-                  :rotation-interval="2800"
-                  element-level-class-name="inline-block"
-                />
+                <div class="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold leading-[1.1] tracking-tight">
+                  <span class="block text-white/80 mb-2 text-lg uppercase tracking-[0.3em] font-medium text-white/40">记录 · 思考 · 延伸</span>
+                  <span class="block">
+                    <RotatingText
+                      :texts="['写点想法', '留点日常', '开心常在', '平安喜乐！🎉']"
+                      :auto="true"
+                      :stagger-duration="0.04"
+                      :rotation-interval="2800"
+                      element-level-class-name="inline-block text-white"
+                    />
+                  </span>
+                </div>
               </Motion>
               <template #fallback>
-                <h1 class="hero-title mt-10 text-[clamp(2rem,4.5vw,3.2rem)] font-bold leading-[1.1] tracking-tight">
-                  写点想法
-                </h1>
+                <div class="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold leading-[1.1] tracking-tight">
+                  <span class="block text-white/80 mb-2 text-lg uppercase tracking-[0.3em] font-medium text-white/40">记录 · 思考 · 延伸</span>
+                  <span class="block bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">写点想法</span>
+                </div>
               </template>
             </ClientOnly>
+
+            <!-- 描述 -->
             <ClientOnly>
               <Motion
                 tag="div"
-                :initial="{ y: 14, opacity: 0 }"
+                :initial="{ y: 25, opacity: 0 }"
                 :animate="{ y: 0, opacity: 1 }"
-                :transition="{ duration: 0.9, delay: 0.28, ease: 'easeOut' }"
-                class="mt-20 flex flex-wrap gap-3"
+                :transition="{ duration: 0.8, delay: 0.25, ease: 'easeOut' }"
+                class="mb-8 max-w-md"
               >
-                <NuxtLink to="/blog" class="nav-pill group">
-                  <span class="nav-dot bg-cyan-400 group-hover:shadow-[0_0_8px_3px_rgba(34,211,238,0.5)] transition-shadow duration-200" />
-                  博客文章
-                  <span class="nav-arrow">→</span>
+                <p class="text-base sm:text-lg text-white/[0.65] leading-relaxed font-light">
+                  在喧嚣中寻找宁静，在平凡中发现不凡。<br class="hidden sm:block" />每一篇文字，都是一次与自我的对话。
+                </p>
+              </Motion>
+              <template #fallback>
+                <p class="text-base sm:text-lg text-white/[0.65] leading-relaxed font-light mb-8">
+                  在喧嚣中寻找宁静，在平凡中发现不凡。<br class="hidden sm:block" />每一篇文字，都是一次与自我的对话。
+                </p>
+              </template>
+            </ClientOnly>
+
+            <!-- 导航按钮 -->
+            <ClientOnly>
+              <Motion
+                tag="div"
+                :initial="{ y: 25, opacity: 0 }"
+                :animate="{ y: 0, opacity: 1 }"
+                :transition="{ duration: 0.8, delay: 0.35, ease: 'easeOut' }"
+                class="flex flex-wrap gap-4"
+              >
+                <NuxtLink
+                  to="/blog"
+                  class="group relative inline-flex items-center gap-3 px-7 py-3.5 rounded-2xl overflow-hidden bg-gradient-to-br from-cyan-500/[0.15] to-blue-500/[0.15] border border-cyan-500/20 text-cyan-300 font-medium text-sm transition-all duration-500 hover:from-cyan-500/[0.25] hover:to-blue-500/[0.25] hover:border-cyan-500/30 hover:text-white hover:shadow-[0_0_40px_rgba(56,189,248,0.15)] before:absolute before:inset-0 before:bg-gradient-to-r before:from-cyan-400/0 before:via-cyan-400/10 before:to-cyan-400/0 before:transition-all before:duration-500 before:-translate-x-full hover:before:translate-x-full"
+                >
+                  <span class="relative z-10 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-cyan-400 group-hover:animate-pulse"></span>
+                    浏览文章
+                  </span>
+                  <svg class="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
                 </NuxtLink>
-                <NuxtLink to="/blog?tab=ai-fiction" class="nav-pill group">
-                  <span class="nav-dot bg-violet-400 group-hover:shadow-[0_0_8px_3px_rgba(167,139,250,0.5)] transition-shadow duration-200" />
-                  Ai 小说
-                  <span class="nav-arrow">→</span>
+                <NuxtLink
+                  to="/blog?tab=ai-fiction"
+                  class="group relative inline-flex items-center gap-3 px-7 py-3.5 rounded-2xl overflow-hidden bg-gradient-to-br from-amber-500/[0.1] to-pink-500/[0.1] border border-amber-500/15 text-amber-300/80 font-medium text-sm transition-all duration-500 hover:from-amber-500/[0.15] hover:to-pink-500/[0.15] hover:border-amber-500/25 hover:text-amber-200 hover:shadow-[0_0_40px_rgba(245,158,11,0.1)] before:absolute before:inset-0 before:bg-gradient-to-r before:from-amber-400/0 before:via-amber-400/10 before:to-amber-400/0 before:transition-all before:duration-500 before:-translate-x-full hover:before:translate-x-full"
+                >
+                  <span class="relative z-10 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-amber-400/60 group-hover:animate-pulse"></span>
+                    AI 小说
+                  </span>
+                  <svg class="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
                 </NuxtLink>
               </Motion>
               <template #fallback>
-                <div class="mt-8 flex flex-wrap gap-3">
-                  <NuxtLink to="/blog" class="nav-pill">博客文章 →</NuxtLink>
+                <div class="flex flex-wrap gap-4">
+                  <NuxtLink to="/blog" class="px-7 py-3.5 rounded-2xl bg-cyan-500/20 border border-cyan-500/30 text-cyan-300">
+                    浏览文章
+                  </NuxtLink>
                 </div>
               </template>
             </ClientOnly>
           </div>
 
-          <!-- 右：快照卡片 -->
-          <ClientOnly>
-            <Motion
-              tag="div"
-              :initial="{ x: 32, opacity: 0 }"
-              :animate="{ x: 0, opacity: 1 }"
-              :transition="{ duration: 1, delay: 0.35, ease: 'easeOut' }"
-              class="w-full max-w-[280px] flex-shrink-0 lg:w-[260px]"
-            >
-              <HomeSnapshotCard
-                :loading="pending"
-                :snapshots="homeSnapshots"
-                title="日常快照"
-                summary="像朋友圈一样记录生活片段，轻量、直接。"
-              />
-            </Motion>
-            <template #fallback><div class="w-[260px]" /></template>
-          </ClientOnly>
+          <!-- 右侧：快照卡片 -->
+          <div class="w-full lg:w-[340px] flex-shrink-0 mt-16 lg:mt-0">
+            <ClientOnly>
+              <Motion
+                tag="div"
+                :initial="{ x: 40, opacity: 0, scale: 0.95 }"
+                :animate="{ x: 0, opacity: 1, scale: 1 }"
+                :transition="{ duration: 0.9, delay: 0.4, ease: 'easeOut' }"
+                class="transform-gpu"
+              >
+                <HomeSnapshotCard
+                  :loading="pending"
+                  :snapshots="homeSnapshots"
+                  title="日常快照"
+                  summary="记录生活中的温暖瞬间"
+                />
+              </Motion>
+              <template #fallback>
+                <div class="w-full h-[440px] bg-white/5 rounded-3xl animate-pulse border border-white/10"></div>
+              </template>
+            </ClientOnly>
+          </div>
 
         </div>
       </div>
@@ -123,11 +169,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import { Motion } from "motion-v";
 import RotatingText from "~/components/RotatingText.vue";
 import HomeSnapshotCard from "~/components/HomeSnapshotCard.vue";
-import ParticlesBg from "~/components/ParticlesBg.vue";
 
 /* 鼠标跟随光晕 */
 const mouseX = ref(760);
@@ -142,39 +187,18 @@ const config = useRuntimeConfig();
 const basePath = ((config.public.baseUrl as string) || "/").replace(/\/$/, "");
 const jsonBase = import.meta.server ? "" : basePath;
 
-const { data: snapshots, pending } = await useAsyncData(
+const { data: snapshots, pending } = useAsyncData(
   "home-latest-snapshot",
   async () => {
-    if (import.meta.server) {
-      return await queryContent("snapshots").sort({ date: -1 }).find();
-    }
-    const cached = useNuxtData("home-latest-snapshot").data.value;
-    if (cached?.length !== undefined) return cached;
-    if (import.meta.dev) {
-      try {
-        return await queryContent("snapshots").sort({ date: -1 }).find();
-      } catch {
-        /* fallback */
-      }
-    }
     const jsonPath = basePath ? `${jsonBase}/snapshots-list.json` : "/snapshots-list.json";
     return await $fetch<unknown[]>(jsonPath).catch(() => []);
   },
-  { getCachedData: () => (import.meta.dev ? null : undefined), lazy: true },
+  {
+    server: false,
+    lazy: true,
+    default: () => [],
+  },
 );
-
-onMounted(async () => {
-  if (
-    import.meta.client &&
-    (!snapshots.value || !Array.isArray(snapshots.value) || snapshots.value.length === 0)
-  ) {
-    const jsonPath = basePath ? `${jsonBase}/snapshots-list.json` : "/snapshots-list.json";
-    const list = await $fetch<unknown[]>(jsonPath).catch(() => []);
-    if (Array.isArray(list) && list.length > 0) {
-      snapshots.value = list;
-    }
-  }
-});
 
 function withBasePath(path: string): string {
   const base = (config.public.baseUrl as string) || "/";
@@ -197,56 +221,16 @@ const homeSnapshots = computed(() => {
     };
   }) as Array<{ title?: string; summary?: string; images?: string[] }>;
 });
+
+onMounted(() => {
+  const warmup = () => {
+    // 预热首次跳转目标页，减少第一次点击“浏览文章 / AI 小说”的等待。
+    preloadRouteComponents("/blog").catch(() => {});
+  };
+  if ("requestIdleCallback" in window) {
+    window.requestIdleCallback(warmup, { timeout: 1200 });
+  } else {
+    setTimeout(warmup, 300);
+  }
+});
 </script>
-
-<style scoped>
-/* 大标题：白色文字 + 青色光晕 */
-.hero-title {
-  color: #ffffff;
-  filter: drop-shadow(0 0 32px rgba(34, 211, 238, 0.45))
-          drop-shadow(0 0 80px rgba(34, 211, 238, 0.18));
-}
-
-/* 导航药丸 */
-.nav-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.04);
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.65);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
-}
-
-.nav-pill:hover {
-  background: rgba(255, 255, 255, 0.09);
-  border-color: rgba(255, 255, 255, 0.2);
-  color: rgba(255, 255, 255, 0.92);
-  transform: translateY(-1px);
-}
-
-.nav-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.nav-arrow {
-  opacity: 0.35;
-  font-size: 0.7rem;
-  transition: opacity 0.2s, transform 0.2s;
-}
-
-.nav-pill:hover .nav-arrow {
-  opacity: 0.75;
-  transform: translateX(2px);
-}
-
-</style>

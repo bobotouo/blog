@@ -38,6 +38,10 @@ const articleSlugRoutes = collectRoutes(
   "",
 ).map((s) => (s.startsWith("/") ? s : `/${s}`));
 const isGhPages = process.env.NUXT_GH_PAGES === "true";
+const isNetlify = process.env.NETLIFY === "true";
+const enableSsr = process.env.NUXT_ENABLE_SSR
+  ? process.env.NUXT_ENABLE_SSR === "true"
+  : !isGhPages && isNetlify;
 const appBase = process.env.NUXT_APP_BASE_URL || "/";
 const cdnBase = process.env.NUXT_APP_CDN_URL || "";
 const normalizedBase = appBase.endsWith("/") ? appBase : `${appBase}/`;
@@ -88,13 +92,14 @@ export default defineNuxtConfig({
   // Global page headers
   app: {
     head: {
-      title: "个人博客",
+      title: "Personal Blog",
       meta: [
         { charset: "utf-8" },
         { name: "viewport", content: "width=device-width,initial-scale=1" },
-        { name: "description", content: "个人博客，使用 Nuxt 3 + Content" },
+        { name: "description", content: "Personal Blog Use AI" },
       ],
       link: [
+        { rel: "icon", type: "image/x-icon", href: "/favicon.ico" },
         { rel: "preconnect", href: "https://fonts.googleapis.com" },
         { rel: "preconnect", href: "https://fonts.gstatic.com", crossorigin: "" },
         {
@@ -114,6 +119,10 @@ export default defineNuxtConfig({
     baseURL: appBase,
     cdnURL: cdnBase,
     buildAssetsDir: "/_nuxt/",
+    pageTransition: {
+      name: "page",
+      mode: "out-in",
+    },
   },
 
   // Modules
@@ -148,21 +157,26 @@ export default defineNuxtConfig({
 
   // Build settings
   build: {
-    transpile: ["motion-v"],
+    // motion-v 在现代浏览器/Node 下通常无需额外转译；
+    // 默认关闭可明显改善本地 dev 冷启动，必要时可通过环境变量强制开启。
+    transpile: process.env.NUXT_FORCE_TRANSPILE_MOTION_V === "true" ? ["motion-v"] : [],
   },
 
   // 链接 hover 时预取，配合 lazy 数据实现秒开
   experimental: {
     defaults: {
       nuxtLink: {
-        prefetchOn: "interaction",
+        prefetchOn: {
+          visibility: true,
+          interaction: true,
+        },
       },
     },
   },
 
-  ssr: true,
+  ssr: enableSsr,
   nitro: {
-    preset: isGhPages ? "static" : process.env.NITRO_PRESET || "netlify",
+    preset: isGhPages || !enableSsr ? "static" : process.env.NITRO_PRESET || "netlify",
     prerender: isGhPages
       ? {
           crawlLinks: false,

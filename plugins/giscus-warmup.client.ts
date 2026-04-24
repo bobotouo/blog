@@ -1,6 +1,19 @@
 const GISCUS_SRC = "https://giscus.app/client.js";
 let warmed = false;
 
+const mayNeedCommentsSoon = (path: string): boolean => {
+  if (!path || path === "/") return false;
+  if (path === "/blog" || path === "/ai-fiction" || path === "/snapshots" || path === "/stats") {
+    return false;
+  }
+  return (
+    path.startsWith("/blog/") ||
+    path.startsWith("/ai-fiction/") ||
+    path.startsWith("/snapshots/") ||
+    /^\/[^/]+\/?$/.test(path)
+  );
+};
+
 const warmGiscusAssets = () => {
   if (warmed) return;
   warmed = true;
@@ -14,12 +27,14 @@ const warmGiscusAssets = () => {
     document.head.appendChild(prefetch);
   }
 
-  fetch(GISCUS_SRC, { mode: "no-cors", cache: "force-cache" }).catch(() => {
-    // Ignore warmup failures in poor network conditions.
-  });
+  // 避免本地调试阶段多一个跨站请求占用资源；由真实评论页按需加载即可。
 };
 
 export default defineNuxtPlugin(() => {
+  if (import.meta.dev) return;
+  const route = useRoute();
+  if (!mayNeedCommentsSoon(route.path)) return;
+
   const scheduleWarmup = () => {
     const requestIdle = (window as any).requestIdleCallback;
     if (typeof requestIdle === "function") {
