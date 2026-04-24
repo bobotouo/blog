@@ -79,7 +79,7 @@
         <span class="text-xs uppercase tracking-[0.3em] text-cyan-400/60 font-medium">Comments</span>
       </div>
       <div class="rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.05] to-white/[0.02] backdrop-blur-sm p-8">
-        <Comments />
+        <ClientOnly><Comments /></ClientOnly>
       </div>
     </div>
   </article>

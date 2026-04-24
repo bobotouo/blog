@@ -34,9 +34,34 @@ if (existsSync(dest)) {
   
   if (hasIndex && hasNuxt) {
     console.log('✓ dist already contains build output from Netlify preset');
+
+    // 将 public/ 里的静态资源（favicon.ico 等）合并进 dist/，不覆盖已有文件
+    const publicDir = join(cwd, 'public');
+    if (existsSync(publicDir)) {
+      const mergePublicToDist = (src, dst) => {
+        const entries = readdirSync(src, { withFileTypes: true });
+        for (const entry of entries) {
+          const srcPath = join(src, entry.name);
+          const dstPath = join(dst, entry.name);
+          if (entry.isDirectory()) {
+            // 不覆盖 _nuxt / blog / ai-fiction 等构建产物目录
+            if (!existsSync(dstPath)) {
+              cpSync(srcPath, dstPath, { recursive: true });
+              console.log(`✓ Merged dir public/${entry.name} → dist/`);
+            }
+          } else {
+            if (!existsSync(dstPath)) {
+              cpSync(srcPath, dstPath);
+              console.log(`✓ Merged file public/${entry.name} → dist/`);
+            }
+          }
+        }
+      };
+      mergePublicToDist(publicDir, dest);
+    }
+
     // 确保 _redirects 文件存在
     const redirectsFile = join(dest, '_redirects');
-    // 优先保留 Nitro 写入的 dist/_redirects（不包含 /* -> function，避免 API 收到错误 path）
     if (!existsSync(redirectsFile)) {
       console.log('⚠ _redirects not found in dist, copying from public/ if present');
       const publicRedirects = join(cwd, 'public', '_redirects');
