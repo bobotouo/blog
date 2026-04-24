@@ -1,1 +1,0 @@
-import{Y as a,Z as s,$ as r,i as u,a0 as o}from"./GVoQb97-.js";function i(e){const t=e||s();return t?.ssrContext?.head||t?.runWithContext(()=>{if(r())return u(o)})}function x(e,t={}){const n=i(t.nuxt);if(n)return a(e,{head:n,...t})}export{x as u};
