@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@10.22.0",
   "scripts": {
     "novel:import": "node scripts/import-novel.mjs --dest 登棋仙途",
     "daily:digest": "node scripts/daily-digest.mjs",
