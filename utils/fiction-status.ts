@@ -14,7 +14,7 @@ export function trimFictionStatus(raw: unknown): string | undefined {
   return splitFictionStatus(raw)[0];
 }
 
-/** 任意文案共用一套中性样式，与深色博客统一 */
+/** 任意文案共用一套中性样式，与手绘浅色主题统一 */
 export function fictionStatusBadgeClass(): string {
-  return "border-white/20 bg-white/10 text-white/90";
+  return "border-pencil bg-postit text-pencil";
 }

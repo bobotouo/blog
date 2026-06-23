@@ -1,55 +1,44 @@
 <template>
-  <article class="max-w-4xl mx-auto py-10 px-6">
-    <button
-      type="button"
-      class="inline-block bg-transparent border-0 p-0 text-left text-xs uppercase tracking-[0.35em] text-white/50 hover:text-white/70 transition cursor-pointer font-inherit"
-      @click="goBack"
-    >
-      ← 返回列表
-    </button>
+  <article class="hand-container hand-section">
+    <BackButton label="返回随笔" fallback-to="/blog" />
 
-    <div class="mt-6 rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-8 md:p-10 shadow-[0_30px_80px_rgba(0,0,0,0.45)]">
-      <div v-if="pending" class="article-skeleton space-y-6">
-        <div class="article-skeleton-line h-3 w-20 rounded-full" />
-        <div class="article-skeleton-line h-10 max-w-xl rounded-lg" />
-        <div class="article-skeleton-line h-4 w-48 rounded-full" />
+    <HandCard class="mt-8" decoration="tack" padding="p-0" :hover-lift="false">
+      <div v-if="pending" class="p-8 space-y-4">
+        <div class="h-4 w-24 bg-erased animate-pulse" />
+        <div class="h-10 max-w-xl bg-erased animate-pulse" />
+        <div class="h-4 w-48 bg-erased animate-pulse" />
         <div class="space-y-2 pt-4">
-          <div class="article-skeleton-line h-4 w-full rounded" />
-          <div class="article-skeleton-line h-4 w-full rounded" />
-          <div class="article-skeleton-line h-4 max-w-[66%] rounded" />
+          <div class="h-4 w-full bg-erased animate-pulse" />
+          <div class="h-4 w-full bg-erased animate-pulse" />
+          <div class="h-4 max-w-[66%] bg-erased animate-pulse" />
         </div>
       </div>
-      <template v-else-if="post">
-        <p class="text-xs uppercase tracking-[0.4em] text-white/40 mb-4">Feature</p>
-        <h1 class="text-4xl md:text-5xl font-semibold text-white mb-4">
-          {{ post.title }}
-        </h1>
-        <div class="text-sm text-white/60 mb-6 flex flex-wrap items-center gap-4">
-          <span>{{ formatDateYmd(post.date) }}</span>
-          <span v-if="views !== null" class="text-white/40">· {{ views }} 次阅读</span>
-          <span v-if="commentCount !== null" class="text-white/40">
-            · {{ commentCount }} 条评论
-          </span>
-        </div>
-        <div v-if="post.tags" class="flex flex-wrap gap-2 mb-8">
-          <span
-            v-for="tag in post.tags"
-            :key="tag"
-          class="px-4 py-1.5 bg-white/10 text-white/80 rounded-full text-xs border border-white/15"
-        >
-          {{ tag }}
-        </span>
-        </div>
 
-        <div class="prose prose-invert max-w-none">
-          <ContentRenderer :value="post as any" />
+      <template v-else-if="post">
+        <div class="p-6 md:p-10 border-b-2 border-dashed border-pencil/20">
+          <HandTag variant="muted" class="mb-4">Article</HandTag>
+          <h1 class="font-heading text-4xl md:text-5xl font-bold text-pencil mb-4">{{ post.title }}</h1>
+          <div class="font-body text-sm text-pencil/50 flex flex-wrap gap-3">
+            <span>{{ formatDateYmd(post.date) }}</span>
+            <span v-if="views !== null">· {{ views }} 次阅读</span>
+            <span v-if="commentCount !== null">· {{ commentCount }} 条评论</span>
+          </div>
+          <div v-if="post.tags" class="flex flex-wrap gap-2 mt-5">
+            <HandTag v-for="tag in post.tags" :key="tag" variant="postit" class="!text-sm">{{ tag }}</HandTag>
+          </div>
+        </div>
+        <div class="p-6 md:p-10">
+          <div class="prose max-w-none">
+            <ContentRenderer :value="post as any" />
+          </div>
         </div>
       </template>
-    </div>
+    </HandCard>
 
     <div v-if="!pending && post" class="mt-10">
-      <div class="text-xs uppercase tracking-[0.35em] text-white/50 mb-4">
-        Comments
+      <div class="flex items-center gap-3 mb-5">
+        <HandTag variant="muted">评论</HandTag>
+        <span class="flex-1 hand-dashed-divider" />
       </div>
       <ClientOnly><Comments /></ClientOnly>
     </div>
@@ -59,29 +48,16 @@
 <script setup lang="ts">
 import { formatDateYmd } from "~/utils/format-date";
 
-definePageMeta({
-  layout: "blog",
-});
+definePageMeta({ layout: "blog" });
 
 const route = useRoute();
-const router = useRouter();
-const goBack = () => {
-  if (import.meta.client && window.history.length > 1) {
-    router.back();
-  } else {
-    navigateTo("/blog");
-  }
-};
 const { views } = usePageStats(route.path);
 const { count: commentCount } = useCommentCount(route.path);
 
-const slug = Array.isArray(route.params.slug)
-  ? route.params.slug.join("/")
-  : route.params.slug;
+const slug = Array.isArray(route.params.slug) ? route.params.slug.join("/") : route.params.slug;
 const contentPath = `/blog/${slug}`;
 const config = useRuntimeConfig();
-const base = (config.public.baseUrl as string) || "/";
-const basePath = base.replace(/\/$/, "");
+const basePath = ((config.public.baseUrl as string) || "/").replace(/\/$/, "");
 const jsonBase = import.meta.server ? "" : basePath;
 
 const { data: post, pending } = await useAsyncData(
@@ -91,16 +67,12 @@ const { data: post, pending } = await useAsyncData(
       $fetch<{ body?: string; title?: string; date?: string; tags?: string[] }>(
         `${jsonBase}/blog/${slug}.json`,
       ).catch(() => null);
-
     const load = async () => {
       const fromQuery = await queryContent(contentPath).findOne();
       if (fromQuery) return fromQuery;
       return await loadJson();
     };
-
-    if (import.meta.server) {
-      return await load();
-    }
+    if (import.meta.server) return await load();
     const cached = useNuxtData(`blog-post-${contentPath}`).data.value;
     if (cached) return cached;
     try {
@@ -115,97 +87,8 @@ const { data: post, pending } = await useAsyncData(
 watch(
   [pending, post],
   ([p, data]) => {
-    if (!p && !data) {
-      throw createError({ statusCode: 404, statusMessage: "Page not found" });
-    }
+    if (!p && !data) throw createError({ statusCode: 404, statusMessage: "Page not found" });
   },
   { immediate: true },
 );
-
 </script>
-
-<style scoped>
-.prose {
-  line-height: 1.8;
-  color: #e5e7eb;
-}
-.prose :deep(*) {
-  color: inherit;
-}
-.prose :deep(a) {
-  color: #a78bfa;
-}
-.prose :deep(strong) {
-  color: #ffffff;
-}
-.prose :deep(code) {
-  color: #e5e7eb;
-}
-.prose :deep(pre) {
-  color: #f9fafb;
-}
-.prose p {
-  margin-bottom: 1rem;
-}
-.prose ul,
-.prose ol {
-  margin-bottom: 1rem;
-  padding-left: 2rem;
-}
-.prose li {
-  margin-bottom: 0.5rem;
-}
-.prose code {
-  background-color: rgba(34, 211, 238, 0.18);
-  padding: 0.2rem 0.4rem;
-  border-radius: 0.35rem;
-  font-size: 0.9rem;
-  color: #e2e8f0;
-}
-.prose pre {
-  background-color: rgba(9, 12, 18, 0.9);
-  color: #f9fafb;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  overflow-x: auto;
-  margin-bottom: 1rem;
-  border: 1px solid rgba(34, 211, 238, 0.2);
-}
-.prose pre code {
-  background-color: transparent;
-  color: inherit;
-  padding: 0;
-}
-.prose blockquote {
-  border-left: 4px solid #22d3ee;
-  padding-left: 1rem;
-  font-style: italic;
-  color: #d1d5db;
-  margin-bottom: 1rem;
-  background: rgba(34, 211, 238, 0.08);
-  padding: 1rem;
-  border-radius: 0 0.5rem 0.5rem 0;
-}
-.prose a {
-  color: #38bdf8;
-  text-decoration: underline;
-}
-.prose strong {
-  color: #ffffff;
-}
-
-.article-skeleton-line {
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.06));
-  background-size: 220% 100%;
-  animation: article-skeleton-shimmer 1.25s ease-in-out infinite;
-}
-
-@keyframes article-skeleton-shimmer {
-  0% {
-    background-position: 100% 0;
-  }
-  100% {
-    background-position: -100% 0;
-  }
-}
-</style>

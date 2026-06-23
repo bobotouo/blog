@@ -2,100 +2,60 @@
   访问统计展示：总访问量、按页面/设备/地域分布
 -->
 <template>
-  <div class="stats-summary text-white/70 text-sm space-y-4">
-    <div v-if="pending && !summary" class="animate-pulse">
+  <div class="stats-summary font-body text-pencil/80 text-sm space-y-4">
+    <div v-if="pending && !summary" class="animate-pulse font-body text-pencil/50">
       统计加载中…
     </div>
     <template v-else-if="summary">
-      <!-- 时间段汇总：近一周 / 近一月 / 近一年 / 总共 -->
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-2">
-        <div class="rounded-xl border border-white/10 bg-white/5 px-3 py-2">
-          <p class="text-white/50 text-xs">近一周</p>
-          <p class="text-white font-medium tabular-nums">{{ formatNumber(summary.last7Days) }}</p>
-        </div>
-        <div class="rounded-xl border border-white/10 bg-white/5 px-3 py-2">
-          <p class="text-white/50 text-xs">近一月</p>
-          <p class="text-white font-medium tabular-nums">{{ formatNumber(summary.last30Days) }}</p>
-        </div>
-        <div class="rounded-xl border border-white/10 bg-white/5 px-3 py-2">
-          <p class="text-white/50 text-xs">近一年</p>
-          <p class="text-white font-medium tabular-nums">{{ formatNumber(summary.last365Days) }}</p>
-        </div>
-        <div class="rounded-xl border border-white/10 bg-white/5 px-3 py-2">
-          <p class="text-white/50 text-xs">总共</p>
-          <p class="text-white font-medium tabular-nums">{{ formatNumber(summary.total) }}</p>
+        <div
+          v-for="item in periodCards"
+          :key="item.label"
+          class="border-2 border-pencil bg-white px-3 py-2 shadow-hand-subtle"
+          :style="{ borderRadius: wobblyRadius.sm }"
+        >
+          <p class="text-pencil/50 text-xs font-body">{{ item.label }}</p>
+          <p class="font-heading text-lg font-bold text-pencil tabular-nums">{{ formatNumber(item.value) }}</p>
         </div>
       </div>
 
-      <!-- 按设备分布 -->
-      <div v-if="deviceEntries.length" class="mt-3">
-        <p class="text-white/50 mb-2">按设备分布</p>
-        <ul class="space-y-1.5 pl-0 list-none">
-          <li
-            v-for="[key, count] in deviceEntries"
-            :key="key"
-            class="flex items-center gap-2"
-          >
-            <span class="w-16 shrink-0 text-white/70">{{ deviceLabel(key) }}</span>
-            <span class="tabular-nums text-white/50 shrink-0 w-8">{{ count }}</span>
-            <div class="flex-1 min-w-0 h-1.5 rounded-full bg-white/10 overflow-hidden max-w-32">
-              <div
-                class="h-full rounded-full bg-[color:var(--accent)]"
-                :style="barStyle(count, deviceMax)"
-              />
+      <div v-if="deviceEntries.length" class="mt-4">
+        <p class="font-heading text-pencil mb-2">按设备分布</p>
+        <ul class="space-y-2 pl-0 list-none">
+          <li v-for="[key, count] in deviceEntries" :key="key" class="flex items-center gap-2">
+            <span class="w-16 shrink-0">{{ deviceLabel(key) }}</span>
+            <span class="tabular-nums text-pencil/50 shrink-0 w-8">{{ count }}</span>
+            <div class="flex-1 min-w-0 h-2 border border-pencil/20 overflow-hidden max-w-32 bg-erased">
+              <div class="h-full bg-pen" :style="barStyle(count, deviceMax)" />
             </div>
           </li>
         </ul>
       </div>
 
-      <!-- 按地域分布 -->
-      <div v-if="summary.byCountry?.length" class="mt-3">
-        <p class="text-white/50 mb-2">按地域分布</p>
-        <ul class="space-y-1.5 pl-0 list-none max-h-40 overflow-y-auto">
-          <li
-            v-for="item in summary.byCountry"
-            :key="item.code"
-            class="flex items-center gap-2"
-          >
-            <span class="flex-1 min-w-0 text-white/70">{{ item.country }}</span>
-            <span class="tabular-nums text-white/50 shrink-0">{{ item.views }}</span>
-            <div class="w-16 h-1.5 rounded-full bg-white/10 shrink-0 overflow-hidden">
-              <div
-                class="h-full rounded-full bg-[color:var(--accent)]"
-                :style="barStyle(item.views, countryMax)"
-              />
+      <div v-if="summary.byCountry?.length" class="mt-4">
+        <p class="font-heading text-pencil mb-2">按地域分布</p>
+        <ul class="space-y-2 pl-0 list-none max-h-40 overflow-y-auto">
+          <li v-for="item in summary.byCountry" :key="item.code" class="flex items-center gap-2">
+            <span class="flex-1 min-w-0">{{ item.country }}</span>
+            <span class="tabular-nums text-pencil/50 shrink-0">{{ item.views }}</span>
+            <div class="w-16 h-2 border border-pencil/20 shrink-0 overflow-hidden bg-erased">
+              <div class="h-full bg-marker" :style="barStyle(item.views, countryMax)" />
             </div>
           </li>
         </ul>
       </div>
 
-      <!-- 按页面分布 -->
-      <details v-if="summary.byPath.length" class="mt-3 group/details" :open="defaultOpen">
-        <summary class="cursor-pointer list-none text-white/50 hover:text-white/70 inline-flex items-center gap-1">
+      <details v-if="summary.byPath.length" class="mt-4 group/details" :open="defaultOpen">
+        <summary class="cursor-pointer list-none text-pen hover:text-marker inline-flex items-center gap-1 font-body">
           <span>按页面分布</span>
           <span class="transition group-open/details:rotate-180">▼</span>
         </summary>
-        <ul class="mt-2 space-y-1.5 pl-0 list-none max-h-48 overflow-y-auto">
-          <li
-            v-for="item in summary.byPath"
-            :key="item.path"
-            class="flex items-center gap-2"
-          >
-            <span
-              class="flex-1 min-w-0 truncate text-white/70"
-              :title="item.path"
-            >
-              {{ displayPath(item.path) }}
-            </span>
-            <span class="tabular-nums text-white/50 shrink-0">{{ item.views }}</span>
-            <div
-              class="w-12 h-1.5 rounded-full bg-white/10 shrink-0 overflow-hidden"
-              :title="`${item.views} 次`"
-            >
-              <div
-                class="h-full rounded-full bg-[color:var(--accent)]"
-                :style="barStyle(item.views, pathMax)"
-              />
+        <ul class="mt-2 space-y-2 pl-0 list-none max-h-48 overflow-y-auto">
+          <li v-for="item in summary.byPath" :key="item.path" class="flex items-center gap-2">
+            <span class="flex-1 min-w-0 truncate" :title="item.path">{{ displayPath(item.path) }}</span>
+            <span class="tabular-nums text-pencil/50 shrink-0">{{ item.views }}</span>
+            <div class="w-12 h-2 border border-pencil/20 shrink-0 overflow-hidden bg-erased" :title="`${item.views} 次`">
+              <div class="h-full bg-pen" :style="barStyle(item.views, pathMax)" />
             </div>
           </li>
         </ul>
@@ -105,13 +65,13 @@
 </template>
 
 <script setup lang="ts">
+import { wobblyRadius } from "~/utils/design-tokens";
 import type { DeviceType, StatsSummary } from "~/composables/useStatsSummary";
 
 const props = withDefaults(
   defineProps<{
     summary: StatsSummary | null;
     pending: boolean;
-    /** 是否默认展开「按页面分布」 */
     defaultOpen?: boolean;
   }>(),
   { defaultOpen: false },
@@ -124,6 +84,17 @@ const deviceLabels: Record<DeviceType, string> = {
   bot: "爬虫",
   unknown: "未知",
 };
+
+const periodCards = computed(() => {
+  const s = props.summary;
+  if (!s) return [];
+  return [
+    { label: "近一周", value: s.last7Days },
+    { label: "近一月", value: s.last30Days },
+    { label: "近一年", value: s.last365Days },
+    { label: "总共", value: s.total },
+  ];
+});
 
 const formatNumber = (n: number) => {
   if (n >= 1e8) return `${(n / 1e8).toFixed(1)}亿`;
@@ -156,8 +127,7 @@ const countryMax = computed(() => {
 });
 
 function barStyle(views: number, max: number) {
-  const pct = max ? (views / max) * 100 : 0;
-  return { width: `${Math.min(pct, 100)}%` };
+  return { width: `${Math.min(max ? (views / max) * 100 : 0, 100)}%` };
 }
 
 function deviceLabel(key: string): string {

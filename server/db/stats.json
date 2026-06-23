@@ -2,7 +2,7 @@
   "views": {
     "/snapshots/2026-02-12-second-snapshot": 2,
     "/snapshots/2026-02-10-first-snapshot": 7,
-    "/blog": 46,
+    "/blog": 48,
     "/blog/": 66,
     "/2026-02-11-happy-day": 9,
     "/2024-01-01-welcome": 4,
@@ -15,14 +15,17 @@
     "/ai-fiction/%E7%99%BB%E6%A3%8B%E4%BB%99%E9%80%94/01-%E9%9B%A8%E5%A4%9C%E6%94%B6%E5%B0%B8": 7,
     "/ai-fiction/%E7%99%BB%E6%A3%8B%E4%BB%99%E9%80%94/02-%E5%80%9F%E7%81%AB%E4%B8%8D%E6%88%90": 3,
     "/ai-fiction/": 3,
-    "/blog/20260402-twitter-digest": 2
+    "/blog/20260402-twitter-digest": 2,
+    "/blog/20260622-twitter-digest": 4,
+    "/ai-fiction": 2,
+    "/ai-fiction/%E7%99%BB%E6%A3%8B%E4%BB%99%E9%80%94/01-%E8%BE%B9%E9%99%B2%E5%B0%91%E5%B9%B4": 1
   },
   "byDevice": {
-    "desktop": 128,
+    "desktop": 137,
     "mobile": 50
   },
   "byCountry": {
-    "XX": 178
+    "XX": 187
   },
   "daily": {
     "2026-02-12": 21,
@@ -32,6 +35,7 @@
     "2026-03-27": 5,
     "2026-04-01": 10,
     "2026-04-02": 6,
-    "2026-04-03": 3
+    "2026-04-03": 3,
+    "2026-06-23": 9
   }
 }

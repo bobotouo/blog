@@ -1,28 +1,16 @@
 <template>
-  <section class="max-w-4xl mx-auto py-10 px-6">
-    <button
-      type="button"
-      class="inline-block bg-transparent border-0 p-0 text-left text-xs uppercase tracking-[0.35em] text-white/50 hover:text-white/70 transition cursor-pointer font-inherit"
-      @click="goBack"
-    >
-      ← 返回 AI 小说
-    </button>
+  <section class="hand-container hand-section">
+    <BackButton label="返回幻想" fallback-to="/ai-fiction" />
 
     <div v-if="pending" class="mt-8 space-y-4">
-      <div class="h-10 w-2/3 rounded-lg bg-white/10 animate-pulse" />
-      <div class="h-32 rounded-2xl bg-white/5" />
+      <div class="h-10 w-2/3 bg-erased animate-pulse" />
+      <div class="h-32 bg-erased animate-pulse" />
     </div>
 
-    <div v-else-if="!bundle" class="mt-20 flex flex-col items-center gap-4 text-center">
-      <p class="text-5xl font-semibold text-white/10">404</p>
-      <p class="text-white/50">找不到这本小说</p>
-      <button
-        type="button"
-        class="mt-2 rounded-full border border-white/15 px-5 py-2 text-sm text-white/60 transition hover:text-white/90 hover:border-white/30"
-        @click="goBack"
-      >
-        返回小说列表
-      </button>
+    <div v-else-if="!bundle" class="mt-16 flex flex-col items-center gap-4 text-center">
+      <p class="font-heading text-6xl text-pencil/15">404</p>
+      <p class="font-body text-pencil/50">找不到这本小说</p>
+      <HandButton type="button" variant="secondary" @click="goBack">返回小说列表</HandButton>
     </div>
 
     <template v-else-if="bundle">
@@ -32,38 +20,33 @@
         <!-- ── 左栏：封面 + 信息卡（桌面 sticky） ── -->
         <div class="lg:sticky lg:top-8">
           <!-- 封面 -->
-          <div class="relative w-full rounded-2xl overflow-hidden bg-black/30 aspect-[3/4] max-h-[340px] lg:max-h-none lg:aspect-[2/3]">
-            <div class="absolute inset-0 bg-[linear-gradient(160deg,rgba(34,211,238,0.1),transparent_55%,rgba(249,115,22,0.08))] pointer-events-none z-[1]" />
+          <div
+            class="relative w-full overflow-hidden border-[3px] border-pencil bg-erased aspect-[3/4] max-h-[340px] lg:max-h-none lg:aspect-[2/3]"
+            :style="{ borderRadius: wobblyRadius.md, boxShadow: shadows.subtle }"
+          >
             <img
               v-if="bundle.coverImage"
               :src="bundle.coverImage"
               :alt="bundle.novelName"
-              class="relative z-0 h-full w-full object-cover"
+              class="h-full w-full object-cover"
             />
-            <div v-else class="flex h-full w-full items-end p-4">
-              <span class="text-[10px] uppercase tracking-[0.35em] text-white/20">Novel</span>
-            </div>
+            <div v-else class="flex h-full w-full items-center justify-center text-5xl">📖</div>
           </div>
 
-          <!-- 信息区 -->
           <div class="mt-4 space-y-2.5">
             <div class="flex flex-wrap items-center gap-2">
-              <span class="text-[10px] uppercase tracking-[0.32em] text-[color:var(--accent)]/70">AI Fiction</span>
+              <HandTag variant="postit" class="!text-xs">幻想</HandTag>
               <FictionStatusBadge :status="bundle.status" />
             </div>
-            <h1 class="text-xl font-semibold text-white leading-snug">
-              {{ bundle.novelName }}
-            </h1>
-            <p v-if="bundle.description" class="text-sm text-white/60 leading-relaxed">
-              {{ bundle.description }}
-            </p>
+            <h1 class="font-heading text-xl font-bold text-pencil leading-snug">{{ bundle.novelName }}</h1>
+            <p v-if="bundle.description" class="font-body text-sm text-pencil/60 leading-relaxed">{{ bundle.description }}</p>
             <div
               v-if="typeof bundle.summaryBody === 'string' && bundle.summaryBody.length > 0"
-              class="prose prose-invert prose-sm max-w-none text-white/60 border-t border-white/10 pt-3"
+              class="prose prose-sm max-w-none border-t-2 border-dashed border-pencil/20 pt-3"
             >
               <div v-html="bundle.summaryBody" />
             </div>
-            <div class="flex flex-wrap items-center gap-3 pt-1 text-xs text-white/40 border-t border-white/[0.07]">
+            <div class="flex flex-wrap items-center gap-3 pt-1 font-body text-xs text-pencil/45 border-t-2 border-dashed border-pencil/15">
               <span>{{ bundle.chapters?.length ?? 0 }} 章</span>
               <span v-if="commentCount !== null">{{ commentCount }} 条评论</span>
             </div>
@@ -77,11 +60,12 @@
           <div ref="tocRef">
             <!-- 目录头部 -->
             <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
-              <h2 class="text-sm uppercase tracking-[0.35em] text-white/50">章节目录</h2>
+              <h2 class="font-heading text-lg text-pencil">章节目录</h2>
               <button
                 v-if="lastReadPath"
                 type="button"
-                class="inline-flex items-center gap-1.5 rounded-full border border-[color:var(--accent)]/25 bg-[color:var(--accent)]/10 px-3.5 py-1.5 text-xs text-[color:var(--accent)]/90 transition hover:bg-[color:var(--accent)]/20"
+                class="inline-flex items-center gap-1.5 border-2 border-pencil bg-postit px-3.5 py-1.5 font-body text-xs text-pencil shadow-hand-subtle transition hover:bg-marker hover:text-white hover:shadow-hand-hover hover:translate-x-0.5 hover:translate-y-0.5"
+                :style="{ borderRadius: wobblyRadius.sm }"
                 @click="jumpToLastRead"
               >
                 <span>继续阅读</span>
@@ -90,65 +74,49 @@
               </button>
             </div>
 
-            <!-- 分卷导航 -->
             <div v-if="arcGroups.length > 1" class="mb-4 flex flex-wrap gap-2">
               <button
                 v-for="(arc, ai) in arcGroups"
                 :key="ai"
                 type="button"
-                class="rounded-full border px-3 py-1 text-xs transition"
-                :class="
-                  activeArc === ai
-                    ? 'border-white/25 bg-white/10 text-white'
-                    : 'border-white/10 bg-transparent text-white/50 hover:text-white/80 hover:border-white/20'
-                "
+                class="border-2 border-pencil px-3 py-1 font-body text-xs transition"
+                :class="activeArc === ai ? 'bg-postit font-bold shadow-hand-subtle' : 'bg-white hover:bg-erased'"
+                :style="{ borderRadius: wobblyRadius.sm }"
                 @click="selectArc(ai)"
               >
                 {{ arc.label }}
               </button>
             </div>
 
-            <!-- 章节列表：两列 -->
             <ol class="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <li
                 v-for="(ch, localIdx) in visibleChapters"
                 :key="ch._path"
-                class="group rounded-xl border transition"
-                :class="
-                  ch._path === lastReadPath
-                    ? 'border-[color:var(--accent)]/30 bg-[color:var(--accent)]/[0.08]'
-                    : 'border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/[0.14]'
-                "
+                class="group border-2 transition duration-100"
+                :class="ch._path === lastReadPath ? 'border-pen bg-pen/5 shadow-hand-subtle' : 'border-pencil/25 bg-white hover:border-pencil hover:-rotate-[0.5deg]'"
+                :style="{ borderRadius: wobblyRadius.sm }"
               >
                 <NuxtLink :to="chapterLink(ch)" class="flex items-center gap-3 px-4 py-3.5 h-full">
-                  <span class="w-8 shrink-0 text-right text-xs tabular-nums text-white/30 font-mono">
+                  <span class="w-8 shrink-0 text-right font-body text-xs tabular-nums text-pencil/35">
                     {{ arcGroups.length > 1 ? arcGroups[activeArc]!.start + localIdx + 1 : localIdx + 1 }}
                   </span>
                   <span
-                    class="flex-1 min-w-0 text-sm leading-snug transition"
-                    :class="ch._path === lastReadPath ? 'text-[color:var(--accent)]/90 font-medium' : 'text-white/75 group-hover:text-white'"
+                    class="flex-1 min-w-0 font-body text-sm leading-snug transition"
+                    :class="ch._path === lastReadPath ? 'text-pen font-bold' : 'text-pencil/75 group-hover:text-pencil'"
                   >
                     {{ ch.title }}
                   </span>
-                  <span
-                    v-if="ch._path === lastReadPath"
-                    class="shrink-0 text-[10px] text-[color:var(--accent)]/60"
-                  >
-                    续
-                  </span>
+                  <span v-if="ch._path === lastReadPath" class="shrink-0 font-body text-[10px] text-marker">续</span>
                 </NuxtLink>
               </li>
             </ol>
 
-            <!-- 加载更多 / 收起 -->
-            <div
-              v-if="arcGroups.length === 1 && (bundle.chapters?.length ?? 0) > PAGE_SIZE"
-              class="mt-4 flex items-center gap-4"
-            >
+            <div v-if="arcGroups.length === 1 && (bundle.chapters?.length ?? 0) > PAGE_SIZE" class="mt-4 flex items-center gap-4">
               <button
                 v-if="showCount < (bundle.chapters?.length ?? 0)"
                 type="button"
-                class="rounded-full border border-white/15 px-5 py-2 text-sm text-white/55 transition hover:border-white/25 hover:text-white/90"
+                class="border-2 border-pencil bg-white px-5 py-2 font-body text-sm text-pencil shadow-hand-subtle hover:bg-erased transition"
+                :style="{ borderRadius: wobblyRadius.sm }"
                 @click="showCount = Math.min(showCount + PAGE_SIZE, bundle.chapters?.length ?? 0)"
               >
                 加载更多（剩余 {{ (bundle.chapters?.length ?? 0) - showCount }} 章）
@@ -156,7 +124,7 @@
               <button
                 v-if="showCount > PAGE_SIZE"
                 type="button"
-                class="text-xs text-white/35 transition hover:text-white/60"
+                class="font-body text-xs text-pencil/45 hover:text-pen transition"
                 @click="showCount = PAGE_SIZE; scrollToToc()"
               >
                 收起
@@ -164,10 +132,12 @@
             </div>
           </div>
 
-          <!-- 评论区 -->
           <div>
-            <div class="text-xs uppercase tracking-[0.35em] text-white/50 mb-4">Comments</div>
-            <p v-if="commentCount !== null" class="text-sm text-white/40 mb-4">
+            <div class="flex items-center gap-3 mb-4">
+              <HandTag variant="muted">评论</HandTag>
+              <span class="flex-1 hand-dashed-divider" />
+            </div>
+            <p v-if="commentCount !== null" class="font-body text-sm text-pencil/45 mb-4">
               {{ commentCount }} 条讨论 · 使用 GitHub 账号留言
             </p>
             <ClientOnly><Comments /></ClientOnly>
@@ -180,6 +150,7 @@
 </template>
 
 <script setup lang="ts">
+import { wobblyRadius, shadows } from "~/utils/design-tokens";
 import { normalizeSegment } from "~/utils/ai-fiction-slug";
 import { nuxtLinkToFromContentPath } from "~/utils/route-from-content-path";
 
@@ -323,7 +294,7 @@ function goBack() {
   if (import.meta.client && window.history.length > 1) {
     router.back();
   } else {
-    navigateTo("/blog?tab=ai-fiction");
+    navigateTo("/ai-fiction");
   }
 }
 

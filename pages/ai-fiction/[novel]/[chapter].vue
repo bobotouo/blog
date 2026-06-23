@@ -1,110 +1,86 @@
 <template>
-  <article class="max-w-4xl mx-auto py-10 px-6">
-    <button
-      type="button"
-      class="inline-block bg-transparent border-0 p-0 text-left text-xs uppercase tracking-[0.35em] text-white/50 hover:text-white/70 transition cursor-pointer font-inherit"
-      @click="goBack"
-    >
-      ← 返回目录
-    </button>
+  <article class="hand-container hand-section">
+    <BackButton label="返回目录" :fallback-to="`/ai-fiction/${novel}`" />
 
-    <div class="mt-6 rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-8 md:p-10 shadow-[0_30px_80px_rgba(0,0,0,0.45)]">
-      <div v-if="pending" class="article-skeleton space-y-6">
-        <div class="article-skeleton-line h-3 w-20 rounded-full" />
-        <div class="article-skeleton-line h-10 max-w-xl rounded-lg" />
-        <div class="article-skeleton-line h-4 w-48 rounded-full" />
+    <HandCard class="mt-8" decoration="postit" padding="p-0" :hover-lift="false">
+      <div v-if="pending" class="p-8 space-y-4">
+        <div class="h-4 w-20 bg-erased animate-pulse" />
+        <div class="h-10 max-w-xl bg-erased animate-pulse" />
         <div class="space-y-2 pt-4">
-          <div class="article-skeleton-line h-4 w-full rounded" />
-          <div class="article-skeleton-line h-4 w-full rounded" />
+          <div class="h-4 w-full bg-erased animate-pulse" />
+          <div class="h-4 w-full bg-erased animate-pulse" />
         </div>
       </div>
       <template v-else-if="post">
-        <p class="text-xs uppercase tracking-[0.4em] text-white/40 mb-4">AI Fiction</p>
-        <h1 class="text-4xl md:text-5xl font-semibold text-white mb-4">
-          {{ post.title }}
-        </h1>
-        <div class="text-sm text-white/60 mb-6 flex flex-wrap items-center gap-4">
-          <span>{{ formatDateYmd(post.date) }}</span>
-          <span v-if="views !== null" class="text-white/40">· {{ views }} 次阅读</span>
-          <span v-if="commentCount !== null" class="text-white/40">
-            · {{ commentCount }} 条评论
-          </span>
+        <div class="p-6 md:p-10 border-b-2 border-dashed border-pencil/20">
+          <HandTag variant="muted" class="mb-4">幻想</HandTag>
+          <h1 class="font-heading text-4xl md:text-5xl font-bold text-pencil mb-4">{{ post.title }}</h1>
+          <div class="font-body text-sm text-pencil/50 flex flex-wrap gap-3">
+            <span>{{ formatDateYmd(post.date) }}</span>
+            <span v-if="views !== null">· {{ views }} 次阅读</span>
+            <span v-if="commentCount !== null">· {{ commentCount }} 条评论</span>
+          </div>
+          <div v-if="post.tags" class="flex flex-wrap gap-2 mt-5">
+            <HandTag v-for="tag in post.tags" :key="tag" variant="postit" class="!text-sm">{{ tag }}</HandTag>
+          </div>
         </div>
-        <div v-if="post.tags" class="flex flex-wrap gap-2 mb-8">
-          <span
-            v-for="tag in post.tags"
-            :key="tag"
-            class="px-4 py-1.5 bg-white/10 text-white/80 rounded-full text-xs border border-white/15"
-          >
-            {{ tag }}
-          </span>
-        </div>
-
-        <div class="prose prose-invert max-w-none">
-          <div v-if="staticBody" v-html="staticBody" />
-          <ContentRenderer v-else :value="post as any" />
+        <div class="p-6 md:p-10">
+          <div class="prose max-w-none">
+            <div v-if="staticBody" v-html="staticBody" />
+            <ContentRenderer v-else :value="post as any" />
+          </div>
         </div>
       </template>
-    </div>
+    </HandCard>
 
     <nav
       v-if="!pending && post && (prevNext.prev || prevNext.next)"
-      class="chapter-nav mt-10 w-full overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.08] via-white/[0.03] to-transparent shadow-[0_20px_56px_rgba(0,0,0,0.42)] backdrop-blur-xl"
+      class="mt-10 w-full overflow-hidden border-[3px] border-pencil bg-white shadow-hand"
+      :style="{ borderRadius: wobblyRadius.md }"
       aria-label="章节导航"
     >
-      <div
-        class="flex flex-col divide-y divide-white/[0.08] md:flex-row md:divide-x md:divide-y-0 md:divide-white/[0.08]"
-      >
+      <div class="flex flex-col divide-y-2 divide-dashed divide-pencil/20 md:flex-row md:divide-x-2 md:divide-y-0">
         <NuxtLink
           v-if="prevNext.prev"
           :to="nuxtLinkToFromContentPath(prevNext.prev._path, base)"
-          class="chapter-nav-link group flex flex-1 items-center gap-4 p-5 text-left transition-colors duration-200 hover:bg-white/[0.04] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[color:var(--accent)]/35 md:p-6"
+          class="group flex flex-1 items-center gap-4 p-5 md:p-6 hover:bg-erased/50 transition"
         >
           <span
-            class="chapter-nav-icon flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/[0.1] bg-white/[0.04] text-white/45 transition group-hover:border-white/[0.16] group-hover:bg-white/[0.07] group-hover:text-[color:var(--accent)]"
+            class="flex h-10 w-10 shrink-0 items-center justify-center border-2 border-pencil bg-postit text-pencil group-hover:bg-pen group-hover:text-white transition"
+            :style="{ borderRadius: wobblyRadius.sm }"
             aria-hidden="true"
           >
-            <svg class="h-[1.125rem] w-[1.125rem]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M15 18l-6-6 6-6" />
-            </svg>
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6" /></svg>
           </span>
           <div class="min-w-0 flex-1">
-            <p class="mb-1 text-[10px] font-medium uppercase tracking-[0.32em] text-white/38">上一章</p>
-            <p
-              class="line-clamp-2 text-[15px] font-medium leading-snug text-white/95 transition group-hover:text-white"
-            >
-              {{ prevNext.prev.title }}
-            </p>
+            <p class="mb-1 font-body text-xs text-pencil/45">上一章</p>
+            <p class="line-clamp-2 font-heading text-base font-bold text-pencil">{{ prevNext.prev.title }}</p>
           </div>
         </NuxtLink>
         <NuxtLink
           v-if="prevNext.next"
           :to="nuxtLinkToFromContentPath(prevNext.next._path, base)"
-          class="chapter-nav-link group flex flex-1 items-center gap-4 p-5 text-left transition-colors duration-200 hover:bg-white/[0.04] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[color:var(--accent)]/35 md:flex-row-reverse md:p-6 md:text-right"
+          class="group flex flex-1 items-center gap-4 p-5 md:p-6 md:flex-row-reverse md:text-right hover:bg-erased/50 transition"
         >
           <span
-            class="chapter-nav-icon flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/[0.1] bg-white/[0.04] text-white/45 transition group-hover:border-white/[0.16] group-hover:bg-white/[0.07] group-hover:text-[color:var(--accent)]"
+            class="flex h-10 w-10 shrink-0 items-center justify-center border-2 border-pencil bg-postit text-pencil group-hover:bg-pen group-hover:text-white transition"
+            :style="{ borderRadius: wobblyRadius.sm }"
             aria-hidden="true"
           >
-            <svg class="h-[1.125rem] w-[1.125rem]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M9 18l6-6-6-6" />
-            </svg>
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6" /></svg>
           </span>
           <div class="min-w-0 flex-1 md:text-right">
-            <p class="mb-1 text-[10px] font-medium uppercase tracking-[0.32em] text-white/38">下一章</p>
-            <p
-              class="line-clamp-2 text-[15px] font-medium leading-snug text-white/95 transition group-hover:text-white"
-            >
-              {{ prevNext.next.title }}
-            </p>
+            <p class="mb-1 font-body text-xs text-pencil/45">下一章</p>
+            <p class="line-clamp-2 font-heading text-base font-bold text-pencil">{{ prevNext.next.title }}</p>
           </div>
         </NuxtLink>
       </div>
     </nav>
 
     <div v-if="!pending && post" class="mt-10">
-      <div class="text-xs uppercase tracking-[0.35em] text-white/50 mb-4">
-        Comments
+      <div class="flex items-center gap-3 mb-5">
+        <HandTag variant="muted">评论</HandTag>
+        <span class="flex-1 hand-dashed-divider" />
       </div>
       <ClientOnly><Comments /></ClientOnly>
     </div>
@@ -112,6 +88,7 @@
 </template>
 
 <script setup lang="ts">
+import { wobblyRadius } from "~/utils/design-tokens";
 import { normalizeSegment } from "~/utils/ai-fiction-slug";
 import { formatDateYmd } from "~/utils/format-date";
 import { nuxtLinkToFromContentPath } from "~/utils/route-from-content-path";
@@ -334,89 +311,3 @@ watch(chapterNavList, (list) => {
 }, { once: true });
 
 </script>
-
-<style scoped>
-.prose {
-  line-height: 1.8;
-  color: #e5e7eb;
-}
-.prose :deep(*) {
-  color: inherit;
-}
-.prose :deep(a) {
-  color: #a78bfa;
-}
-.prose :deep(strong) {
-  color: #ffffff;
-}
-.prose :deep(code) {
-  color: #e5e7eb;
-}
-.prose :deep(pre) {
-  color: #f9fafb;
-}
-.prose p {
-  margin-bottom: 1rem;
-}
-.prose ul,
-.prose ol {
-  margin-bottom: 1rem;
-  padding-left: 2rem;
-}
-.prose li {
-  margin-bottom: 0.5rem;
-}
-.prose code {
-  background-color: rgba(34, 211, 238, 0.18);
-  padding: 0.2rem 0.4rem;
-  border-radius: 0.35rem;
-  font-size: 0.9rem;
-  color: #e2e8f0;
-}
-.prose pre {
-  background-color: rgba(9, 12, 18, 0.9);
-  color: #f9fafb;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  overflow-x: auto;
-  margin-bottom: 1rem;
-  border: 1px solid rgba(34, 211, 238, 0.2);
-}
-.prose pre code {
-  background-color: transparent;
-  color: inherit;
-  padding: 0;
-}
-.prose blockquote {
-  border-left: 4px solid #22d3ee;
-  padding-left: 1rem;
-  font-style: italic;
-  color: #d1d5db;
-  margin-bottom: 1rem;
-  background: rgba(34, 211, 238, 0.08);
-  padding: 1rem;
-  border-radius: 0 0.5rem 0.5rem 0;
-}
-.prose a {
-  color: #38bdf8;
-  text-decoration: underline;
-}
-.prose strong {
-  color: #ffffff;
-}
-
-.article-skeleton-line {
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.06));
-  background-size: 220% 100%;
-  animation: article-skeleton-shimmer 1.25s ease-in-out infinite;
-}
-
-@keyframes article-skeleton-shimmer {
-  0% {
-    background-position: 100% 0;
-  }
-  100% {
-    background-position: -100% 0;
-  }
-}
-</style>

@@ -3,8 +3,9 @@
     <span
       v-for="label in labels"
       :key="label"
-      class="inline-flex max-w-full shrink-0 items-center rounded-full border px-2.5 py-0.5 text-[11px] font-medium tracking-wide shadow-sm truncate"
+      class="inline-flex max-w-full shrink-0 items-center border-2 border-pencil px-2.5 py-0.5 font-body text-[11px] truncate"
       :class="fictionStatusBadgeClass()"
+      :style="{ borderRadius: wobblyRadius.sm }"
       :title="label"
     >
       {{ label }}
@@ -13,6 +14,7 @@
 </template>
 
 <script setup lang="ts">
+import { wobblyRadius } from "~/utils/design-tokens";
 import { fictionStatusBadgeClass, splitFictionStatus } from "~/utils/fiction-status";
 
 const props = defineProps<{

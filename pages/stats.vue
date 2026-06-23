@@ -1,19 +1,15 @@
-<!--
-  访问统计页：总访问量 + 按页面/设备/地域分布，仅自己查看（路径 /stats 避免与 /admin Decap CMS 冲突）
--->
 <template>
-  <section class="max-w-3xl mx-auto py-10 px-6">
-    <div class="mb-8 flex flex-col gap-2">
-      <h1 class="text-2xl font-semibold text-white">访问统计</h1>
-      <p class="text-sm text-white/50">仅后台查看，不对外展示</p>
-    </div>
+  <section class="hand-container hand-section">
+    <HandTag variant="muted" class="mb-4">后台</HandTag>
+    <h1 class="font-heading text-3xl md:text-4xl font-bold text-pencil mb-2">访问统计</h1>
+    <p class="font-body text-pencil/50 mb-8">仅自己查看，不对外展示</p>
 
-    <div class="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-6">
-      <div class="flex items-center justify-between gap-4 mb-4">
-        <span class="text-white/50 text-sm">数据来源：当前站点 API</span>
+    <HandCard decoration="tape" padding="p-6" :hover-lift="false">
+      <div class="flex items-center justify-between gap-4 mb-5">
+        <span class="font-body text-sm text-pencil/50">数据来源：当前站点 API</span>
         <button
           type="button"
-          class="text-sm text-white/50 hover:text-white/70 transition disabled:opacity-50"
+          class="font-body text-sm text-pen hover:text-marker transition disabled:opacity-50 hand-wavy-underline"
           :disabled="statsSummaryPending"
           @click="statsSummary.refresh()"
         >
@@ -25,19 +21,18 @@
         :pending="statsSummaryPending"
         :default-open="true"
       />
-    </div>
+    </HandCard>
 
-    <div class="mt-6 flex gap-4 text-sm text-white/50">
-      <NuxtLink to="/blog" class="hover:text-white transition">返回博客</NuxtLink>
-      <a href="/admin/" class="hover:text-white transition">内容后台</a>
+    <div class="mt-8 flex gap-6 font-body text-pencil/50">
+      <NuxtLink to="/" class="hover:text-marker hover:line-through transition">返回首页</NuxtLink>
+      <NuxtLink to="/blog" class="hover:text-pen hover:line-through transition">随笔</NuxtLink>
+      <a href="/admin/" class="hover:text-pencil hover:line-through transition">内容后台</a>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
-definePageMeta({
-  layout: "blog",
-});
+definePageMeta({ layout: "blog" });
 
 const statsSummary = useStatsSummary();
 const statsSummaryData = computed(() => statsSummary.summary.value);

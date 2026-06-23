@@ -92,11 +92,11 @@ export default defineNuxtConfig({
   // Global page headers
   app: {
     head: {
-      title: "Personal Blog",
+      title: "波波头的博客",
       meta: [
         { charset: "utf-8" },
         { name: "viewport", content: "width=device-width,initial-scale=1" },
-        { name: "description", content: "Personal Blog Use AI" },
+        { name: "description", content: "纸上留痕，笔下有光 — 随手记下的文字、幻想、生活片段" },
       ],
       link: [
         { rel: "icon", type: "image/x-icon", href: "/favicon.ico" },
@@ -104,7 +104,7 @@ export default defineNuxtConfig({
         { rel: "preconnect", href: "https://fonts.gstatic.com", crossorigin: "" },
         {
           rel: "stylesheet",
-          href: "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap",
+          href: "https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Patrick+Hand&display=swap",
           media: "print",
           onload: "this.media='all'",
         },
@@ -136,7 +136,9 @@ export default defineNuxtConfig({
   // 排除未使用的重量级组件（FloatingLines 引入 three.js 37MB+），避免拖慢构建
   components: {
     dirs: [
-      { path: "~/components", ignore: ["FloatingLines.vue"] },
+      { path: "~/components", ignore: ["FloatingLines.vue", "**/ui/**"] },
+      // ui/ 下组件直接用 HandCard、HandSectionPanel 等名称，不加 Ui 前缀
+      { path: "~/components/ui", pathPrefix: false },
     ],
   },
 
@@ -225,7 +227,7 @@ export default defineNuxtConfig({
       giscusRepoId: "",
       giscusCategory: "Announcements",
       giscusCategoryId: "",
-      giscusTheme: "dark",
+      giscusTheme: "light",
       statsBase: "",
       /** GitHub Pages 等静态部署无 /api，可指向 Netlify 等有后端的地址，如 "https://blog.xxx.netlify.app" */
       commentsApiBase: "",

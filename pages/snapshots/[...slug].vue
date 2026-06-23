@@ -1,82 +1,60 @@
 <template>
-  <article class="max-w-4xl mx-auto py-10 px-6">
-    <button
-      type="button"
-      class="inline-block bg-transparent border-0 p-0 text-left text-xs uppercase tracking-[0.35em] text-white/50 hover:text-white/70 transition cursor-pointer font-inherit"
-      @click="goBack"
-    >
-      ← 返回快照
-    </button>
+  <article class="hand-container hand-section">
+    <BackButton label="返回快照" fallback-to="/snapshots" />
 
-    <div class="mt-6 rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-8 md:p-10 shadow-[0_30px_80px_rgba(0,0,0,0.45)]">
-      <div v-if="pending" class="snapshot-skeleton space-y-6">
-        <div class="snapshot-skeleton-line h-3 w-24 rounded-full" />
-        <div class="snapshot-skeleton-line h-10 max-w-xl rounded-lg" />
-        <div class="snapshot-skeleton-line h-4 w-56 rounded-full" />
+    <HandCard class="mt-8" decoration="tape" padding="p-0" :hover-lift="false">
+      <div v-if="pending" class="p-8 space-y-4">
+        <div class="h-4 w-24 bg-erased animate-pulse" />
+        <div class="h-10 max-w-xl bg-erased animate-pulse" />
         <div class="grid gap-3 sm:grid-cols-2 pt-4">
-          <div class="snapshot-skeleton-line aspect-[4/3] w-full rounded-2xl" />
-          <div class="snapshot-skeleton-line aspect-[4/3] w-full rounded-2xl" />
-        </div>
-        <div class="space-y-2 pt-4">
-          <div class="snapshot-skeleton-line h-4 w-full rounded" />
-          <div class="snapshot-skeleton-line h-4 max-w-[80%] rounded" />
+          <div class="aspect-[4/3] bg-erased animate-pulse" />
+          <div class="aspect-[4/3] bg-erased animate-pulse" />
         </div>
       </div>
+
       <template v-else-if="snapshot">
-        <p class="text-xs uppercase tracking-[0.4em] text-white/40 mb-4">Snapshot</p>
-        <h1 class="text-4xl md:text-5xl font-semibold text-white mb-4">
-          {{ snapshot.title }}
-        </h1>
-        <div class="text-sm text-white/60 mb-6 flex flex-wrap items-center gap-4">
-          <span>{{ formatDateYmd(snapshot.date) }}</span>
-          <span v-if="snapshot.location" class="text-white/40">· {{ snapshot.location }}</span>
-          <span v-if="views !== null" class="text-white/40">· {{ views }} 次浏览</span>
-          <span v-if="commentCount !== null" class="text-white/40">
-            · {{ commentCount }} 条评论
-          </span>
+        <div class="p-6 md:p-10 border-b-2 border-dashed border-pencil/20">
+          <HandTag variant="postit" class="mb-4">Snapshot</HandTag>
+          <h1 class="font-heading text-4xl md:text-5xl font-bold text-pencil mb-4">{{ snapshot.title }}</h1>
+          <div class="font-body text-sm text-pencil/50 flex flex-wrap gap-3">
+            <span>{{ formatDateYmd(snapshot.date) }}</span>
+            <span v-if="snapshot.location">· {{ snapshot.location }}</span>
+            <span v-if="views !== null">· {{ views }} 次浏览</span>
+            <span v-if="commentCount !== null">· {{ commentCount }} 条评论</span>
+          </div>
+          <p v-if="snapshot.summary" class="mt-4 font-body text-lg text-pencil/70">{{ snapshot.summary }}</p>
         </div>
 
-        <p v-if="snapshot.summary" class="text-white/70 mb-6">
-          {{ snapshot.summary }}
-        </p>
+        <div class="p-6 md:p-10">
+          <div v-if="snapshot.images?.length" class="grid gap-4 sm:grid-cols-2 mb-8">
+            <img
+              v-for="(img, idx) in snapshot.images"
+              :key="`${snapshot._path}-img-${idx}`"
+              :src="img"
+              alt="snapshot"
+              :loading="idx === 0 ? 'eager' : 'lazy'"
+              decoding="async"
+              class="block h-auto w-full max-h-[32rem] border-[3px] border-pencil object-contain"
+              :style="{ borderRadius: wobblyRadius.sm, boxShadow: shadows.subtle }"
+            />
+          </div>
 
-        <div v-if="snapshot.images && snapshot.images.length" class="grid gap-3 sm:grid-cols-2 mb-8">
-          <div
-            v-for="(img, idx) in snapshot.images"
-            :key="`${snapshot._path}-img-${idx}`"
-            class="flex items-start justify-center overflow-hidden"
-          >
-          <img
-            :src="img"
-            alt="snapshot"
-            :loading="idx === 0 ? 'eager' : 'lazy'"
-            :fetchpriority="idx === 0 ? 'high' : 'auto'"
-            decoding="async"
-            class="block h-auto w-full max-h-[32rem] max-w-[42rem] rounded-2xl border border-white/15 object-contain"
-          />
+          <div v-if="snapshot.tags" class="flex flex-wrap gap-2 mb-6">
+            <HandTag v-for="tag in snapshot.tags" :key="tag" variant="muted" class="!text-xs">{{ tag }}</HandTag>
+          </div>
+
+          <div class="prose max-w-none">
+            <div v-if="staticBody" v-html="staticBody" />
+            <ContentRenderer v-else :value="snapshot as any" />
           </div>
         </div>
-
-        <div v-if="snapshot.tags" class="flex flex-wrap gap-2 mb-8">
-          <span
-            v-for="tag in snapshot.tags"
-            :key="tag"
-            class="px-3 py-1 text-xs uppercase tracking-[0.2em] text-white/60 border border-white/10 rounded-full"
-          >
-            {{ tag }}
-          </span>
-        </div>
-
-        <div class="prose prose-invert max-w-none">
-          <div v-if="staticBody" v-html="staticBody" />
-          <ContentRenderer v-else :value="snapshot as any" />
-        </div>
       </template>
-    </div>
+    </HandCard>
 
     <div v-if="!pending && snapshot" class="mt-10">
-      <div class="text-xs uppercase tracking-[0.35em] text-white/50 mb-4">
-        Comments
+      <div class="flex items-center gap-3 mb-5">
+        <HandTag variant="muted">评论</HandTag>
+        <span class="flex-1 hand-dashed-divider" />
       </div>
       <ClientOnly><Comments /></ClientOnly>
     </div>
@@ -84,30 +62,19 @@
 </template>
 
 <script setup lang="ts">
+import { wobblyRadius, shadows } from "~/utils/design-tokens";
 import { formatDateYmd } from "~/utils/format-date";
 
-definePageMeta({
-  layout: "blog",
-});
+definePageMeta({ layout: "blog" });
 
 const route = useRoute();
-const router = useRouter();
-const goBack = () => {
-  if (import.meta.client && window.history.length > 1) {
-    router.back();
-  } else {
-    navigateTo("/snapshots");
-  }
-};
 const config = useRuntimeConfig();
 const base = (config.public.baseUrl as string) || "/";
 const fullPath = base.replace(/\/$/, "") + route.path;
 const { views } = usePageStats(fullPath);
 const { count: commentCount } = useCommentCount(fullPath);
 
-const slug = Array.isArray(route.params.slug)
-  ? route.params.slug.join("/")
-  : route.params.slug;
+const slug = Array.isArray(route.params.slug) ? route.params.slug.join("/") : route.params.slug;
 const contentPath = `/snapshots/${slug}`;
 const basePath = base.replace(/\/$/, "");
 const jsonBase = import.meta.server ? "" : basePath;
@@ -116,19 +83,13 @@ const { data: snapshot, pending } = await useAsyncData(
   `snapshot-${contentPath}`,
   async () => {
     const loadJson = () =>
-      $fetch<{ body?: string; title?: string; date?: string }>(
-        `${jsonBase}/snapshots/${slug}.json`,
-      ).catch(() => null);
-
+      $fetch<{ body?: string; title?: string; date?: string }>(`${jsonBase}/snapshots/${slug}.json`).catch(() => null);
     const load = async () => {
       const fromQuery = await queryContent(contentPath).findOne();
       if (fromQuery) return fromQuery;
       return await loadJson();
     };
-
-    if (import.meta.server) {
-      return await load();
-    }
+    if (import.meta.server) return await load();
     const cached = useNuxtData(`snapshot-${contentPath}`).data.value;
     if (cached) return cached;
     try {
@@ -143,80 +104,14 @@ const { data: snapshot, pending } = await useAsyncData(
 watch(
   [pending, snapshot],
   ([p, data]) => {
-    if (!p && !data) {
-      throw createError({ statusCode: 404, statusMessage: "Page not found" });
-    }
+    if (!p && !data) throw createError({ statusCode: 404, statusMessage: "Page not found" });
   },
   { immediate: true },
 );
 
-// 仅当 body 为字符串时用 v-html（静态 JSON）；Netlify 上 queryContent 返回的 body 是对象，用 ContentRenderer
 const staticBody = computed(() => {
   const s = snapshot.value as { body?: unknown } | null | undefined;
   const b = s?.body;
   return typeof b === "string" ? b : null;
 });
-
 </script>
-
-<style scoped>
-.prose {
-  line-height: 1.8;
-  color: #e5e7eb;
-}
-.prose :deep(*) {
-  color: inherit;
-}
-.prose :deep(a) {
-  color: #38bdf8;
-}
-.prose :deep(strong) {
-  color: #ffffff;
-}
-.prose :deep(code) {
-  background-color: rgba(34, 211, 238, 0.18);
-  padding: 0.2rem 0.4rem;
-  border-radius: 0.35rem;
-  font-size: 0.9rem;
-  color: #e2e8f0;
-}
-.prose :deep(pre) {
-  background-color: rgba(9, 12, 18, 0.9);
-  color: #f9fafb;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  overflow-x: auto;
-  margin-bottom: 1rem;
-  border: 1px solid rgba(34, 211, 238, 0.2);
-}
-.prose :deep(pre code) {
-  background-color: transparent;
-  color: inherit;
-  padding: 0;
-}
-.prose :deep(blockquote) {
-  border-left: 4px solid #22d3ee;
-  padding-left: 1rem;
-  font-style: italic;
-  color: #d1d5db;
-  margin-bottom: 1rem;
-  background: rgba(34, 211, 238, 0.08);
-  padding: 1rem;
-  border-radius: 0 0.5rem 0.5rem 0;
-}
-
-.snapshot-skeleton-line {
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.06));
-  background-size: 220% 100%;
-  animation: snapshot-skeleton-shimmer 1.25s ease-in-out infinite;
-}
-
-@keyframes snapshot-skeleton-shimmer {
-  0% {
-    background-position: 100% 0;
-  }
-  100% {
-    background-position: -100% 0;
-  }
-}
-</style>

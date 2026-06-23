@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import { colors, shadows } from "./utils/design-tokens";
 
 export default {
   content: [
@@ -10,9 +11,24 @@ export default {
   ],
   theme: {
     extend: {
+      colors: {
+        paper: colors.background,
+        pencil: colors.foreground,
+        erased: colors.muted,
+        marker: colors.accent,
+        pen: colors.secondary,
+        postit: colors.postIt,
+      },
       fontFamily: {
-        sans: ['"Space Grotesk"', "Helvetica Neue", "Helvetica", "Arial", "sans-serif"],
-        mono: ['"JetBrains Mono"', "SFMono-Regular", "Menlo", "monospace"],
+        heading: ['"Kalam"', "cursive"],
+        body: ['"Patrick Hand"', "cursive"],
+        sans: ['"Patrick Hand"', "cursive"],
+      },
+      boxShadow: {
+        hand: shadows.standard,
+        "hand-lg": shadows.emphasized,
+        "hand-subtle": shadows.subtle,
+        "hand-hover": shadows.hover,
       },
     },
   },
