@@ -28,9 +28,10 @@
 <script setup lang="ts">
 import { wobblyRadius, shadows } from "~/utils/design-tokens";
 import {
-  clearGiscusOAuthPending,
-  restoreGiscusOAuthToUrl,
-  stripGiscusOAuthFromUrl,
+  clearGiscusSession,
+  finalizeGiscusOAuthHandoff,
+  getGiscusDiscussionTerm,
+  primeGiscusSessionForClient,
 } from "~/utils/giscus-oauth";
 
 const GISCUS_ORIGIN = "https://giscus.app";
@@ -41,6 +42,7 @@ let widgetObserver: MutationObserver | null = null;
 let frameResizeObserver: ResizeObserver | null = null;
 
 const route = useRoute();
+const router = useRouter();
 const config = useRuntimeConfig();
 const repo = config.public.giscusRepo || "";
 const repoId = config.public.giscusRepoId || "";
@@ -52,14 +54,13 @@ const hasGiscusConfig = computed(() => !!repo && !!repoId && !!categoryId);
 const showConfigHint = computed(() => import.meta.dev && !hasGiscusConfig.value);
 const showSkeleton = computed(() => hasGiscusConfig.value && !widgetReady.value);
 
-function discussionPathname() {
-  if (typeof window === "undefined") return route.path;
-  return window.location.pathname;
+function discussionTerm() {
+  return getGiscusDiscussionTerm(route.path);
 }
 
 function canonicalUrl() {
   if (typeof window === "undefined") return "";
-  return `${window.location.origin}${discussionPathname()}`;
+  return `${window.location.origin}${discussionTerm()}`;
 }
 
 function getGiscusFrame() {
@@ -81,9 +82,10 @@ function teardownGiscus() {
 
 function loadComments() {
   if (!commentsContainer.value || !hasGiscusConfig.value) return;
+  if (commentsContainer.value.querySelector('script[src*="giscus.app"]')) return;
 
-  restoreGiscusOAuthToUrl();
   teardownGiscus();
+  primeGiscusSessionForClient();
 
   const script = document.createElement("script");
   script.src = `${GISCUS_ORIGIN}/client.js`;
@@ -93,7 +95,9 @@ function loadComments() {
   script.setAttribute("data-repo-id", repoId);
   script.setAttribute("data-category", category);
   script.setAttribute("data-category-id", categoryId);
-  script.setAttribute("data-mapping", "pathname");
+  // specific + pathname 作为 term，与 GitHub Discussions 标题及 /api/comments 查询一致
+  script.setAttribute("data-mapping", "specific");
+  script.setAttribute("data-term", discussionTerm());
   script.setAttribute("data-strict", "0");
   script.setAttribute("data-reactions-enabled", "1");
   script.setAttribute("data-emit-metadata", "0");
@@ -106,6 +110,7 @@ function loadComments() {
 
   commentsContainer.value.appendChild(script);
   commentsLoaded.value = true;
+  finalizeGiscusOAuthHandoff();
 }
 
 function markReadyWhenFrameVisible(frame: HTMLIFrameElement) {
@@ -140,19 +145,30 @@ function onGiscusMessage(event: MessageEvent) {
   }
 
   if (payload.signedIn === true) {
-    clearGiscusOAuthPending();
-    stripGiscusOAuthFromUrl();
+    finalizeGiscusOAuthHandoff();
+    detectWidgetReady();
+  } else if (payload.error) {
+    const msg = String(payload.error);
+    if (
+      msg.includes("Invalid state")
+      || msg.includes("State has expired")
+      || msg.includes("Bad credentials")
+    ) {
+      clearGiscusSession();
+    }
     detectWidgetReady();
   } else if (payload.discussionReady) {
     detectWidgetReady();
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   if (!commentsContainer.value || !hasGiscusConfig.value) return;
   window.addEventListener("message", onGiscusMessage);
   widgetObserver = new MutationObserver(detectWidgetReady);
   widgetObserver.observe(commentsContainer.value, { childList: true, subtree: true });
+  await router.isReady();
+  primeGiscusSessionForClient();
   loadComments();
   detectWidgetReady();
 });
@@ -164,7 +180,7 @@ watch(
     widgetReady.value = false;
     postToGiscus({
       setConfig: {
-        term: discussionPathname(),
+        term: discussionTerm(),
         url: canonicalUrl(),
       },
     });
