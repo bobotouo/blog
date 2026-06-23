@@ -12,7 +12,7 @@
     <div class="space-y-8">
       <article v-for="(item, idx) in snapshots" :key="item._path">
         <HandCard
-          :decoration="idx % 2 === 0 ? 'tape' : 'none'"
+          decoration="none"
           :rotate="idx % 2 === 0 ? '-0.5deg' : '0.5deg'"
           padding="p-6 md:p-8"
         >

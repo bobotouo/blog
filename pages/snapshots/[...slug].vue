@@ -2,7 +2,7 @@
   <article class="hand-container hand-section">
     <BackButton label="返回快照" fallback-to="/snapshots" />
 
-    <HandCard class="mt-8" decoration="tape" padding="p-0" :hover-lift="false">
+    <HandCard class="mt-8" decoration="none" padding="p-0" :hover-lift="false">
       <div v-if="pending" class="p-8 space-y-4">
         <div class="h-4 w-24 bg-erased animate-pulse" />
         <div class="h-10 max-w-xl bg-erased animate-pulse" />

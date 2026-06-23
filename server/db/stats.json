@@ -18,14 +18,15 @@
     "/blog/20260402-twitter-digest": 2,
     "/blog/20260622-twitter-digest": 5,
     "/ai-fiction": 2,
-    "/ai-fiction/%E7%99%BB%E6%A3%8B%E4%BB%99%E9%80%94/01-%E8%BE%B9%E9%99%B2%E5%B0%91%E5%B9%B4": 1
+    "/ai-fiction/%E7%99%BB%E6%A3%8B%E4%BB%99%E9%80%94/01-%E8%BE%B9%E9%99%B2%E5%B0%91%E5%B9%B4": 1,
+    "/blog/20260623-finance-digest": 2
   },
   "byDevice": {
-    "desktop": 142,
+    "desktop": 144,
     "mobile": 50
   },
   "byCountry": {
-    "XX": 192
+    "XX": 194
   },
   "daily": {
     "2026-02-12": 21,
@@ -36,6 +37,6 @@
     "2026-04-01": 10,
     "2026-04-02": 6,
     "2026-04-03": 3,
-    "2026-06-23": 14
+    "2026-06-23": 16
   }
 }
