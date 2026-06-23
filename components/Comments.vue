@@ -2,7 +2,6 @@
   <div
     id="comments"
     ref="commentsContainer"
-    :class="{ 'comments-ready': widgetReady }"
     class="comments-shell relative min-h-[18rem] md:min-h-[20rem] border-2 border-pencil bg-white p-4 md:p-6"
     :style="{ borderRadius: wobblyRadius.md, boxShadow: shadows.subtle }"
   >
@@ -23,10 +22,9 @@
       评论系统未配置：请在环境变量中设置 Giscus 参数后重启开发服务。
     </p>
     <p v-else-if="loadError" class="font-body text-pencil/70 space-y-2">
-      <span class="block">评论服务连接超时（giscus.app 无法访问）。</span>
+      <span class="block">评论服务加载失败。</span>
       <span class="block text-sm text-pencil/50">
-        国内网络常见，可开代理/VPN 后
-        <button type="button" class="underline hover:text-pencil" @click="retryLoad">重试</button>
+        <button type="button" class="underline hover:text-pencil" @click="retryLoad">点击重试</button>
       </span>
     </p>
   </div>
@@ -38,7 +36,8 @@ import {
   clearGiscusSession,
   finalizeGiscusOAuthHandoff,
   getGiscusDiscussionTerm,
-  primeGiscusSessionForClient,
+  hasOAuthCallback,
+  primeGiscusSessionForOAuth,
 } from "~/utils/giscus-oauth";
 
 const GISCUS_ORIGIN = "https://giscus.app";
@@ -47,6 +46,7 @@ const commentsLoaded = ref(false);
 const widgetReady = ref(false);
 let widgetObserver: MutationObserver | null = null;
 let frameResizeObserver: ResizeObserver | null = null;
+let loadGeneration = 0;
 
 const route = useRoute();
 const router = useRouter();
@@ -67,11 +67,6 @@ function discussionTerm() {
   return getGiscusDiscussionTerm(route.path);
 }
 
-function canonicalUrl() {
-  if (typeof window === "undefined") return "";
-  return `${window.location.origin}${discussionTerm()}`;
-}
-
 function getGiscusFrame() {
   return commentsContainer.value?.querySelector<HTMLIFrameElement>(".giscus-frame") ?? null;
 }
@@ -82,8 +77,6 @@ function postToGiscus(message: Record<string, unknown>) {
 }
 
 function teardownGiscus() {
-  widgetReady.value = false;
-  commentsLoaded.value = false;
   if (!commentsContainer.value) return;
   commentsContainer.value.querySelector('script[src*="giscus.app"]')?.remove();
   commentsContainer.value.querySelector(".giscus")?.remove();
@@ -96,28 +89,39 @@ function clearLoadTimeout() {
   }
 }
 
-function loadComments() {
+function loadComments(force = false) {
   if (!commentsContainer.value || !hasGiscusConfig.value) return;
+  if (commentsLoaded.value && !force) return;
 
+  const gen = ++loadGeneration;
   loadError.value = false;
+  widgetReady.value = false;
   clearLoadTimeout();
   teardownGiscus();
-  primeGiscusSessionForClient();
+
+  if (hasOAuthCallback()) {
+    primeGiscusSessionForOAuth();
+  }
 
   const script = document.createElement("script");
   script.src = `${GISCUS_ORIGIN}/client.js`;
   script.async = true;
   script.crossOrigin = "anonymous";
   script.onerror = () => {
+    if (gen !== loadGeneration) return;
     loadError.value = true;
     widgetReady.value = true;
     clearLoadTimeout();
+  };
+  script.onload = () => {
+    if (gen !== loadGeneration) return;
+    // 只清 sessionStorage 备份；giscus-session 由 client.js / 登录成功后保留
+    finalizeGiscusOAuthHandoff();
   };
   script.setAttribute("data-repo", repo);
   script.setAttribute("data-repo-id", repoId);
   script.setAttribute("data-category", category);
   script.setAttribute("data-category-id", categoryId);
-  // specific + pathname 作为 term，与 GitHub Discussions 标题及 /api/comments 查询一致
   script.setAttribute("data-mapping", "specific");
   script.setAttribute("data-term", discussionTerm());
   script.setAttribute("data-strict", "0");
@@ -126,28 +130,28 @@ function loadComments() {
   script.setAttribute("data-input-position", "bottom");
   script.setAttribute("data-theme", theme);
   script.setAttribute("data-lang", "zh-CN");
-  script.setAttribute("data-loading", "lazy");
-  const url = canonicalUrl();
-  if (url) script.setAttribute("data-canonical-url", url);
+  // 不用 lazy：OAuth 回跳后页面常在顶部，评论区不在视口内会导致 iframe 不加载
+  script.setAttribute("data-loading", "eager");
 
   commentsContainer.value.appendChild(script);
   commentsLoaded.value = true;
-  finalizeGiscusOAuthHandoff();
 
   loadTimeoutId = setTimeout(() => {
+    if (gen !== loadGeneration) return;
     if (!getGiscusFrame()) {
       loadError.value = true;
-      widgetReady.value = true;
     }
-  }, 15000);
+    widgetReady.value = true;
+  }, 20000);
 }
 
 function retryLoad() {
-  loadComments();
+  commentsLoaded.value = false;
+  loadComments(true);
 }
 
 function markReadyWhenFrameVisible(frame: HTMLIFrameElement) {
-  if (frame.getBoundingClientRect().height >= 120) widgetReady.value = true;
+  if (frame.getBoundingClientRect().height >= 80) widgetReady.value = true;
 }
 
 function bindFrameObservers(frame: HTMLIFrameElement) {
@@ -168,6 +172,12 @@ function detectWidgetReady() {
   markReadyWhenFrameVisible(frame);
 }
 
+function isAuthError(msg: string) {
+  return msg.includes("Invalid state")
+    || msg.includes("State has expired")
+    || msg.includes("Bad credentials");
+}
+
 function onGiscusMessage(event: MessageEvent) {
   if (event.origin !== GISCUS_ORIGIN) return;
   const payload = event.data?.giscus;
@@ -183,12 +193,10 @@ function onGiscusMessage(event: MessageEvent) {
     detectWidgetReady();
   } else if (payload.error) {
     const msg = String(payload.error);
-    if (
-      msg.includes("Invalid state")
-      || msg.includes("State has expired")
-      || msg.includes("Bad credentials")
-    ) {
+    if (isAuthError(msg)) {
       clearGiscusSession();
+      commentsLoaded.value = false;
+      loadComments(true);
     }
     detectWidgetReady();
   } else if (payload.discussionReady) {
@@ -197,32 +205,27 @@ function onGiscusMessage(event: MessageEvent) {
 }
 
 onMounted(async () => {
-  if (!commentsContainer.value) return;
-  if (!hasGiscusConfig.value) return;
+  if (!commentsContainer.value || !hasGiscusConfig.value) return;
 
   window.addEventListener("message", onGiscusMessage);
   widgetObserver = new MutationObserver(detectWidgetReady);
   widgetObserver.observe(commentsContainer.value, { childList: true, subtree: true });
 
   await router.isReady();
+  if (hasOAuthCallback()) {
+    primeGiscusSessionForOAuth();
+  }
   loadComments();
   detectWidgetReady();
-
-  // 避免 iframe 一直 opacity:0 看起来像「组件没加载」
-  window.setTimeout(() => {
-    if (!widgetReady.value) widgetReady.value = true;
-  }, 8000);
 });
 
 watch(
   () => route.path,
   () => {
     if (!commentsLoaded.value) return;
-    widgetReady.value = false;
     postToGiscus({
       setConfig: {
         term: discussionTerm(),
-        url: canonicalUrl(),
       },
     });
     detectWidgetReady();
@@ -242,13 +245,4 @@ onUnmounted(() => {
 .skeleton-fade-leave-active { transition: opacity 0.28s ease; }
 .skeleton-fade-enter-from,
 .skeleton-fade-leave-to { opacity: 0; }
-
-:global(#comments .giscus-frame) {
-  opacity: 0;
-  transition: opacity 0.22s ease;
-}
-
-:global(#comments.comments-ready .giscus-frame) {
-  opacity: 1;
-}
 </style>

@@ -20,14 +20,14 @@
     "/ai-fiction": 2,
     "/ai-fiction/%E7%99%BB%E6%A3%8B%E4%BB%99%E9%80%94/01-%E8%BE%B9%E9%99%B2%E5%B0%91%E5%B9%B4": 1,
     "/blog/20260623-finance-digest": 2,
-    "/blog/20260623-twitter-digest": 14
+    "/blog/20260623-twitter-digest": 16
   },
   "byDevice": {
-    "desktop": 158,
+    "desktop": 160,
     "mobile": 50
   },
   "byCountry": {
-    "XX": 208
+    "XX": 210
   },
   "daily": {
     "2026-02-12": 21,
@@ -38,6 +38,6 @@
     "2026-04-01": 10,
     "2026-04-02": 6,
     "2026-04-03": 3,
-    "2026-06-23": 30
+    "2026-06-23": 32
   }
 }

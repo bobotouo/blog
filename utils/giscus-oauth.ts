@@ -1,4 +1,4 @@
-/** Giscus OAuth：client.js 从 ?giscus= 或 localStorage「giscus-session」读取一次性 code */
+/** Giscus OAuth 回调：保留 ?giscus= 供 client.js 读取（一次性 code） */
 export const GISCUS_OAUTH_STORAGE_KEY = "__giscus_oauth_pending__";
 const GISCUS_OAUTH_TS_KEY = "__giscus_oauth_pending_ts__";
 const GISCUS_SESSION_KEY = "giscus-session";
@@ -27,19 +27,17 @@ function isPendingFresh(): boolean {
   return ts > 0 && Date.now() - ts < GISCUS_OAUTH_TTL_MS;
 }
 
-/** 仅在 OAuth 回调页（URL 或 2 分钟内捕获的 pending）才有 code */
-export function getFreshGiscusOAuthCode(): string | null {
-  if (typeof window === "undefined") return null;
+export function hasOAuthCallback(): boolean {
+  if (typeof window === "undefined") return false;
   try {
-    const fromUrl = new URL(window.location.href).searchParams.get("giscus");
-    if (fromUrl) return fromUrl;
-    if (!isPendingFresh()) return null;
-    return sessionStorage.getItem(GISCUS_OAUTH_STORAGE_KEY);
+    if (new URL(window.location.href).searchParams.get("giscus")) return true;
+    return isPendingFresh() && !!sessionStorage.getItem(GISCUS_OAUTH_STORAGE_KEY);
   } catch {
-    return null;
+    return false;
   }
 }
 
+/** 路由 hydration 可能抹掉 ?giscus=，在 client.js 执行前写回 URL（勿自行写 localStorage，交给官方 client.js） */
 export function restoreGiscusOAuthToUrl() {
   if (typeof window === "undefined") return false;
   try {
@@ -59,12 +57,27 @@ export function restoreGiscusOAuthToUrl() {
   }
 }
 
-/** 仅在 OAuth 回调时写入 giscus-session，避免普通访问注入过期 code */
-export function primeGiscusSessionForClient() {
-  if (typeof window === "undefined") return;
-  const code = getFreshGiscusOAuthCode();
-  if (!code) return;
+function readOAuthCode(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const fromUrl = new URL(window.location.href).searchParams.get("giscus");
+    if (fromUrl) return fromUrl;
+    if (!isPendingFresh()) return null;
+    return sessionStorage.getItem(GISCUS_OAUTH_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * client.js 是 async 加载，期间 SPA 可能抹掉 URL 上的 ?giscus=。
+ * 仅在 OAuth 回跳时写入 localStorage，格式与官方 client.js 一致。
+ */
+export function primeGiscusSessionForOAuth() {
+  if (!hasOAuthCallback()) return;
   restoreGiscusOAuthToUrl();
+  const code = readOAuthCode();
+  if (!code) return;
   localStorage.setItem(GISCUS_SESSION_KEY, JSON.stringify(code));
 }
 
@@ -80,6 +93,7 @@ export function clearGiscusSession() {
   clearGiscusOAuthPending();
 }
 
+/** client.js 同步读取 URL 后再清备份 */
 export function finalizeGiscusOAuthHandoff() {
   clearGiscusOAuthPending();
 }
