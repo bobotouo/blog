@@ -27,6 +27,7 @@ function isPendingFresh(): boolean {
   return ts > 0 && Date.now() - ts < GISCUS_OAUTH_TTL_MS;
 }
 
+/** 仅在 OAuth 回调页（URL 或 2 分钟内捕获的 pending）才有 code */
 export function getFreshGiscusOAuthCode(): string | null {
   if (typeof window === "undefined") return null;
   try {
@@ -39,7 +40,6 @@ export function getFreshGiscusOAuthCode(): string | null {
   }
 }
 
-/** 路由 hydration 可能抹掉 ?giscus=，在 client.js 执行前写回 URL */
 export function restoreGiscusOAuthToUrl() {
   if (typeof window === "undefined") return false;
   try {
@@ -59,15 +59,12 @@ export function restoreGiscusOAuthToUrl() {
   }
 }
 
-/**
- * giscus client.js 在 script 执行时读 location.href；async 加载期间 query 可能再被抹掉。
- * 提前写入 giscus-session，与官方 client.js 逻辑一致：JSON.stringify(code)
- */
+/** 仅在 OAuth 回调时写入 giscus-session，避免普通访问注入过期 code */
 export function primeGiscusSessionForClient() {
   if (typeof window === "undefined") return;
-  restoreGiscusOAuthToUrl();
   const code = getFreshGiscusOAuthCode();
   if (!code) return;
+  restoreGiscusOAuthToUrl();
   localStorage.setItem(GISCUS_SESSION_KEY, JSON.stringify(code));
 }
 
@@ -83,7 +80,6 @@ export function clearGiscusSession() {
   clearGiscusOAuthPending();
 }
 
-/** client.js 自己会 strip ?giscus=，这里只清我们自己的备份 */
 export function finalizeGiscusOAuthHandoff() {
   clearGiscusOAuthPending();
 }

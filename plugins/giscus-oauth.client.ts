@@ -1,34 +1,9 @@
-import {
-  captureGiscusOAuthFromUrl,
-  getFreshGiscusOAuthCode,
-  primeGiscusSessionForClient,
-  restoreGiscusOAuthToUrl,
-} from "~/utils/giscus-oauth";
+import { captureGiscusOAuthFromUrl } from "~/utils/giscus-oauth";
 
+/** 仅尽早捕获 ?giscus=，具体恢复在 Comments 加载前执行，避免污染全局路由 */
 captureGiscusOAuthFromUrl();
 
 export default defineNuxtPlugin({
   name: "giscus-oauth",
   enforce: "pre",
-  setup() {
-    const router = useRouter();
-
-    router.beforeEach((to) => {
-      const code = getFreshGiscusOAuthCode();
-      if (code && !to.query.giscus) {
-        return {
-          path: to.path,
-          hash: to.hash,
-          query: { ...to.query, giscus: code },
-          replace: true,
-        };
-      }
-    });
-
-    restoreGiscusOAuthToUrl();
-    router.isReady().then(() => {
-      restoreGiscusOAuthToUrl();
-      primeGiscusSessionForClient();
-    });
-  },
 });

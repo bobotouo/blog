@@ -8,6 +8,11 @@
   NODE_OPTIONS = "--max-old-space-size=4096"
   NITRO_PRESET = "netlify"
   NUXT_PUBLIC_COMMENTS_API_BASE = "https://blog.bobotou112.dpdns.org"
+  NUXT_PUBLIC_GISCUS_REPO = "bobotouo/blog"
+  NUXT_PUBLIC_GISCUS_REPO_ID = "R_kgDORMxRqg"
+  NUXT_PUBLIC_GISCUS_CATEGORY = "Announcements"
+  NUXT_PUBLIC_GISCUS_CATEGORY_ID = "DIC_kwDORMxRqs4C2IoF"
+  NUXT_PUBLIC_GISCUS_THEME = "noborder_light"
 
 # 不在这里做 /* -> function 的 rewrite，否则函数会收到 /.netlify/functions/server 导致 API 404。
 # Nitro 已把 server 配置为 path: "/*"、preferStatic: true，由 Netlify 直接按路径调用函数并保留原始 URL。

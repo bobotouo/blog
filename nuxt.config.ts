@@ -1,6 +1,11 @@
 import { readdirSync } from "node:fs";
 import { join } from "node:path";
+import { config as loadEnv } from "dotenv";
 import { defineNuxtConfig } from "nuxt/config";
+
+// nuxt.config 求值早于 Nuxt 内置 dotenv，本地 .env.local 需在此显式加载
+loadEnv({ path: join(process.cwd(), ".env") });
+loadEnv({ path: join(process.cwd(), ".env.local") });
 
 const collectRoutes = (dir: string, base: string): string[] => {
   try {
@@ -223,16 +228,16 @@ export default defineNuxtConfig({
 
   // Runtime config (placeholder for API keys etc.)
   runtimeConfig: {
-    giscusToken: "",
+    giscusToken: process.env.NUXT_GISCUS_TOKEN || "",
     public: {
-      giscusRepo: "",
-      giscusRepoId: "",
-      giscusCategory: "Announcements",
-      giscusCategoryId: "",
-      giscusTheme: "noborder_light",
-      statsBase: "",
+      giscusRepo: process.env.NUXT_PUBLIC_GISCUS_REPO || "",
+      giscusRepoId: process.env.NUXT_PUBLIC_GISCUS_REPO_ID || "",
+      giscusCategory: process.env.NUXT_PUBLIC_GISCUS_CATEGORY || "Announcements",
+      giscusCategoryId: process.env.NUXT_PUBLIC_GISCUS_CATEGORY_ID || "",
+      giscusTheme: process.env.NUXT_PUBLIC_GISCUS_THEME || "noborder_light",
+      statsBase: process.env.NUXT_PUBLIC_STATS_BASE || "",
       /** GitHub Pages 等静态部署无 /api，可指向 Netlify 等有后端的地址，如 "https://blog.xxx.netlify.app" */
-      commentsApiBase: "",
+      commentsApiBase: process.env.NUXT_PUBLIC_COMMENTS_API_BASE || "",
       baseUrl: appBase,
     },
   },

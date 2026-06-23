@@ -22,6 +22,13 @@
     <p v-if="showConfigHint" class="font-body text-pencil/60">
       评论系统未配置：请在环境变量中设置 Giscus 参数后重启开发服务。
     </p>
+    <p v-else-if="loadError" class="font-body text-pencil/70 space-y-2">
+      <span class="block">评论服务连接超时（giscus.app 无法访问）。</span>
+      <span class="block text-sm text-pencil/50">
+        国内网络常见，可开代理/VPN 后
+        <button type="button" class="underline hover:text-pencil" @click="retryLoad">重试</button>
+      </span>
+    </p>
   </div>
 </template>
 
@@ -52,7 +59,9 @@ const rawTheme = config.public.giscusTheme || "";
 const theme = rawTheme && rawTheme !== "preferred_color_scheme" ? rawTheme : "light";
 const hasGiscusConfig = computed(() => !!repo && !!repoId && !!categoryId);
 const showConfigHint = computed(() => import.meta.dev && !hasGiscusConfig.value);
-const showSkeleton = computed(() => hasGiscusConfig.value && !widgetReady.value);
+const loadError = ref(false);
+const showSkeleton = computed(() => hasGiscusConfig.value && !widgetReady.value && !loadError.value);
+let loadTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
 function discussionTerm() {
   return getGiscusDiscussionTerm(route.path);
@@ -80,10 +89,18 @@ function teardownGiscus() {
   commentsContainer.value.querySelector(".giscus")?.remove();
 }
 
+function clearLoadTimeout() {
+  if (loadTimeoutId) {
+    clearTimeout(loadTimeoutId);
+    loadTimeoutId = null;
+  }
+}
+
 function loadComments() {
   if (!commentsContainer.value || !hasGiscusConfig.value) return;
-  if (commentsContainer.value.querySelector('script[src*="giscus.app"]')) return;
 
+  loadError.value = false;
+  clearLoadTimeout();
   teardownGiscus();
   primeGiscusSessionForClient();
 
@@ -91,6 +108,11 @@ function loadComments() {
   script.src = `${GISCUS_ORIGIN}/client.js`;
   script.async = true;
   script.crossOrigin = "anonymous";
+  script.onerror = () => {
+    loadError.value = true;
+    widgetReady.value = true;
+    clearLoadTimeout();
+  };
   script.setAttribute("data-repo", repo);
   script.setAttribute("data-repo-id", repoId);
   script.setAttribute("data-category", category);
@@ -111,6 +133,17 @@ function loadComments() {
   commentsContainer.value.appendChild(script);
   commentsLoaded.value = true;
   finalizeGiscusOAuthHandoff();
+
+  loadTimeoutId = setTimeout(() => {
+    if (!getGiscusFrame()) {
+      loadError.value = true;
+      widgetReady.value = true;
+    }
+  }, 15000);
+}
+
+function retryLoad() {
+  loadComments();
 }
 
 function markReadyWhenFrameVisible(frame: HTMLIFrameElement) {
@@ -141,6 +174,7 @@ function onGiscusMessage(event: MessageEvent) {
   if (!payload) return;
 
   if (payload.resizeMessage) {
+    loadError.value = false;
     detectWidgetReady();
   }
 
@@ -163,14 +197,21 @@ function onGiscusMessage(event: MessageEvent) {
 }
 
 onMounted(async () => {
-  if (!commentsContainer.value || !hasGiscusConfig.value) return;
+  if (!commentsContainer.value) return;
+  if (!hasGiscusConfig.value) return;
+
   window.addEventListener("message", onGiscusMessage);
   widgetObserver = new MutationObserver(detectWidgetReady);
   widgetObserver.observe(commentsContainer.value, { childList: true, subtree: true });
+
   await router.isReady();
-  primeGiscusSessionForClient();
   loadComments();
   detectWidgetReady();
+
+  // 避免 iframe 一直 opacity:0 看起来像「组件没加载」
+  window.setTimeout(() => {
+    if (!widgetReady.value) widgetReady.value = true;
+  }, 8000);
 });
 
 watch(
@@ -189,6 +230,7 @@ watch(
 );
 
 onUnmounted(() => {
+  clearLoadTimeout();
   window.removeEventListener("message", onGiscusMessage);
   widgetObserver?.disconnect();
   frameResizeObserver?.disconnect();
