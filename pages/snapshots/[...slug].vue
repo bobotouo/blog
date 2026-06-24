@@ -39,8 +39,8 @@
             />
           </div>
 
-          <div v-if="snapshot.tags" class="flex flex-wrap gap-2 mb-6">
-            <HandTag v-for="tag in snapshot.tags" :key="tag" variant="muted" class="!text-xs">{{ tag }}</HandTag>
+          <div v-if="snapshotTags.length" class="flex flex-wrap gap-2 mb-6">
+            <HandTag v-for="tag in snapshotTags" :key="tag" variant="muted" class="!text-xs">{{ tag }}</HandTag>
           </div>
 
           <div class="prose max-w-none">
@@ -65,6 +65,7 @@
 import { wobblyRadius, shadows } from "~/utils/design-tokens";
 import { formatDateYmd } from "~/utils/format-date";
 import { devSkipAsyncCache } from "~/utils/async-data";
+import { normalizeTags } from "~/utils/normalize-tags";
 
 definePageMeta({ layout: "blog" });
 
@@ -115,4 +116,6 @@ const staticBody = computed(() => {
   const b = s?.body;
   return typeof b === "string" ? b : null;
 });
+
+const snapshotTags = computed(() => normalizeTags((snapshot.value as { tags?: unknown } | null)?.tags));
 </script>

@@ -36,6 +36,39 @@ function rewriteAssetInMeta(value) {
   return value;
 }
 
+function stripTagQuotes(tag) {
+  return tag.trim().replace(/^[\[\]"'`\s]+|[\]\s"'`]+$/g, "");
+}
+
+/** 与 utils/normalize-tags.ts 保持一致 */
+function normalizeTags(raw) {
+  if (raw == null || raw === "") return undefined;
+  if (Array.isArray(raw)) {
+    const out = raw.flatMap((item) => normalizeTags(item) ?? []).map((t) => t.trim()).filter(Boolean);
+    return out.length ? out : undefined;
+  }
+  if (typeof raw !== "string") return undefined;
+  const s = raw.trim();
+  if (!s) return undefined;
+  if (s.startsWith("[") && s.endsWith("]")) {
+    try {
+      const parsed = JSON.parse(s);
+      if (Array.isArray(parsed)) return normalizeTags(parsed);
+    } catch {
+      const inner = s.slice(1, -1).trim();
+      if (!inner) return undefined;
+      const out = inner.split(/[,，]/).map(stripTagQuotes).filter(Boolean);
+      return out.length ? out : undefined;
+    }
+  }
+  if (s.includes(",") || s.includes("，")) {
+    const out = s.split(/[,，]/).map(stripTagQuotes).filter(Boolean);
+    return out.length ? out : undefined;
+  }
+  const single = stripTagQuotes(s);
+  return single ? [single] : undefined;
+}
+
 function parseFrontmatter(raw) {
   const match = raw.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   if (!match) return {};
@@ -149,7 +182,7 @@ function generateArticleSet({ contentFolder, routeBase, listName, detailDir }) {
       title: fm.title ?? slug,
       date,
       description: fm.description ?? undefined,
-      tags: fm.tags ?? undefined,
+      tags: normalizeTags(fm.tags),
       coverImage: rewriteAssetInMeta(fm.coverImage) ?? fm.coverImage,
     };
     list.push(meta);
@@ -204,7 +237,7 @@ function generateAiFictionSet() {
         title: fm.novelTitle ?? fm.title ?? novelName,
         description: fm.description ?? "",
         coverImage: rewriteAssetInMeta(fm.coverImage) ?? fm.coverImage,
-        tags: fm.tags ?? undefined,
+        tags: normalizeTags(fm.tags),
         summaryBody: bodyHtml,
         status: trimFictionStatus(fm.status),
       });
@@ -219,7 +252,7 @@ function generateAiFictionSet() {
       title,
       date,
       description: fm.description ?? undefined,
-      tags: fm.tags ?? undefined,
+      tags: normalizeTags(fm.tags),
       coverImage: rewriteAssetInMeta(fm.coverImage) ?? fm.coverImage,
       novelSlug,
       novelName,
@@ -264,7 +297,7 @@ function generateAiFictionSet() {
       indexPath: `/ai-fiction/${novelSlug}`,
       description: summary?.description ?? "",
       coverImage: summary?.coverImage ?? first.coverImage,
-      tags: summary?.tags ?? undefined,
+      tags: normalizeTags(summary?.tags),
       summaryBody: summary?.summaryBody ?? "",
       status: summary?.status,
       chapterCount: sorted.length,
@@ -287,7 +320,7 @@ function generateAiFictionSet() {
       indexPath: bundle.indexPath,
       description: bundle.description,
       coverImage: bundle.coverImage,
-      tags: bundle.tags,
+      tags: normalizeTags(bundle.tags),
       status: bundle.status,
       chapterCount: bundle.chapterCount,
       firstChapterPath: bundle.firstChapterPath,
@@ -348,7 +381,7 @@ for (const name of snapshotFiles) {
     images: rewriteAssetInMeta(fm.images) ?? fm.images,
     location: fm.location ?? undefined,
     mood: fm.mood ?? undefined,
-    tags: fm.tags ?? undefined,
+    tags: normalizeTags(fm.tags),
   };
   snapshotsList.push(meta);
 

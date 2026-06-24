@@ -11,7 +11,7 @@
     "twitter:digest": "node scripts/twitter-digest.mjs",
     "twitter:digest:local": "node scripts/twitter-digest.mjs",
     "dev": "node scripts/generate-blog-list.mjs && nuxt dev",
-    "build": "node scripts/generate-blog-list.mjs && nuxt build && node scripts/sync-static-json-to-output.mjs",
+    "build": "node scripts/generate-blog-list.mjs && node scripts/vendor-giscus-assets.mjs && nuxt build && node scripts/sync-static-json-to-output.mjs",
     "build:netlify-dist": "node scripts/copy-output-to-dist.mjs",
     "generate": "node scripts/generate-blog-list.mjs && nuxt generate",
     "pregenerate": "node scripts/generate-blog-list.mjs",
@@ -31,7 +31,6 @@
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-vue": "^9.24.0",
-    "giscus": "^1.4.0",
     "gsap": "^3.12.5",
     "marked": "^17.0.1",
     "nuxt": "^3.10.0",
@@ -41,6 +40,7 @@
   },
   "dependencies": {
     "@netlify/blobs": "^10.6.0",
+    "giscus": "^1.6.0",
     "motion-v": "^1.10.2",
     "three": "^0.182.0"
   }

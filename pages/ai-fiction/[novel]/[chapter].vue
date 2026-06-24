@@ -20,8 +20,8 @@
             <span v-if="views !== null">· {{ views }} 次阅读</span>
             <span v-if="commentCount !== null">· {{ commentCount }} 条评论</span>
           </div>
-          <div v-if="post.tags" class="flex flex-wrap gap-2 mt-5">
-            <HandTag v-for="tag in post.tags" :key="tag" variant="postit" class="!text-sm">{{ tag }}</HandTag>
+          <div v-if="postTags.length" class="flex flex-wrap gap-2 mt-5">
+            <HandTag v-for="tag in postTags" :key="tag" variant="postit" class="!text-sm">{{ tag }}</HandTag>
           </div>
         </div>
         <div class="p-6 md:p-10">
@@ -92,6 +92,7 @@ import { wobblyRadius } from "~/utils/design-tokens";
 import { normalizeSegment } from "~/utils/ai-fiction-slug";
 import { formatDateYmd } from "~/utils/format-date";
 import { nuxtLinkToFromContentPath } from "~/utils/route-from-content-path";
+import { normalizeTags } from "~/utils/normalize-tags";
 
 definePageMeta({
   layout: "blog",
@@ -259,6 +260,8 @@ const staticBody = computed(() => {
   const b = p?.body;
   return typeof b === "string" ? b : null;
 });
+
+const postTags = computed(() => normalizeTags((post.value as { tags?: unknown } | null)?.tags));
 
 watch(
   [pending, post],

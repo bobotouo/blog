@@ -15,8 +15,8 @@
           {{ post?.title }}
         </h1>
 
-        <div v-if="post?.tags" class="flex flex-wrap gap-2">
-          <HandTag v-for="tag in post.tags" :key="tag" variant="postit" class="!text-sm">
+        <div v-if="postTags.length" class="flex flex-wrap gap-2">
+          <HandTag v-for="tag in postTags" :key="tag" variant="postit" class="!text-sm">
             {{ tag }}
           </HandTag>
         </div>
@@ -43,6 +43,7 @@
 <script setup lang="ts">
 import { formatDateYmd } from "~/utils/format-date";
 import { devSkipAsyncCache } from "~/utils/async-data";
+import { normalizeTags } from "~/utils/normalize-tags";
 
 definePageMeta({
   layout: "blog",
@@ -95,6 +96,8 @@ const staticBody = computed(() => {
   const b = p?.body;
   return typeof b === "string" ? b : null;
 });
+
+const postTags = computed(() => normalizeTags((post.value as { tags?: unknown } | null)?.tags));
 
 if (!post.value) {
   throw createError({ statusCode: 404, statusMessage: "Page not found" });

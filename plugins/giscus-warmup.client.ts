@@ -1,4 +1,9 @@
-const GISCUS_SRC = "https://giscus.app/client.js";
+import { GISCUS_JSDELIVR_MODULE } from "~/utils/giscus-loader";
+
+const WARM_URLS = [
+  GISCUS_JSDELIVR_MODULE,
+];
+
 let warmed = false;
 
 const mayNeedCommentsSoon = (path: string): boolean => {
@@ -7,10 +12,10 @@ const mayNeedCommentsSoon = (path: string): boolean => {
     return false;
   }
   return (
-    path.startsWith("/blog/") ||
-    path.startsWith("/ai-fiction/") ||
-    path.startsWith("/snapshots/") ||
-    /^\/[^/]+\/?$/.test(path)
+    path.startsWith("/blog/")
+    || path.startsWith("/ai-fiction/")
+    || path.startsWith("/snapshots/")
+    || /^\/[^/]+\/?$/.test(path)
   );
 };
 
@@ -18,16 +23,24 @@ const warmGiscusAssets = () => {
   if (warmed) return;
   warmed = true;
 
-  if (!document.querySelector(`link[rel="prefetch"][href="${GISCUS_SRC}"]`)) {
+  const config = useRuntimeConfig();
+  const base = ((config.public.baseUrl as string) || "/").replace(/\/$/, "");
+  const urls = [
+    config.public.giscusModuleUrl as string,
+    base ? `${base}/giscus-widget.mjs` : "/giscus-widget.mjs",
+    base ? `${base}/giscus-client.js` : "/giscus-client.js",
+    ...WARM_URLS,
+  ].filter(Boolean);
+
+  for (const href of urls) {
+    if (document.querySelector(`link[rel="prefetch"][href="${href}"]`)) continue;
     const prefetch = document.createElement("link");
     prefetch.rel = "prefetch";
     prefetch.as = "script";
-    prefetch.href = GISCUS_SRC;
+    prefetch.href = href;
     prefetch.crossOrigin = "anonymous";
     document.head.appendChild(prefetch);
   }
-
-  // 避免本地调试阶段多一个跨站请求占用资源；由真实评论页按需加载即可。
 };
 
 export default defineNuxtPlugin(() => {
@@ -36,12 +49,11 @@ export default defineNuxtPlugin(() => {
   if (!mayNeedCommentsSoon(route.path)) return;
 
   const scheduleWarmup = () => {
-    const requestIdle = (window as any).requestIdleCallback;
+    const requestIdle = (window as Window & { requestIdleCallback?: typeof requestIdleCallback }).requestIdleCallback;
     if (typeof requestIdle === "function") {
       requestIdle(() => warmGiscusAssets(), { timeout: 1800 });
       return;
     }
-
     window.setTimeout(() => warmGiscusAssets(), 900);
   };
 

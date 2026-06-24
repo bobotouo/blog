@@ -125,6 +125,12 @@ export default defineNuxtConfig({
     },
   },
 
+  vue: {
+    compilerOptions: {
+      isCustomElement: (tag) => tag === "giscus-widget",
+    },
+  },
+
   // Modules
   modules: [
     "@nuxt/content",
@@ -233,6 +239,10 @@ export default defineNuxtConfig({
       statsBase: process.env.NUXT_PUBLIC_STATS_BASE || "",
       /** GitHub Pages 等静态部署无 /api，可指向 Netlify 等有后端的地址，如 "https://blog.xxx.netlify.app" */
       commentsApiBase: process.env.NUXT_PUBLIC_COMMENTS_API_BASE || "",
+      /** 可选：覆盖 giscus Web Component 模块地址（默认走打包 + jsDelivr） */
+      giscusModuleUrl: process.env.NUXT_PUBLIC_GISCUS_MODULE_URL || "",
+      /** Giscus iframe 服务地址（自托管时修改） */
+      giscusHost: process.env.NUXT_PUBLIC_GISCUS_HOST || "https://giscus.app",
       baseUrl: appBase,
     },
   },

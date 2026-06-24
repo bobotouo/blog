@@ -44,8 +44,8 @@
             </div>
           </div>
 
-          <div v-if="item.tags" class="mt-5 flex flex-wrap gap-2">
-            <HandTag v-for="tag in item.tags" :key="tag" variant="postit" class="!text-xs">
+          <div v-if="normalizeTags(item.tags).length" class="mt-5 flex flex-wrap gap-2">
+            <HandTag v-for="tag in normalizeTags(item.tags)" :key="tag" variant="postit" class="!text-xs">
               {{ tag }}
             </HandTag>
           </div>
@@ -61,6 +61,7 @@ import { formatDateYmd } from "~/utils/format-date";
 import { nuxtLinkToFromContentPath } from "~/utils/route-from-content-path";
 import { devSkipAsyncCache, skipEmptySsrPayload } from "~/utils/async-data";
 import { loadPublicJson } from "~/utils/load-public-json";
+import { normalizeTags } from "~/utils/normalize-tags";
 
 definePageMeta({ layout: "blog" });
 
