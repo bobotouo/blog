@@ -42,8 +42,6 @@ if (existsSync(dest)) {
       'ai-fiction-list.json',
       'ai-fiction-series.json',
       'snapshots-list.json',
-      'giscus-widget.mjs',
-      'giscus-client.js',
     ]);
     if (existsSync(publicDir)) {
       const mergePublicToDist = (src, dst) => {

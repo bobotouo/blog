@@ -1,4 +1,5 @@
 import { onMounted, ref } from "vue";
+import { resolveCommentsApiUrl } from "~/utils/comments-api";
 
 type CountCacheEntry = {
   comments: number;
@@ -72,18 +73,13 @@ export const useCommentCount = (path: string) => {
     }
 
     const config = useRuntimeConfig();
-    const apiBase = (config.public.commentsApiBase as string) || "";
-    const baseUrl = (config.public.baseUrl as string) || "/";
-    const basePath = baseUrl.replace(/\/$/, "");
-    const url = apiBase
-      ? `${apiBase.replace(/\/$/, "")}/api/comments`
-      : basePath
-        ? `${basePath}/api/comments`
-        : "/api/comments";
+    const url = resolveCommentsApiUrl("comments", { path }, {
+      apiBase: config.public.commentsApiBase as string,
+      basePath: ((config.public.baseUrl as string) || "/").replace(/\/$/, ""),
+    });
 
     try {
       const data = await $fetch<{ comments: number | null }>(url, {
-        query: { path },
         timeout: 4500,
       });
       if (typeof data?.comments === "number") {

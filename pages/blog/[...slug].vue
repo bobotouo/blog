@@ -48,6 +48,7 @@
 
 <script setup lang="ts">
 import { formatDateYmd } from "~/utils/format-date";
+import { detailPageCachedData, loadContentDetail } from "~/utils/async-data";
 import { normalizeTags } from "~/utils/normalize-tags";
 
 definePageMeta({ layout: "blog" });
@@ -60,39 +61,21 @@ const slug = Array.isArray(route.params.slug) ? route.params.slug.join("/") : ro
 const contentPath = `/blog/${slug}`;
 const config = useRuntimeConfig();
 const basePath = ((config.public.baseUrl as string) || "/").replace(/\/$/, "");
-const jsonBase = import.meta.server ? "" : basePath;
 
 const { data: post, pending } = await useAsyncData(
   `blog-post-${contentPath}`,
-  async () => {
-    const loadJson = () =>
-      $fetch<{ body?: string; title?: string; date?: string; tags?: string[] }>(
-        `${jsonBase}/blog/${slug}.json`,
-      ).catch(() => null);
-    const load = async () => {
-      const fromQuery = await queryContent(contentPath).findOne();
-      if (fromQuery) return fromQuery;
-      return await loadJson();
-    };
-    if (import.meta.server) return await load();
-    const cached = useNuxtData(`blog-post-${contentPath}`).data.value;
-    if (cached) return cached;
-    try {
-      return await load();
-    } catch {
-      return await loadJson();
-    }
-  },
-  { getCachedData: import.meta.dev ? () => undefined : undefined, lazy: true },
+  () =>
+    loadContentDetail<{ body?: string; title?: string; date?: string; tags?: string[] }>({
+      contentPath,
+      jsonRelativePath: `blog/${slug}.json`,
+      basePath,
+    }),
+  { getCachedData: detailPageCachedData() },
 );
 
-watch(
-  [pending, post],
-  ([p, data]) => {
-    if (!p && !data) throw createError({ statusCode: 404, statusMessage: "Page not found" });
-  },
-  { immediate: true },
-);
+if (!post.value) {
+  throw createError({ statusCode: 404, statusMessage: "Page not found" });
+}
 
 const staticBody = computed(() => {
   const p = post.value as { body?: unknown } | null | undefined;

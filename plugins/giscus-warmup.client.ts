@@ -1,9 +1,4 @@
-import { GISCUS_JSDELIVR_MODULE } from "~/utils/giscus-loader";
-
-const WARM_URLS = [
-  GISCUS_JSDELIVR_MODULE,
-];
-
+const GISCUS_SRC = "https://giscus.app/client.js";
 let warmed = false;
 
 const mayNeedCommentsSoon = (path: string): boolean => {
@@ -23,14 +18,7 @@ const warmGiscusAssets = () => {
   if (warmed) return;
   warmed = true;
 
-  const config = useRuntimeConfig();
-  const base = ((config.public.baseUrl as string) || "/").replace(/\/$/, "");
-  const urls = [
-    config.public.giscusModuleUrl as string,
-    base ? `${base}/giscus-widget.mjs` : "/giscus-widget.mjs",
-    base ? `${base}/giscus-client.js` : "/giscus-client.js",
-    ...WARM_URLS,
-  ].filter(Boolean);
+  const urls = [GISCUS_SRC];
 
   for (const href of urls) {
     if (document.querySelector(`link[rel="prefetch"][href="${href}"]`)) continue;
@@ -57,17 +45,5 @@ export default defineNuxtPlugin(() => {
     window.setTimeout(() => warmGiscusAssets(), 900);
   };
 
-  const onFirstInteraction = () => {
-    warmGiscusAssets();
-    window.removeEventListener("pointerdown", onFirstInteraction);
-    window.removeEventListener("keydown", onFirstInteraction);
-    window.removeEventListener("touchstart", onFirstInteraction);
-    window.removeEventListener("mousemove", onFirstInteraction);
-  };
-
   scheduleWarmup();
-  window.addEventListener("pointerdown", onFirstInteraction, { passive: true });
-  window.addEventListener("keydown", onFirstInteraction, { passive: true });
-  window.addEventListener("touchstart", onFirstInteraction, { passive: true });
-  window.addEventListener("mousemove", onFirstInteraction, { passive: true });
 });

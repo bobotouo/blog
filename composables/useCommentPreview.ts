@@ -1,4 +1,5 @@
 import { onMounted, ref } from "vue";
+import { resolveCommentsApiUrl } from "~/utils/comments-api";
 
 export type CommentPreviewItem = {
   author: string;
@@ -33,18 +34,13 @@ export function useCommentPreview(path: string, limit = 3) {
     }
 
     const config = useRuntimeConfig();
-    const apiBase = (config.public.commentsApiBase as string) || "";
-    const baseUrl = (config.public.baseUrl as string) || "/";
-    const basePath = baseUrl.replace(/\/$/, "");
-    const url = apiBase
-      ? `${apiBase.replace(/\/$/, "")}/api/comments-preview`
-      : basePath
-        ? `${basePath}/api/comments-preview`
-        : "/api/comments-preview";
+    const url = resolveCommentsApiUrl("comments-preview", { path, limit }, {
+      apiBase: config.public.commentsApiBase as string,
+      basePath: ((config.public.baseUrl as string) || "/").replace(/\/$/, ""),
+    });
 
     try {
       const data = await $fetch<{ comments: CommentPreviewItem[] | null }>(url, {
-        query: { path, limit },
         timeout: 5000,
       });
       if (data?.comments === null) {

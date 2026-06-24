@@ -18,27 +18,6 @@
         />
       </div>
     </Transition>
-
-    <giscus-widget
-      v-if="useWidget && widgetVisible"
-      :key="widgetKey"
-      class="giscus-widget-host block w-full"
-      :host="giscusHost"
-      :repo="repo"
-      :repoid="repoId"
-      :category="category"
-      :categoryid="categoryId"
-      mapping="specific"
-      :term="discussionTerm"
-      strict="0"
-      reactionsenabled="1"
-      emitmetadata="0"
-      inputposition="bottom"
-      :theme="theme"
-      lang="zh-CN"
-      loading="eager"
-    />
-
     <p v-if="showConfigHint" class="font-body text-pencil/60">
       评论系统未配置：请在环境变量中设置 Giscus 参数后重启开发服务。
     </p>
@@ -60,26 +39,18 @@ import {
   hasOAuthCallback,
   primeGiscusSessionForOAuth,
 } from "~/utils/giscus-oauth";
-import {
-  GISCUS_HOST,
-  giscusClientScriptUrls,
-  loadGiscusWidget,
-} from "~/utils/giscus-loader";
 
+const GISCUS_ORIGIN = "https://giscus.app";
 const commentsContainer = ref<HTMLElement | null>(null);
-const useWidget = ref(true);
-const widgetVisible = ref(false);
-const widgetKey = ref(0);
+const commentsLoaded = ref(false);
 const widgetReady = ref(false);
+let widgetObserver: MutationObserver | null = null;
 let frameResizeObserver: ResizeObserver | null = null;
 let loadGeneration = 0;
 
 const route = useRoute();
 const router = useRouter();
 const config = useRuntimeConfig();
-const basePath = ((config.public.baseUrl as string) || "/").replace(/\/$/, "");
-const giscusHost = (config.public.giscusHost as string) || GISCUS_HOST;
-const giscusModuleUrl = (config.public.giscusModuleUrl as string) || "";
 const repo = config.public.giscusRepo || "";
 const repoId = config.public.giscusRepoId || "";
 const category = config.public.giscusCategory || "Announcements";
@@ -90,27 +61,29 @@ const hasGiscusConfig = computed(() => !!repo && !!repoId && !!categoryId);
 const showConfigHint = computed(() => import.meta.dev && !hasGiscusConfig.value);
 const loadError = ref(false);
 const showSkeleton = computed(() => hasGiscusConfig.value && !widgetReady.value && !loadError.value);
-const discussionTerm = computed(() => getGiscusDiscussionTerm(route.path));
 let loadTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
+function discussionTerm() {
+  return getGiscusDiscussionTerm(route.path);
+}
+
+function giscusScriptUrl() {
+  return `${GISCUS_ORIGIN}/client.js`;
+}
+
 function getGiscusFrame() {
-  const root = commentsContainer.value;
-  if (!root) return null;
-  const widget = root.querySelector("giscus-widget");
-  const shadowFrame = widget?.shadowRoot?.querySelector("iframe");
-  if (shadowFrame) return shadowFrame;
-  return (
-    root.querySelector<HTMLIFrameElement>(".giscus-frame")
-    ?? root.querySelector<HTMLIFrameElement>('iframe[title="Comments"]')
-  );
+  return commentsContainer.value?.querySelector<HTMLIFrameElement>(".giscus-frame") ?? null;
+}
+
+function postToGiscus(message: Record<string, unknown>) {
+  const frame = getGiscusFrame();
+  frame?.contentWindow?.postMessage({ giscus: message }, GISCUS_ORIGIN);
 }
 
 function teardownGiscus() {
   if (!commentsContainer.value) return;
   commentsContainer.value.querySelectorAll('script[src*="giscus"]').forEach((el) => el.remove());
   commentsContainer.value.querySelector(".giscus")?.remove();
-  commentsContainer.value.querySelector("giscus-widget")?.remove();
-  widgetVisible.value = false;
 }
 
 function clearLoadTimeout() {
@@ -120,86 +93,9 @@ function clearLoadTimeout() {
   }
 }
 
-function markReadyWhenFrameVisible(frame: HTMLIFrameElement) {
-  if (frame.getBoundingClientRect().height >= 80) widgetReady.value = true;
-}
-
-function bindFrameObservers(frame: HTMLIFrameElement) {
-  frame.addEventListener("load", () => requestAnimationFrame(() => markReadyWhenFrameVisible(frame)));
-  frameResizeObserver?.disconnect();
-  frameResizeObserver = new ResizeObserver(() => markReadyWhenFrameVisible(frame));
-  frameResizeObserver.observe(frame);
-}
-
-function detectWidgetReady() {
-  const frame = getGiscusFrame();
-  if (!frame) return;
-  if (frame.dataset.readyBound !== "1") {
-    frame.dataset.readyBound = "1";
-    bindFrameObservers(frame);
-  }
-  markReadyWhenFrameVisible(frame);
-}
-
-function armLoadTimeout(gen: number) {
-  loadTimeoutId = setTimeout(() => {
-    if (gen !== loadGeneration) return;
-    if (!getGiscusFrame()) loadError.value = true;
-    widgetReady.value = true;
-  }, 20000);
-}
-
-function loadCommentsViaScript(gen: number) {
-  if (!commentsContainer.value) return;
-
-  const urls = giscusClientScriptUrls(basePath);
-  let index = 0;
-
-  const tryNext = () => {
-    if (gen !== loadGeneration || index >= urls.length) {
-      if (gen === loadGeneration) {
-        loadError.value = true;
-        widgetReady.value = true;
-      }
-      return;
-    }
-
-    const script = document.createElement("script");
-    script.src = urls[index]!;
-    script.async = true;
-    script.crossOrigin = "anonymous";
-    script.onerror = () => {
-      index += 1;
-      script.remove();
-      tryNext();
-    };
-    script.onload = () => {
-      if (gen !== loadGeneration) return;
-      finalizeGiscusOAuthHandoff();
-      detectWidgetReady();
-    };
-    script.setAttribute("data-repo", repo);
-    script.setAttribute("data-repo-id", repoId);
-    script.setAttribute("data-category", category);
-    script.setAttribute("data-category-id", categoryId);
-    script.setAttribute("data-mapping", "specific");
-    script.setAttribute("data-term", discussionTerm.value);
-    script.setAttribute("data-strict", "0");
-    script.setAttribute("data-reactions-enabled", "1");
-    script.setAttribute("data-emit-metadata", "0");
-    script.setAttribute("data-input-position", "bottom");
-    script.setAttribute("data-theme", theme);
-    script.setAttribute("data-lang", "zh-CN");
-    script.setAttribute("data-loading", "eager");
-    commentsContainer.value!.appendChild(script);
-    armLoadTimeout(gen);
-  };
-
-  tryNext();
-}
-
-async function loadComments(force = false) {
+function loadComments(force = false) {
   if (!commentsContainer.value || !hasGiscusConfig.value) return;
+  if (commentsLoaded.value && !force) return;
 
   const gen = ++loadGeneration;
   loadError.value = false;
@@ -211,27 +107,72 @@ async function loadComments(force = false) {
     primeGiscusSessionForOAuth();
   }
 
-  useWidget.value = true;
-  try {
-    await loadGiscusWidget({ moduleUrl: giscusModuleUrl || undefined, basePath });
+  const script = document.createElement("script");
+  script.src = giscusScriptUrl();
+  script.async = true;
+  script.crossOrigin = "anonymous";
+  script.onerror = () => {
     if (gen !== loadGeneration) return;
-    widgetVisible.value = true;
-    widgetKey.value += 1;
+    loadError.value = true;
+    widgetReady.value = true;
+    clearLoadTimeout();
+  };
+  script.onload = () => {
+    if (gen !== loadGeneration) return;
     finalizeGiscusOAuthHandoff();
-    await nextTick();
     detectWidgetReady();
-    armLoadTimeout(gen);
-    return;
-  } catch {
-  }
+  };
+  script.setAttribute("data-repo", repo);
+  script.setAttribute("data-repo-id", repoId);
+  script.setAttribute("data-category", category);
+  script.setAttribute("data-category-id", categoryId);
+  script.setAttribute("data-mapping", "specific");
+  script.setAttribute("data-term", discussionTerm());
+  script.setAttribute("data-strict", "0");
+  script.setAttribute("data-reactions-enabled", "1");
+  script.setAttribute("data-emit-metadata", "0");
+  script.setAttribute("data-input-position", "bottom");
+  script.setAttribute("data-theme", theme);
+  script.setAttribute("data-lang", "zh-CN");
+  script.setAttribute("data-loading", "eager");
 
-  if (gen !== loadGeneration) return;
-  useWidget.value = false;
-  loadCommentsViaScript(gen);
+  commentsContainer.value.appendChild(script);
+  commentsLoaded.value = true;
+
+  loadTimeoutId = setTimeout(() => {
+    if (gen !== loadGeneration) return;
+    if (!getGiscusFrame()) {
+      loadError.value = true;
+    }
+    widgetReady.value = true;
+  }, 20000);
 }
 
 function retryLoad() {
+  commentsLoaded.value = false;
   loadComments(true);
+}
+
+function markReadyWhenFrameVisible(frame: HTMLIFrameElement) {
+  if (frame.getBoundingClientRect().height >= 80) widgetReady.value = true;
+}
+
+function bindFrameObservers(frame: HTMLIFrameElement) {
+  frame.addEventListener("load", () => requestAnimationFrame(() => markReadyWhenFrameVisible(frame)));
+  if (frameResizeObserver) frameResizeObserver.disconnect();
+  frameResizeObserver = new ResizeObserver(() => markReadyWhenFrameVisible(frame));
+  frameResizeObserver.observe(frame);
+}
+
+function detectWidgetReady() {
+  if (!commentsContainer.value) return;
+  const frame = getGiscusFrame();
+  if (!frame) return;
+  if (frame.dataset.readyBound !== "1") {
+    frame.dataset.readyBound = "1";
+    bindFrameObservers(frame);
+  }
+  markReadyWhenFrameVisible(frame);
 }
 
 function isAuthError(msg: string) {
@@ -241,7 +182,7 @@ function isAuthError(msg: string) {
 }
 
 function onGiscusMessage(event: MessageEvent) {
-  if (event.origin !== giscusHost) return;
+  if (event.origin !== GISCUS_ORIGIN) return;
   const payload = event.data?.giscus;
   if (!payload) return;
 
@@ -257,6 +198,7 @@ function onGiscusMessage(event: MessageEvent) {
     const msg = String(payload.error);
     if (isAuthError(msg)) {
       clearGiscusSession();
+      commentsLoaded.value = false;
       loadComments(true);
     }
     detectWidgetReady();
@@ -269,25 +211,34 @@ onMounted(async () => {
   if (!commentsContainer.value || !hasGiscusConfig.value) return;
 
   window.addEventListener("message", onGiscusMessage);
+  widgetObserver = new MutationObserver(detectWidgetReady);
+  widgetObserver.observe(commentsContainer.value, { childList: true, subtree: true });
+
   await router.isReady();
   if (hasOAuthCallback()) {
     primeGiscusSessionForOAuth();
   }
-  await loadComments();
+  loadComments();
+  detectWidgetReady();
 });
 
 watch(
-  () => discussionTerm.value,
+  () => route.path,
   () => {
-    if (!widgetVisible.value || !useWidget.value) return;
-    widgetKey.value += 1;
-    nextTick(() => detectWidgetReady());
+    if (!commentsLoaded.value) return;
+    postToGiscus({
+      setConfig: {
+        term: discussionTerm(),
+      },
+    });
+    detectWidgetReady();
   },
 );
 
 onUnmounted(() => {
   clearLoadTimeout();
   window.removeEventListener("message", onGiscusMessage);
+  widgetObserver?.disconnect();
   frameResizeObserver?.disconnect();
 });
 </script>
@@ -297,9 +248,4 @@ onUnmounted(() => {
 .skeleton-fade-leave-active { transition: opacity 0.28s ease; }
 .skeleton-fade-enter-from,
 .skeleton-fade-leave-to { opacity: 0; }
-
-.giscus-widget-host :deep(iframe) {
-  width: 100%;
-  min-height: 150px;
-}
 </style>

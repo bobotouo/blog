@@ -46,7 +46,7 @@ const isGhPages = process.env.NUXT_GH_PAGES === "true";
 const isNetlify = process.env.NETLIFY === "true";
 const enableSsr = process.env.NUXT_ENABLE_SSR
   ? process.env.NUXT_ENABLE_SSR === "true"
-  : !isGhPages && isNetlify;
+  : !isGhPages;
 const appBase = process.env.NUXT_APP_BASE_URL || "/";
 const cdnBase = process.env.NUXT_APP_CDN_URL || "";
 const normalizedBase = appBase.endsWith("/") ? appBase : `${appBase}/`;
@@ -122,12 +122,6 @@ export default defineNuxtConfig({
     buildAssetsDir: "/_nuxt/",
     pageTransition: {
       name: "page",
-    },
-  },
-
-  vue: {
-    compilerOptions: {
-      isCustomElement: (tag) => tag === "giscus-widget",
     },
   },
 
@@ -239,10 +233,6 @@ export default defineNuxtConfig({
       statsBase: process.env.NUXT_PUBLIC_STATS_BASE || "",
       /** GitHub Pages 等静态部署无 /api，可指向 Netlify 等有后端的地址，如 "https://blog.xxx.netlify.app" */
       commentsApiBase: process.env.NUXT_PUBLIC_COMMENTS_API_BASE || "",
-      /** 可选：覆盖 giscus Web Component 模块地址（默认走打包 + jsDelivr） */
-      giscusModuleUrl: process.env.NUXT_PUBLIC_GISCUS_MODULE_URL || "",
-      /** Giscus iframe 服务地址（自托管时修改） */
-      giscusHost: process.env.NUXT_PUBLIC_GISCUS_HOST || "https://giscus.app",
       baseUrl: appBase,
     },
   },

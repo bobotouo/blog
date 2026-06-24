@@ -64,7 +64,7 @@
 <script setup lang="ts">
 import { wobblyRadius, shadows } from "~/utils/design-tokens";
 import { formatDateYmd } from "~/utils/format-date";
-import { devSkipAsyncCache } from "~/utils/async-data";
+import { devSkipAsyncCache, detailPageCachedData, loadContentDetail } from "~/utils/async-data";
 import { normalizeTags } from "~/utils/normalize-tags";
 
 definePageMeta({ layout: "blog" });
@@ -79,37 +79,21 @@ const { count: commentCount } = useCommentCount(fullPath);
 const slug = Array.isArray(route.params.slug) ? route.params.slug.join("/") : route.params.slug;
 const contentPath = `/snapshots/${slug}`;
 const basePath = base.replace(/\/$/, "");
-const jsonBase = import.meta.server ? "" : basePath;
 
 const { data: snapshot, pending } = await useAsyncData(
   `snapshot-${contentPath}`,
-  async () => {
-    const loadJson = () =>
-      $fetch<{ body?: string; title?: string; date?: string }>(`${jsonBase}/snapshots/${slug}.json`).catch(() => null);
-    const load = async () => {
-      const fromQuery = await queryContent(contentPath).findOne();
-      if (fromQuery) return fromQuery;
-      return await loadJson();
-    };
-    if (import.meta.server) return await load();
-    const cached = useNuxtData(`snapshot-${contentPath}`).data.value;
-    if (cached) return cached;
-    try {
-      return await load();
-    } catch {
-      return await loadJson();
-    }
-  },
-  { getCachedData: devSkipAsyncCache(), lazy: true },
+  () =>
+    loadContentDetail<{ body?: string; title?: string; date?: string }>({
+      contentPath,
+      jsonRelativePath: `snapshots/${slug}.json`,
+      basePath,
+    }),
+  { getCachedData: detailPageCachedData() },
 );
 
-watch(
-  [pending, snapshot],
-  ([p, data]) => {
-    if (!p && !data) throw createError({ statusCode: 404, statusMessage: "Page not found" });
-  },
-  { immediate: true },
-);
+if (!snapshot.value) {
+  throw createError({ statusCode: 404, statusMessage: "Page not found" });
+}
 
 const staticBody = computed(() => {
   const s = snapshot.value as { body?: unknown } | null | undefined;

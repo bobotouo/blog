@@ -91,6 +91,8 @@
 import { wobblyRadius } from "~/utils/design-tokens";
 import { normalizeSegment } from "~/utils/ai-fiction-slug";
 import { formatDateYmd } from "~/utils/format-date";
+import { detailPageCachedData } from "~/utils/async-data";
+import { loadPublicJson, loadPublicJsonObject } from "~/utils/load-public-json";
 import { nuxtLinkToFromContentPath } from "~/utils/route-from-content-path";
 import { normalizeTags } from "~/utils/normalize-tags";
 
@@ -112,13 +114,9 @@ const stableKey = computed(() => `chapter::${route.path.replace(/\/$/, "")}`);
 const config = useRuntimeConfig();
 const base = (config.public.baseUrl as string) || "/";
 const basePath = base.replace(/\/$/, "");
-const jsonBase = import.meta.server ? "" : basePath;
 const fullPath = basePath + route.path;
 const { views } = usePageStats(fullPath);
 const { count: commentCount } = useCommentCount(fullPath);
-
-// useRequestFetch 在 SSR 里自动补全 URL（带 host），避免 queryContent+clientDB 抛异常
-const requestFetch = useRequestFetch();
 
 function cmpChapterPath(a: string, b: string) {
   const fa = a.split("/").pop() || a;
@@ -136,30 +134,19 @@ const { data: chapterNavList } = await useAsyncData(
   async () => {
     const n = novel.value;
 
-    // 主路径：per-novel bundle.json（仅含本书章节，体积更小）
-    try {
-      const bundle = await requestFetch<{ chapters?: ChapterNavItem[] }>(
-        `${jsonBase}/ai-fiction/${encodeURIComponent(n)}/bundle.json`,
-      );
-      if (bundle?.chapters?.length) return bundle.chapters as ChapterNavItem[];
-    } catch {
-      /* silent */
-    }
+    const bundle = await loadPublicJsonObject<{ chapters?: ChapterNavItem[] }>(
+      `ai-fiction/${n}/bundle.json`,
+      basePath,
+    );
+    if (bundle?.chapters?.length) return bundle.chapters;
 
-    // 兜底：全量 series.json
-    try {
-      const list = await requestFetch<Array<{ novelSlug: string; chapters?: ChapterNavItem[] }>>(
-        `${jsonBase}/ai-fiction-series.json`,
-      );
-      if (Array.isArray(list)) {
-        const s = list.find((x) => normalizeSegment(x.novelSlug) === n);
-        if (s?.chapters?.length) return s.chapters as ChapterNavItem[];
-      }
-    } catch {
-      /* silent */
-    }
+    const list = await loadPublicJson<{ novelSlug: string; chapters?: ChapterNavItem[] }>(
+      "ai-fiction-series.json",
+      basePath,
+    );
+    const s = list.find((x) => normalizeSegment(x.novelSlug) === n);
+    if (s?.chapters?.length) return s.chapters;
 
-    // 客户端兜底：queryContent（clientDB 仅在客户端可靠）
     if (import.meta.client) {
       try {
         const all = await queryContent("ai-fiction").find();
@@ -181,7 +168,7 @@ const { data: chapterNavList } = await useAsyncData(
 
     return [] as ChapterNavItem[];
   },
-  { watch: [novel] },
+  { watch: [novel], getCachedData: detailPageCachedData() },
 );
 
 const prevNext = computed(() => {
@@ -204,33 +191,25 @@ const { data: post, pending } = await useAsyncData(
     const n = novel.value;
     const ch = chapter.value;
 
-    // 通过 ai-fiction-list.json 做 Unicode 归一化匹配，拿到 canonical 路径
-    let canonicalPath: string | undefined;
-    try {
-      const indexRows = await requestFetch<Array<{ _path?: string; chapterFile?: string }>>(
-        `${jsonBase}/ai-fiction-list.json`,
-      );
-      if (Array.isArray(indexRows)) {
-        canonicalPath = indexRows.find((row) => {
-          const segs = String(row?._path ?? "").replace(/^\/ai-fiction\//, "").split("/");
-          const chapterSeg = row?.chapterFile ?? segs[1] ?? "";
-          return normalizeSegment(segs[0] ?? "") === n && normalizeSegment(chapterSeg) === ch;
-        })?._path;
-      }
-    } catch {
-      /* silent */
-    }
+    const indexRows = await loadPublicJson<{
+      _path?: string;
+      chapterFile?: string;
+    }>("ai-fiction-list.json", basePath);
+
+    const canonicalPath = indexRows.find((row) => {
+      const segs = String(row?._path ?? "").replace(/^\/ai-fiction\//, "").split("/");
+      const chapterSeg = row?.chapterFile ?? segs[1] ?? "";
+      return normalizeSegment(segs[0] ?? "") === n && normalizeSegment(chapterSeg) === ch;
+    })?._path;
 
     const tryJson = async (pathLike: string) => {
       const rel = String(pathLike).replace(/^\/ai-fiction\//, "");
       const segs = rel.split("/");
       if (segs.length < 2) return null;
-      const jsonUrl = `${jsonBase}/ai-fiction/${encodeURIComponent(segs[0]!)}/${encodeURIComponent(segs[1]!)}.json`;
-      try {
-        return await requestFetch<{ body?: string; title?: string; date?: string; tags?: string[] }>(jsonUrl);
-      } catch {
-        return null;
-      }
+      return await loadPublicJsonObject<{ body?: string; title?: string; date?: string; tags?: string[] }>(
+        `ai-fiction/${segs[0]!}/${segs[1]!}.json`,
+        basePath,
+      );
     };
 
     if (canonicalPath) {
@@ -241,7 +220,6 @@ const { data: post, pending } = await useAsyncData(
     const direct = await tryJson(`/ai-fiction/${n}/${ch}`);
     if (direct?.body) return direct;
 
-    // 客户端兜底：queryContent
     if (import.meta.client) {
       try {
         const doc = await queryContent(canonicalPath || `/ai-fiction/${n}/${ch}`).findOne();
@@ -252,8 +230,12 @@ const { data: post, pending } = await useAsyncData(
     }
     return null;
   },
-  { watch: [novel, chapter] },
+  { watch: [novel, chapter], getCachedData: detailPageCachedData() },
 );
+
+if (!post.value) {
+  throw createError({ statusCode: 404, statusMessage: "Page not found" });
+}
 
 const staticBody = computed(() => {
   const p = post.value as { body?: unknown } | null | undefined;
@@ -262,16 +244,6 @@ const staticBody = computed(() => {
 });
 
 const postTags = computed(() => normalizeTags((post.value as { tags?: unknown } | null)?.tags));
-
-watch(
-  [pending, post],
-  ([p, data]) => {
-    if (!p && !data) {
-      throw createError({ statusCode: 404, statusMessage: "Page not found" });
-    }
-  },
-  { immediate: true },
-);
 
 function goBack() {
   if (import.meta.client && window.history.length > 1) {

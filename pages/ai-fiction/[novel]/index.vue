@@ -152,6 +152,8 @@
 <script setup lang="ts">
 import { wobblyRadius, shadows } from "~/utils/design-tokens";
 import { normalizeSegment } from "~/utils/ai-fiction-slug";
+import { detailPageCachedData } from "~/utils/async-data";
+import { loadPublicJson, loadPublicJsonObject } from "~/utils/load-public-json";
 import { nuxtLinkToFromContentPath } from "~/utils/route-from-content-path";
 
 definePageMeta({
@@ -163,7 +165,6 @@ const router = useRouter();
 const config = useRuntimeConfig();
 const base = (config.public.baseUrl as string) || "/";
 const basePath = base.replace(/\/$/, "");
-const jsonBase = import.meta.server ? "" : basePath;
 const fullPath = basePath + route.path;
 const { count: commentCount } = useCommentCount(fullPath);
 
@@ -195,7 +196,6 @@ type Bundle = {
 
 // useRequestFetch 在 SSR 里自动把相对路径补成 http://localhost:PORT/...
 // 避免 queryContent + clientDB:true 在 _payload.json 请求时抛未捕获异常
-const requestFetch = useRequestFetch();
 
 const { data: bundle, pending } = await useAsyncData<Bundle | null>(
   `novel::${route.path.replace(/\/$/, "")}`,
@@ -203,37 +203,23 @@ const { data: bundle, pending } = await useAsyncData<Bundle | null>(
     const n = novelParam.value;
     if (!n) return null;
 
-    // ── 主路径：per-novel bundle.json（体积小，仅含本书数据） ───────────────
-    try {
-      const bundle = await requestFetch<Bundle>(
-        `${jsonBase}/ai-fiction/${encodeURIComponent(n)}/bundle.json`,
-      );
-      if (bundle && bundle.novelSlug) {
-        return {
-          ...bundle,
-          chapters: Array.isArray(bundle.chapters) ? bundle.chapters : [],
-          summaryBody: typeof bundle.summaryBody === "string" ? bundle.summaryBody : "",
-        };
-      }
-    } catch {
-      /* silent */
+    const fromBundle = await loadPublicJsonObject<Bundle>(`ai-fiction/${n}/bundle.json`, basePath);
+    if (fromBundle?.novelSlug) {
+      return {
+        ...fromBundle,
+        chapters: Array.isArray(fromBundle.chapters) ? fromBundle.chapters : [],
+        summaryBody: typeof fromBundle.summaryBody === "string" ? fromBundle.summaryBody : "",
+      };
     }
 
-    // ── 兜底：全量 series.json（兼容旧版静态部署）───────────────────────────
-    try {
-      const list = await requestFetch<Bundle[]>(`${jsonBase}/ai-fiction-series.json`);
-      if (Array.isArray(list)) {
-        const match = list.find((x) => normalizeSegment(x.novelSlug) === n);
-        if (match) {
-          return {
-            ...match,
-            chapters: Array.isArray((match as Bundle & { chapters?: unknown[] }).chapters) ? (match as Bundle & { chapters: Bundle["chapters"] }).chapters : [],
-            summaryBody: typeof (match as Bundle & { summaryBody?: string }).summaryBody === "string" ? (match as Bundle & { summaryBody: string }).summaryBody : "",
-          };
-        }
-      }
-    } catch {
-      /* silent */
+    const list = await loadPublicJson<Bundle>("ai-fiction-series.json", basePath);
+    const match = list.find((x) => normalizeSegment(x.novelSlug) === n);
+    if (match) {
+      return {
+        ...match,
+        chapters: Array.isArray(match.chapters) ? match.chapters : [],
+        summaryBody: typeof match.summaryBody === "string" ? match.summaryBody : "",
+      };
     }
 
     // ── 客户端兜底：queryContent（clientDB 仅在客户端可靠） ─────────────────
@@ -288,6 +274,7 @@ const { data: bundle, pending } = await useAsyncData<Bundle | null>(
 
     return null;
   },
+  { getCachedData: detailPageCachedData() },
 );
 
 function goBack() {

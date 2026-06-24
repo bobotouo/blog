@@ -42,7 +42,7 @@
 
 <script setup lang="ts">
 import { formatDateYmd } from "~/utils/format-date";
-import { devSkipAsyncCache } from "~/utils/async-data";
+import { detailPageCachedData, loadContentDetail } from "~/utils/async-data";
 import { normalizeTags } from "~/utils/normalize-tags";
 
 definePageMeta({
@@ -65,30 +65,16 @@ const { count: commentCount } = useCommentCount(fullPath);
 
 const contentPath = `/blog/${slug}`;
 const basePath = base.replace(/\/$/, "");
-const jsonBase = import.meta.server ? "" : basePath;
 
 const { data: post } = await useAsyncData(
   `blog-post-${contentPath}`,
-  async () => {
-    const loadJson = () =>
-      $fetch<{ body?: string; title?: string; date?: string; tags?: string[] }>(
-        `${jsonBase}/blog/${slug}.json`,
-      ).catch(() => null);
-    const load = async () => {
-      const fromQuery = await queryContent(contentPath).findOne();
-      if (fromQuery) return fromQuery;
-      return await loadJson();
-    };
-    if (import.meta.server) return await load();
-    const cached = useNuxtData(`blog-post-${contentPath}`).data.value;
-    if (cached) return cached;
-    try {
-      return await load();
-    } catch {
-      return await loadJson();
-    }
-  },
-  { getCachedData: devSkipAsyncCache() },
+  () =>
+    loadContentDetail<{ body?: string; title?: string; date?: string; tags?: string[] }>({
+      contentPath,
+      jsonRelativePath: `blog/${slug}.json`,
+      basePath,
+    }),
+  { getCachedData: detailPageCachedData() },
 );
 
 const staticBody = computed(() => {
