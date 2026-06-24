@@ -1,1 +1,0 @@
-import"./B4c4Sn14.js";function r(){return globalThis.$fetch}function o(t){let e=String(t??"").trim().replace(/\/$/,"");try{e=decodeURIComponent(e)}catch{}return e.normalize("NFC")}export{o as n,r as u};
