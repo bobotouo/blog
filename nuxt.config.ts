@@ -113,12 +113,6 @@ export default defineNuxtConfig({
           media: "print",
           onload: "this.media='all'",
         },
-        { rel: "dns-prefetch", href: "https://giscus.app" },
-        { rel: "dns-prefetch", href: "https://github.githubassets.com" },
-        { rel: "dns-prefetch", href: "https://github.com" },
-        { rel: "dns-prefetch", href: "https://api.github.com" },
-        { rel: "preconnect", href: "https://giscus.app", crossorigin: "" },
-        { rel: "preconnect", href: "https://github.githubassets.com", crossorigin: "" },
         { rel: "preload", href: `${normalizedBase}giscus-oauth-capture.js`, as: "script" },
       ],
       script: [{ src: `${normalizedBase}giscus-oauth-capture.js`, tagPosition: "head" }],
@@ -128,7 +122,6 @@ export default defineNuxtConfig({
     buildAssetsDir: "/_nuxt/",
     pageTransition: {
       name: "page",
-      mode: "out-in",
     },
   },
 
@@ -213,6 +206,8 @@ export default defineNuxtConfig({
       "/api/**": { ssr: false, headers: { "Cache-Control": "public, max-age=0, must-revalidate" } },
       "/api/_content/**": { prerender: false },
       "/_content/**": { prerender: false },
+      "/*-list.json": { headers: { "Cache-Control": "public, max-age=300, stale-while-revalidate=600" } },
+      "/ai-fiction-series.json": { headers: { "Cache-Control": "public, max-age=300, stale-while-revalidate=600" } },
     },
   },
 

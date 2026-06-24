@@ -35,7 +35,7 @@
             <div v-for="(img, imgIdx) in item.images" :key="`${item._path}-img-${imgIdx}`">
               <img
                 :src="img"
-                :alt="`${item.title} 图片 ${imgIdx + 1}`"
+                :alt="`${item.title} 图片 ${Number(imgIdx) + 1}`"
                 loading="lazy"
                 decoding="async"
                 class="block h-auto w-auto max-h-[20rem] max-w-full border-[3px] border-pencil object-contain"
@@ -59,6 +59,7 @@
 import { wobblyRadius, shadows } from "~/utils/design-tokens";
 import { formatDateYmd } from "~/utils/format-date";
 import { nuxtLinkToFromContentPath } from "~/utils/route-from-content-path";
+import { devSkipAsyncCache } from "~/utils/async-data";
 
 definePageMeta({ layout: "blog" });
 
@@ -70,18 +71,26 @@ const jsonBase = import.meta.server ? "" : basePath;
 const { data: snapshots } = await useAsyncData(
   "snapshots",
   async () => {
+    const jsonPath = jsonBase ? `${jsonBase}/snapshots-list.json` : "/snapshots-list.json";
+    const loadJson = () => $fetch<unknown[]>(jsonPath).catch(() => []);
+
     if (import.meta.server) {
+      const fromJson = await loadJson();
+      if (fromJson.length > 0) return fromJson;
       return await queryContent("snapshots").sort({ date: -1 }).find();
     }
+
     const cached = useNuxtData("snapshots").data.value;
-    if (cached?.length !== undefined) return cached;
+    if (Array.isArray(cached) && cached.length > 0) return cached;
+
     if (import.meta.dev) {
       try {
-        return await queryContent("snapshots").sort({ date: -1 }).find();
+        const fromQuery = await queryContent("snapshots").sort({ date: -1 }).find();
+        if (fromQuery.length > 0) return fromQuery;
       } catch { /* fallback */ }
     }
-    return await $fetch<unknown[]>(`${jsonBase}/snapshots-list.json`).catch(() => []);
+    return await loadJson();
   },
-  { getCachedData: () => (import.meta.dev ? null : undefined) },
+  { getCachedData: devSkipAsyncCache<unknown[]>() },
 );
 </script>

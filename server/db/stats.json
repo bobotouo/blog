@@ -2,8 +2,8 @@
   "views": {
     "/snapshots/2026-02-12-second-snapshot": 2,
     "/snapshots/2026-02-10-first-snapshot": 7,
-    "/blog": 49,
-    "/blog/": 68,
+    "/blog": 50,
+    "/blog/": 74,
     "/2026-02-11-happy-day": 9,
     "/2024-01-01-welcome": 4,
     "/2022-11-01-black-macos": 4,
@@ -20,14 +20,15 @@
     "/ai-fiction": 2,
     "/ai-fiction/%E7%99%BB%E6%A3%8B%E4%BB%99%E9%80%94/01-%E8%BE%B9%E9%99%B2%E5%B0%91%E5%B9%B4": 1,
     "/blog/20260623-finance-digest": 2,
-    "/blog/20260623-twitter-digest": 16
+    "/blog/20260623-twitter-digest": 16,
+    "/blog/2022-12-11-tools-collection": 1
   },
   "byDevice": {
-    "desktop": 160,
+    "desktop": 168,
     "mobile": 50
   },
   "byCountry": {
-    "XX": 210
+    "XX": 218
   },
   "daily": {
     "2026-02-12": 21,
@@ -38,6 +39,7 @@
     "2026-04-01": 10,
     "2026-04-02": 6,
     "2026-04-03": 3,
-    "2026-06-23": 32
+    "2026-06-23": 32,
+    "2026-06-24": 8
   }
 }

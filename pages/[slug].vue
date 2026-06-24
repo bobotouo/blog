@@ -42,6 +42,7 @@
 
 <script setup lang="ts">
 import { formatDateYmd } from "~/utils/format-date";
+import { devSkipAsyncCache } from "~/utils/async-data";
 
 definePageMeta({
   layout: "blog",
@@ -86,7 +87,7 @@ const { data: post } = await useAsyncData(
       return await loadJson();
     }
   },
-  { getCachedData: () => (import.meta.dev ? null : undefined) },
+  { getCachedData: devSkipAsyncCache() },
 );
 
 const staticBody = computed(() => {

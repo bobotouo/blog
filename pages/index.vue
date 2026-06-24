@@ -161,7 +161,8 @@ import { Motion } from "motion-v";
 import { site } from "~/utils/design-tokens";
 import { formatDateYmd } from "~/utils/format-date";
 import { nuxtLinkToFromContentPath } from "~/utils/route-from-content-path";
-import RotatingText from "~/components/RotatingText.vue";
+import { useFictionSeries } from "~/composables/useFictionSeries";
+import { useBlogList } from "~/composables/useBlogList";
 import HomeSnapshotCard from "~/components/HomeSnapshotCard.vue";
 import type { HandCardDecoration } from "~/utils/design-tokens";
 
@@ -172,28 +173,9 @@ const base = (config.public.baseUrl as string) || "/";
 const basePath = base.replace(/\/$/, "");
 const jsonBase = import.meta.server ? "" : basePath;
 
-const { data: posts } = await useAsyncData(
-  "home-blog-list",
-  async () => {
-    if (import.meta.server) {
-      return await queryContent("blog").sort({ date: -1 }).find();
-    }
-    if (import.meta.dev) {
-      try {
-        const fromQuery = await queryContent("blog").sort({ date: -1 }).find();
-        if (Array.isArray(fromQuery) && fromQuery.length > 0) return fromQuery;
-      } catch { /* fallback to JSON */ }
-    }
-    const jsonPath = basePath ? `${jsonBase}/blog-list.json` : "/blog-list.json";
-    return await $fetch<unknown[]>(jsonPath).catch(() => []);
-  },
-);
+const { data: posts } = await useBlogList("home-blog-list");
 
-const { data: fictionSeriesData } = await useAsyncData(
-  "home-fiction-count",
-  () => $fetch<unknown[]>(`${jsonBase}/ai-fiction-series.json`).catch(() => []),
-  { default: () => [] },
-);
+const { data: fictionSeriesData } = await useFictionSeries();
 
 const { data: snapshots, pending: snapshotsPending } = useAsyncData(
   "home-snapshots",

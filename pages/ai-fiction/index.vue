@@ -33,65 +33,15 @@
 </template>
 
 <script setup lang="ts">
-import { nuxtLinkToFromContentPath } from "~/utils/route-from-content-path";
+import { useFictionSeries } from "~/composables/useFictionSeries";
 
 definePageMeta({ layout: "blog" });
 
 const config = useRuntimeConfig();
 const base = (config.public.baseUrl as string) || "/";
 const basePath = base.replace(/\/$/, "");
-const jsonBase = import.meta.server ? "" : basePath;
 
-type SeriesItem = {
-  novelSlug: string;
-  novelName: string;
-  indexPath: string;
-  description?: string;
-  coverImage?: string;
-  chapterCount: number;
-  status?: string;
-};
-
-async function loadSeriesFromQuery(): Promise<SeriesItem[]> {
-  const rows = await queryContent("ai-fiction").find();
-  const summaryPaths = rows.filter((r) => String(r._path).endsWith("/summary"));
-  const out: SeriesItem[] = [];
-  for (const s of summaryPaths) {
-    const path = String(s._path);
-    const novelSlug = path.replace(/^\/ai-fiction\//, "").replace(/\/summary$/, "");
-    if (!novelSlug) continue;
-    const chapters = rows.filter(
-      (r) => String(r._path).startsWith(`/ai-fiction/${novelSlug}/`) && !String(r._path).endsWith("/summary"),
-    );
-    const fm = s as { title?: string; description?: string; coverImage?: string; status?: string };
-    out.push({
-      novelSlug,
-      novelName: fm.title ?? novelSlug,
-      indexPath: `/ai-fiction/${novelSlug}`,
-      description: fm.description,
-      coverImage: fm.coverImage as string | undefined,
-      status: fm.status,
-      chapterCount: chapters.length,
-    });
-  }
-  out.sort((a, b) => a.novelName.localeCompare(b.novelName, "zh-CN"));
-  return out;
-}
-
-const { data: fictionSeriesData } = await useAsyncData(
-  "ai-fiction-landing",
-  async () => {
-    const fromJson = await $fetch<SeriesItem[]>(`${jsonBase}/ai-fiction-series.json`).catch(() => []);
-    if (Array.isArray(fromJson) && fromJson.length > 0) return fromJson;
-    try {
-      return await loadSeriesFromQuery();
-    } catch {
-      return [];
-    }
-  },
-  { getCachedData: () => undefined },
-);
-
+const { data: fictionSeriesData } = await useFictionSeries();
 const fictionSeries = computed(() => fictionSeriesData.value ?? []);
 const route = useRoute();
 usePageStats(route.path);

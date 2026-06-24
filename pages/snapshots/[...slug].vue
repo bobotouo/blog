@@ -64,6 +64,7 @@
 <script setup lang="ts">
 import { wobblyRadius, shadows } from "~/utils/design-tokens";
 import { formatDateYmd } from "~/utils/format-date";
+import { devSkipAsyncCache } from "~/utils/async-data";
 
 definePageMeta({ layout: "blog" });
 
@@ -98,7 +99,7 @@ const { data: snapshot, pending } = await useAsyncData(
       return await loadJson();
     }
   },
-  { getCachedData: () => (import.meta.dev ? null : undefined), lazy: true },
+  { getCachedData: devSkipAsyncCache(), lazy: true },
 );
 
 watch(

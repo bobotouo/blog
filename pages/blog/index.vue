@@ -51,11 +51,12 @@
     </div>
 
     <!-- Post list -->
-    <div class="columns-1 md:columns-2 [&>article]:break-inside-avoid gap-8">
+    <div class="blog-post-columns columns-1 md:columns-2 [&>article]:break-inside-avoid gap-8">
       <article v-for="(post, idx) in rest" :key="post._path" class="mb-6">
         <NuxtLink :to="nuxtLinkToFromContentPath(post._path, base)" class="block group">
           <HandCard
-            :decoration="idx % 3 === 0 ? 'tack' : 'none'"
+            :decoration="postDecoration(idx, rest.length)"
+            inset-tack
             :rotate="idx % 2 === 0 ? '-0.5deg' : '0.5deg'"
             padding="p-5"
             class="group-hover:shadow-hand"
@@ -83,32 +84,16 @@
 <script setup lang="ts">
 import { formatDateYmd } from "~/utils/format-date";
 import { nuxtLinkToFromContentPath } from "~/utils/route-from-content-path";
+import type { HandCardDecoration } from "~/utils/design-tokens";
+import { useBlogList } from "~/composables/useBlogList";
 
 definePageMeta({ layout: "blog" });
 
 const config = useRuntimeConfig();
 const base = (config.public.baseUrl as string) || "/";
-const basePath = base.replace(/\/$/, "");
-const jsonBase = import.meta.server ? "" : basePath;
 const route = useRoute();
 
-const { data: posts } = await useAsyncData(
-  "blog",
-  async () => {
-    if (import.meta.server) {
-      return await queryContent("blog").sort({ date: -1 }).find();
-    }
-    const cached = useNuxtData("blog").data.value;
-    if (Array.isArray(cached) && cached.length > 0) return cached;
-    if (import.meta.dev) {
-      try {
-        return await queryContent("blog").sort({ date: -1 }).find();
-      } catch { /* fallback */ }
-    }
-    return await $fetch<unknown[]>(`${jsonBase}/blog-list.json`).catch(() => []);
-  },
-  { getCachedData: () => (import.meta.dev ? null : undefined) },
-);
+const { data: posts } = await useBlogList();
 
 const activePosts = computed(
   () => (posts.value ?? []) as Array<{ _path: string; title: string; date: string; description?: string; coverImage?: string }>,
@@ -133,5 +118,17 @@ const rest = computed(() => {
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 });
 
+/** 双栏瀑布流：DOM 最后两篇即底行，不挂图钉 */
+function postDecoration(idx: number, total: number): HandCardDecoration {
+  if (total > 0 && idx >= total - 2) return "none";
+  return idx % 3 === 0 ? "tack" : "none";
+}
+
 usePageStats(route.path);
 </script>
+
+<style scoped>
+.blog-post-columns article:nth-last-child(-n+2) :deep(.hand-card-tack) {
+  display: none;
+}
+</style>

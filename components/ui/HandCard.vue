@@ -16,7 +16,8 @@
     <!-- thumbtack decoration -->
     <div
       v-if="decoration === 'tack'"
-      class="absolute -top-2.5 left-1/2 z-10 -translate-x-1/2"
+      class="hand-card-tack absolute left-1/2 z-10 -translate-x-1/2"
+      :class="insetTack ? 'top-2' : '-top-2.5'"
       aria-hidden="true"
     >
       <div class="relative h-5 w-5 rounded-full border-2 border-pencil bg-marker shadow-[2px_2px_0_#2d2d2d]">
@@ -39,6 +40,8 @@ const props = withDefaults(
     rotate?: string;
     /** 面板内嵌时使用，去掉额外阴影 */
     flat?: boolean;
+    /** 图钉画在卡片内侧，避免瀑布流/裁切露出半截 */
+    insetTack?: boolean;
   }>(),
   {
     decoration: "none",
@@ -47,6 +50,7 @@ const props = withDefaults(
     padding: "p-6",
     rotate: "",
     flat: false,
+    insetTack: false,
   },
 );
 
