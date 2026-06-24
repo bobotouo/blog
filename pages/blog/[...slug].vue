@@ -29,7 +29,8 @@
         </div>
         <div class="p-6 md:p-10">
           <div class="prose max-w-none">
-            <ContentRenderer :value="post as any" />
+            <div v-if="staticBody" v-html="staticBody" />
+            <ContentRenderer v-else :value="post as any" />
           </div>
         </div>
       </template>
@@ -91,4 +92,10 @@ watch(
   },
   { immediate: true },
 );
+
+const staticBody = computed(() => {
+  const p = post.value as { body?: unknown } | null | undefined;
+  const b = p?.body;
+  return typeof b === "string" ? b : null;
+});
 </script>
