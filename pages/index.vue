@@ -163,6 +163,8 @@ import { formatDateYmd } from "~/utils/format-date";
 import { nuxtLinkToFromContentPath } from "~/utils/route-from-content-path";
 import { useFictionSeries } from "~/composables/useFictionSeries";
 import { useBlogList } from "~/composables/useBlogList";
+import { skipEmptySsrPayload } from "~/utils/async-data";
+import { loadPublicJson } from "~/utils/load-public-json";
 import HomeSnapshotCard from "~/components/HomeSnapshotCard.vue";
 import type { HandCardDecoration } from "~/utils/design-tokens";
 
@@ -171,19 +173,15 @@ definePageMeta({ layout: "blog" });
 const config = useRuntimeConfig();
 const base = (config.public.baseUrl as string) || "/";
 const basePath = base.replace(/\/$/, "");
-const jsonBase = import.meta.server ? "" : basePath;
 
 const { data: posts } = await useBlogList("home-blog-list");
 
 const { data: fictionSeriesData } = await useFictionSeries();
 
-const { data: snapshots, pending: snapshotsPending } = useAsyncData(
+const { data: snapshots, pending: snapshotsPending } = await useAsyncData(
   "home-snapshots",
-  async () => {
-    const jsonPath = basePath ? `${jsonBase}/snapshots-list.json` : "/snapshots-list.json";
-    return await $fetch<unknown[]>(jsonPath).catch(() => []);
-  },
-  { server: false, lazy: true, default: () => [] },
+  () => loadPublicJson<unknown>("snapshots-list.json", basePath),
+  { getCachedData: skipEmptySsrPayload<unknown[]>() },
 );
 
 const recentPosts = computed(

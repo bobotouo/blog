@@ -1,4 +1,5 @@
-import { devSkipAsyncCache } from "~/utils/async-data";
+import { devSkipAsyncCache, skipEmptySsrPayload } from "~/utils/async-data";
+import { loadPublicJson } from "~/utils/load-public-json";
 
 export type FictionSeriesItem = {
   novelSlug: string;
@@ -40,30 +41,23 @@ async function loadSeriesFromQuery(): Promise<FictionSeriesItem[]> {
 export function useFictionSeries(key = "ai-fiction-landing") {
   const config = useRuntimeConfig();
   const basePath = ((config.public.baseUrl as string) || "/").replace(/\/$/, "");
-  const jsonBase = import.meta.server ? "" : basePath;
 
   return useAsyncData(
     key,
     async () => {
-      const jsonPath = jsonBase
-        ? `${jsonBase}/ai-fiction-series.json`
-        : "/ai-fiction-series.json";
-      const loadJson = () => $fetch<FictionSeriesItem[]>(jsonPath).catch(() => []);
-
-      if (import.meta.server) {
-        const fromJson = await loadJson();
-        if (fromJson.length > 0) return fromJson;
-        return await loadSeriesFromQuery();
-      }
-
-      const fromJson = await loadJson();
+      const fromJson = await loadPublicJson<FictionSeriesItem>("ai-fiction-series.json", basePath);
       if (fromJson.length > 0) return fromJson;
+
       try {
         return await loadSeriesFromQuery();
       } catch {
         return [];
       }
     },
-    { getCachedData: devSkipAsyncCache<FictionSeriesItem[]>() },
+    {
+      getCachedData: import.meta.dev
+        ? devSkipAsyncCache<FictionSeriesItem[]>()
+        : skipEmptySsrPayload<FictionSeriesItem[]>(),
+    },
   );
 }

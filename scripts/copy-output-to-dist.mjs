@@ -35,8 +35,14 @@ if (existsSync(dest)) {
   if (hasIndex && hasNuxt) {
     console.log('✓ dist already contains build output from Netlify preset');
 
-    // 将 public/ 里的静态资源（favicon.ico 等）合并进 dist/，不覆盖已有文件
+    // 将 public/ 里的静态资源（含构建 JSON）合并进 dist/，JSON 始终覆盖
     const publicDir = join(cwd, 'public');
+    const forceJsonNames = new Set([
+      'blog-list.json',
+      'ai-fiction-list.json',
+      'ai-fiction-series.json',
+      'snapshots-list.json',
+    ]);
     if (existsSync(publicDir)) {
       const mergePublicToDist = (src, dst) => {
         const entries = readdirSync(src, { withFileTypes: true });
@@ -44,16 +50,16 @@ if (existsSync(dest)) {
           const srcPath = join(src, entry.name);
           const dstPath = join(dst, entry.name);
           if (entry.isDirectory()) {
-            // 不覆盖 _nuxt / blog / ai-fiction 等构建产物目录
             if (!existsSync(dstPath)) {
               cpSync(srcPath, dstPath, { recursive: true });
               console.log(`✓ Merged dir public/${entry.name} → dist/`);
+            } else if (['blog', 'ai-fiction', 'snapshots'].includes(entry.name)) {
+              cpSync(srcPath, dstPath, { recursive: true, force: true });
+              console.log(`✓ Refreshed dir public/${entry.name} → dist/`);
             }
-          } else {
-            if (!existsSync(dstPath)) {
-              cpSync(srcPath, dstPath);
-              console.log(`✓ Merged file public/${entry.name} → dist/`);
-            }
+          } else if (forceJsonNames.has(entry.name) || !existsSync(dstPath)) {
+            cpSync(srcPath, dstPath, { force: true });
+            console.log(`✓ Merged file public/${entry.name} → dist/`);
           }
         }
       };

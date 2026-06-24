@@ -11,7 +11,7 @@
     "twitter:digest": "node scripts/twitter-digest.mjs",
     "twitter:digest:local": "node scripts/twitter-digest.mjs",
     "dev": "node scripts/generate-blog-list.mjs && nuxt dev",
-    "build": "node scripts/generate-blog-list.mjs && nuxt build",
+    "build": "node scripts/generate-blog-list.mjs && nuxt build && node scripts/sync-static-json-to-output.mjs",
     "build:netlify-dist": "node scripts/copy-output-to-dist.mjs",
     "generate": "node scripts/generate-blog-list.mjs && nuxt generate",
     "pregenerate": "node scripts/generate-blog-list.mjs",

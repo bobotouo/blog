@@ -59,38 +59,34 @@
 import { wobblyRadius, shadows } from "~/utils/design-tokens";
 import { formatDateYmd } from "~/utils/format-date";
 import { nuxtLinkToFromContentPath } from "~/utils/route-from-content-path";
-import { devSkipAsyncCache } from "~/utils/async-data";
+import { devSkipAsyncCache, skipEmptySsrPayload } from "~/utils/async-data";
+import { loadPublicJson } from "~/utils/load-public-json";
 
 definePageMeta({ layout: "blog" });
 
 const config = useRuntimeConfig();
 const base = (config.public.baseUrl as string) || "/";
 const basePath = base.replace(/\/$/, "");
-const jsonBase = import.meta.server ? "" : basePath;
 
 const { data: snapshots } = await useAsyncData(
   "snapshots",
   async () => {
-    const jsonPath = jsonBase ? `${jsonBase}/snapshots-list.json` : "/snapshots-list.json";
-    const loadJson = () => $fetch<unknown[]>(jsonPath).catch(() => []);
+    const fromJson = await loadPublicJson<unknown>("snapshots-list.json", basePath);
+    if (fromJson.length > 0) return fromJson;
 
-    if (import.meta.server) {
-      const fromJson = await loadJson();
-      if (fromJson.length > 0) return fromJson;
-      return await queryContent("snapshots").sort({ date: -1 }).find();
-    }
-
-    const cached = useNuxtData("snapshots").data.value;
-    if (Array.isArray(cached) && cached.length > 0) return cached;
-
-    if (import.meta.dev) {
+    if (import.meta.server || import.meta.dev) {
       try {
-        const fromQuery = await queryContent("snapshots").sort({ date: -1 }).find();
-        if (fromQuery.length > 0) return fromQuery;
-      } catch { /* fallback */ }
+        return await queryContent("snapshots").sort({ date: -1 }).find();
+      } catch {
+        return [];
+      }
     }
-    return await loadJson();
+    return [];
   },
-  { getCachedData: devSkipAsyncCache<unknown[]>() },
+  {
+    getCachedData: import.meta.dev
+      ? devSkipAsyncCache<unknown[]>()
+      : skipEmptySsrPayload<unknown[]>(),
+  },
 );
 </script>

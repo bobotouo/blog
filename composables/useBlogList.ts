@@ -1,36 +1,30 @@
 /** 随笔列表：JSON 优先（快），queryContent 兜底 */
-import { devSkipAsyncCache } from "~/utils/async-data";
+import { devSkipAsyncCache, skipEmptySsrPayload } from "~/utils/async-data";
+import { loadPublicJson } from "~/utils/load-public-json";
 
 export function useBlogList(key = "blog") {
   const config = useRuntimeConfig();
   const basePath = ((config.public.baseUrl as string) || "/").replace(/\/$/, "");
-  const jsonBase = import.meta.server ? "" : basePath;
 
   return useAsyncData(
     key,
     async () => {
-      const jsonPath = jsonBase ? `${jsonBase}/blog-list.json` : "/blog-list.json";
-      const loadJson = () => $fetch<unknown[]>(jsonPath).catch(() => []);
+      const fromJson = await loadPublicJson<unknown>("blog-list.json", basePath);
+      if (fromJson.length > 0) return fromJson;
 
-      if (import.meta.server) {
-        const fromJson = await loadJson();
-        if (Array.isArray(fromJson) && fromJson.length > 0) return fromJson;
-        return await queryContent("blog").sort({ date: -1 }).find();
-      }
-
-      const cached = useNuxtData(key).data.value;
-      if (Array.isArray(cached) && cached.length > 0) return cached;
-
-      if (import.meta.dev) {
+      if (import.meta.server || import.meta.dev) {
         try {
-          const fromQuery = await queryContent("blog").sort({ date: -1 }).find();
-          if (Array.isArray(fromQuery) && fromQuery.length > 0) return fromQuery;
+          return await queryContent("blog").sort({ date: -1 }).find();
         } catch {
-          /* fallback JSON */
+          return [];
         }
       }
-      return await loadJson();
+      return [];
     },
-    { getCachedData: devSkipAsyncCache<unknown[]>() },
+    {
+      getCachedData: import.meta.dev
+        ? devSkipAsyncCache<unknown[]>()
+        : skipEmptySsrPayload<unknown[]>(),
+    },
   );
 }
