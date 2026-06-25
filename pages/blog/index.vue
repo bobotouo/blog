@@ -19,9 +19,9 @@
         <span class="flex-1 hand-dashed-divider" />
       </div>
       <NuxtLink :to="nuxtLinkToFromContentPath(featured._path, base)" class="block group">
-        <HandCard decoration="none" padding="p-0" class="group-hover:shadow-hand transition-shadow">
-          <div class="grid gap-0 md:grid-cols-[1.2fr_1fr]">
-            <div class="relative overflow-hidden max-h-[280px] min-h-[200px] border-b-2 md:border-b-0 md:border-r-2 border-pencil">
+        <HandCard decoration="none" padding="p-0" class="overflow-hidden group-hover:shadow-hand transition-shadow">
+          <div class="grid gap-0 md:grid-cols-[1.2fr_1fr] min-w-0">
+            <div class="relative overflow-hidden max-h-[280px] min-h-[200px] min-w-0 border-b-2 md:border-b-0 md:border-r-2 border-pencil">
               <img
                 v-if="featured.coverImage"
                 :src="featured.coverImage"

@@ -4,7 +4,7 @@
     <h1 class="font-heading text-3xl md:text-4xl font-bold text-pencil mb-2">访问统计</h1>
     <p class="font-body text-pencil/50 mb-8">仅自己查看，不对外展示</p>
 
-    <HandCard decoration="tape" padding="p-6" :hover-lift="false">
+    <HandCard decoration="none" padding="p-6" :hover-lift="false">
       <div class="flex items-center justify-between gap-4 mb-5">
         <span class="font-body text-sm text-pencil/50">数据来源：当前站点 API</span>
         <button
