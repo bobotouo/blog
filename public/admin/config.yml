@@ -1,8 +1,14 @@
+# Decap CMS：GitHub 后端 + 本站 /api/auth OAuth（Vercel）
+# 请在主站域名打开 /admin/，GitHub OAuth 回调：https://blog.bobotou118.dpdns.org/api/callback
 backend:
-  name: git-gateway
+  name: github
+  repo: bobotouo/blog
   branch: main
-  identity_url: "https://bobotou-blog.netlify.app/.netlify/identity"
-  gateway_url: "https://bobotou-blog.netlify.app/.netlify/git"
+  base_url: https://blog.bobotou118.dpdns.org
+  auth_endpoint: api/auth
+
+site_url: https://blog.bobotou118.dpdns.org
+display_url: https://blog.bobotou118.dpdns.org
 
 media_folder: "public/uploads"
 public_folder: "/uploads"

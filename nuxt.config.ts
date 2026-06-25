@@ -225,6 +225,9 @@ export default defineNuxtConfig({
 
   // Runtime config (placeholder for API keys etc.)
   runtimeConfig: {
+    /** Decap CMS GitHub OAuth（Vercel 环境变量 OAUTH_GITHUB_CLIENT_ID / OAUTH_GITHUB_CLIENT_SECRET） */
+    oauthGithubClientId: process.env.OAUTH_GITHUB_CLIENT_ID || "",
+    oauthGithubClientSecret: process.env.OAUTH_GITHUB_CLIENT_SECRET || "",
     giscusToken: process.env.NUXT_GISCUS_TOKEN || "",
     public: {
       giscusRepo: process.env.NUXT_PUBLIC_GISCUS_REPO || "",
