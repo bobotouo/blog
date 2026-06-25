@@ -2,7 +2,7 @@
 export const GISCUS_OAUTH_STORAGE_KEY = "__giscus_oauth_pending__";
 const GISCUS_OAUTH_TS_KEY = "__giscus_oauth_pending_ts__";
 export const GISCUS_SESSION_KEY = "giscus-session";
-const GISCUS_OAUTH_TTL_MS = 2 * 60 * 1000;
+const GISCUS_OAUTH_TTL_MS = 10 * 60 * 1000;
 
 export function getGiscusDiscussionTerm(fallbackPath = ""): string {
   if (typeof window !== "undefined") return window.location.pathname;

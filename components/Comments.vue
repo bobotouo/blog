@@ -49,7 +49,6 @@ let frameResizeObserver: ResizeObserver | null = null;
 let loadGeneration = 0;
 
 const route = useRoute();
-const router = useRouter();
 const config = useRuntimeConfig();
 const repo = config.public.giscusRepo || "";
 const repoId = config.public.giscusRepoId || "";
@@ -62,10 +61,6 @@ const showConfigHint = computed(() => import.meta.dev && !hasGiscusConfig.value)
 const loadError = ref(false);
 const showSkeleton = computed(() => hasGiscusConfig.value && !widgetReady.value && !loadError.value);
 let loadTimeoutId: ReturnType<typeof setTimeout> | null = null;
-
-function discussionTerm() {
-  return getGiscusDiscussionTerm(route.path);
-}
 
 function giscusScriptUrl() {
   return `${GISCUS_ORIGIN}/client.js`;
@@ -83,7 +78,7 @@ function postToGiscus(message: Record<string, unknown>) {
 function teardownGiscus() {
   if (!commentsContainer.value) return;
   commentsContainer.value.querySelectorAll('script[src*="giscus"]').forEach((el) => el.remove());
-  commentsContainer.value.querySelector(".giscus")?.remove();
+  commentsContainer.value.querySelectorAll(".giscus-frame").forEach((el) => el.remove());
 }
 
 function clearLoadTimeout() {
@@ -95,17 +90,24 @@ function clearLoadTimeout() {
 
 function loadComments(force = false) {
   if (!commentsContainer.value || !hasGiscusConfig.value) return;
+
+  if (hasOAuthCallback()) {
+    prepareGiscusOAuthHandoff();
+  }
+
+  const existingFrame = commentsContainer.value.querySelector(".giscus-frame");
+  if (existingFrame && !force) {
+    commentsLoaded.value = true;
+    detectWidgetReady();
+    return;
+  }
+
   if (commentsLoaded.value && !force && !hasOAuthCallback()) return;
 
   const gen = ++loadGeneration;
   loadError.value = false;
   widgetReady.value = false;
   clearLoadTimeout();
-
-  if (hasOAuthCallback()) {
-    prepareGiscusOAuthHandoff();
-  }
-
   teardownGiscus();
 
   const script = document.createElement("script");
@@ -120,17 +122,14 @@ function loadComments(force = false) {
   };
   script.onload = () => {
     if (gen !== loadGeneration) return;
-    if (!hasOAuthCallback()) {
-      finalizeGiscusOAuthHandoff();
-    }
+    finalizeGiscusOAuthHandoff();
     detectWidgetReady();
   };
   script.setAttribute("data-repo", repo);
   script.setAttribute("data-repo-id", repoId);
   script.setAttribute("data-category", category);
   script.setAttribute("data-category-id", categoryId);
-  script.setAttribute("data-mapping", "specific");
-  script.setAttribute("data-term", discussionTerm());
+  script.setAttribute("data-mapping", "pathname");
   script.setAttribute("data-strict", "0");
   script.setAttribute("data-reactions-enabled", "1");
   script.setAttribute("data-emit-metadata", "0");
@@ -197,7 +196,7 @@ function onGiscusMessage(event: MessageEvent) {
     detectWidgetReady();
   } else if (payload.error) {
     const msg = String(payload.error);
-    if (isAuthError(msg)) {
+    if (msg.includes("Invalid state") || isAuthError(msg)) {
       clearGiscusSession();
       commentsLoaded.value = false;
       loadComments(true);
@@ -208,14 +207,13 @@ function onGiscusMessage(event: MessageEvent) {
   }
 }
 
-onMounted(async () => {
+onMounted(() => {
   if (!commentsContainer.value || !hasGiscusConfig.value) return;
 
   window.addEventListener("message", onGiscusMessage);
   widgetObserver = new MutationObserver(detectWidgetReady);
   widgetObserver.observe(commentsContainer.value, { childList: true, subtree: true });
 
-  await router.isReady();
   prepareGiscusOAuthHandoff();
   loadComments();
   detectWidgetReady();
@@ -227,7 +225,7 @@ watch(
     if (!commentsLoaded.value) return;
     postToGiscus({
       setConfig: {
-        term: discussionTerm(),
+        term: getGiscusDiscussionTerm(route.path).replace(/^\//, "") || "index",
       },
     });
     detectWidgetReady();
