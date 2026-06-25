@@ -19,7 +19,7 @@
         <span class="flex-1 hand-dashed-divider" />
       </div>
       <NuxtLink :to="nuxtLinkToFromContentPath(featured._path, base)" class="block group">
-        <HandCard decoration="tape" rotate="-0.5deg" padding="p-0" class="overflow-hidden group-hover:shadow-hand transition-shadow">
+        <HandCard decoration="none" padding="p-0" class="group-hover:shadow-hand transition-shadow">
           <div class="grid gap-0 md:grid-cols-[1.2fr_1fr]">
             <div class="relative overflow-hidden max-h-[280px] min-h-[200px] border-b-2 md:border-b-0 md:border-r-2 border-pencil">
               <img
@@ -50,8 +50,8 @@
       </NuxtLink>
     </div>
 
-    <!-- Post list -->
-    <div class="blog-post-columns columns-1 md:columns-2 [&>article]:break-inside-avoid gap-8">
+    <!-- Post list（与精选区间留出间距，避免旋转阴影在栏间露出横线） -->
+    <div class="blog-post-columns columns-1 md:columns-2 [&>article]:break-inside-avoid gap-8 pt-2">
       <article v-for="(post, idx) in rest" :key="post._path" class="mb-6">
         <NuxtLink :to="nuxtLinkToFromContentPath(post._path, base)" class="block group">
           <HandCard
@@ -128,6 +128,8 @@ usePageStats(route.path);
 </script>
 
 <style scoped>
+/* 瀑布流最后一行不显示图钉；首行也不挂，避免栏顶露出半截装饰 */
+.blog-post-columns article:nth-child(-n+2) :deep(.hand-card-tack),
 .blog-post-columns article:nth-last-child(-n+2) :deep(.hand-card-tack) {
   display: none;
 }
