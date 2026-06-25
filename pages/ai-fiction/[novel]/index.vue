@@ -152,16 +152,19 @@
 <script setup lang="ts">
 import { wobblyRadius, shadows } from "~/utils/design-tokens";
 import { normalizeSegment } from "~/utils/ai-fiction-slug";
-import { detailPageCachedData } from "~/utils/async-data";
+import { detailPageCachedData, toJsonFetch } from "~/utils/async-data";
 import { loadPublicJson, loadPublicJsonObject } from "~/utils/load-public-json";
 import { nuxtLinkToFromContentPath } from "~/utils/route-from-content-path";
 
 definePageMeta({
   layout: "blog",
+  prerender: false,
 });
 
 const route = useRoute();
 const router = useRouter();
+const requestFetch = useRequestFetch();
+const jsonFetch = toJsonFetch(requestFetch);
 const config = useRuntimeConfig();
 const base = (config.public.baseUrl as string) || "/";
 const basePath = base.replace(/\/$/, "");
@@ -203,7 +206,7 @@ const { data: bundle, pending } = await useAsyncData<Bundle | null>(
     const n = novelParam.value;
     if (!n) return null;
 
-    const fromBundle = await loadPublicJsonObject<Bundle>(`ai-fiction/${n}/bundle.json`, basePath);
+    const fromBundle = await loadPublicJsonObject<Bundle>(`ai-fiction/${n}/bundle.json`, basePath, jsonFetch);
     if (fromBundle?.novelSlug) {
       return {
         ...fromBundle,
@@ -212,7 +215,7 @@ const { data: bundle, pending } = await useAsyncData<Bundle | null>(
       };
     }
 
-    const list = await loadPublicJson<Bundle>("ai-fiction-series.json", basePath);
+    const list = await loadPublicJson<Bundle>("ai-fiction-series.json", basePath, jsonFetch);
     const match = list.find((x) => normalizeSegment(x.novelSlug) === n);
     if (match) {
       return {

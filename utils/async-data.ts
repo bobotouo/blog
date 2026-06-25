@@ -1,4 +1,5 @@
 import type { NuxtApp } from "#app";
+import type { JsonFetch } from "~/utils/load-public-json";
 import { loadPublicJsonObject } from "~/utils/load-public-json";
 
 /** 开发环境跳过 useAsyncData 缓存，避免空数组/旧数据被复用（列表页用） */
@@ -18,13 +19,23 @@ export function detailPageCachedData<T extends Record<string, unknown>>() {
   };
 }
 
+/** useRequestFetch 与 $fetch 类型不完全一致，统一收窄后传入 JSON 加载器 */
+export function toJsonFetch(fetch: unknown): JsonFetch {
+  return fetch as JsonFetch;
+}
+
 /** SSR / 客户端统一：先读 public JSON，再尝试 queryContent */
 export async function loadContentDetail<T extends Record<string, unknown>>(options: {
   contentPath: string;
   jsonRelativePath: string;
   basePath?: string;
+  fetch?: JsonFetch;
 }): Promise<T | null> {
-  const fromJson = await loadPublicJsonObject<T>(options.jsonRelativePath, options.basePath ?? "");
+  const fromJson = await loadPublicJsonObject<T>(
+    options.jsonRelativePath,
+    options.basePath ?? "",
+    options.fetch,
+  );
   if (fromJson) return fromJson;
 
   try {

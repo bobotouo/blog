@@ -92,12 +92,14 @@ import { wobblyRadius } from "~/utils/design-tokens";
 import { normalizeSegment } from "~/utils/ai-fiction-slug";
 import { formatDateYmd } from "~/utils/format-date";
 import { detailPageCachedData } from "~/utils/async-data";
+import { detailPageCachedData, toJsonFetch } from "~/utils/async-data";
 import { loadPublicJson, loadPublicJsonObject } from "~/utils/load-public-json";
 import { nuxtLinkToFromContentPath } from "~/utils/route-from-content-path";
 import { normalizeTags } from "~/utils/normalize-tags";
 
 definePageMeta({
   layout: "blog",
+  prerender: false,
   middleware: (to) => {
     if (to.params.chapter === "summary") {
       return navigateTo(`/ai-fiction/${encodeURIComponent(String(to.params.novel))}`, { replace: true });
@@ -107,6 +109,8 @@ definePageMeta({
 
 const route = useRoute();
 const router = useRouter();
+const requestFetch = useRequestFetch();
+const jsonFetch = toJsonFetch(requestFetch);
 const novel = computed(() => normalizeSegment(String(route.params.novel ?? "")));
 const chapter = computed(() => normalizeSegment(String(route.params.chapter ?? "")));
 const stableKey = computed(() => `chapter::${route.path.replace(/\/$/, "")}`);
@@ -137,12 +141,14 @@ const { data: chapterNavList } = await useAsyncData(
     const bundle = await loadPublicJsonObject<{ chapters?: ChapterNavItem[] }>(
       `ai-fiction/${n}/bundle.json`,
       basePath,
+      jsonFetch,
     );
     if (bundle?.chapters?.length) return bundle.chapters;
 
     const list = await loadPublicJson<{ novelSlug: string; chapters?: ChapterNavItem[] }>(
       "ai-fiction-series.json",
       basePath,
+      jsonFetch,
     );
     const s = list.find((x) => normalizeSegment(x.novelSlug) === n);
     if (s?.chapters?.length) return s.chapters;
@@ -194,7 +200,7 @@ const { data: post, pending } = await useAsyncData(
     const indexRows = await loadPublicJson<{
       _path?: string;
       chapterFile?: string;
-    }>("ai-fiction-list.json", basePath);
+    }>("ai-fiction-list.json", basePath, jsonFetch);
 
     const canonicalPath = indexRows.find((row) => {
       const segs = String(row?._path ?? "").replace(/^\/ai-fiction\//, "").split("/");
@@ -209,6 +215,7 @@ const { data: post, pending } = await useAsyncData(
       return await loadPublicJsonObject<{ body?: string; title?: string; date?: string; tags?: string[] }>(
         `ai-fiction/${segs[0]!}/${segs[1]!}.json`,
         basePath,
+        jsonFetch,
       );
     };
 

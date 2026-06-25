@@ -64,12 +64,13 @@
 <script setup lang="ts">
 import { wobblyRadius, shadows } from "~/utils/design-tokens";
 import { formatDateYmd } from "~/utils/format-date";
-import { devSkipAsyncCache, detailPageCachedData, loadContentDetail } from "~/utils/async-data";
+import { detailPageCachedData, loadContentDetail, toJsonFetch } from "~/utils/async-data";
 import { normalizeTags } from "~/utils/normalize-tags";
 
-definePageMeta({ layout: "blog" });
+definePageMeta({ layout: "blog", prerender: false });
 
 const route = useRoute();
+const requestFetch = useRequestFetch();
 const config = useRuntimeConfig();
 const base = (config.public.baseUrl as string) || "/";
 const fullPath = base.replace(/\/$/, "") + route.path;
@@ -87,6 +88,7 @@ const { data: snapshot, pending } = await useAsyncData(
       contentPath,
       jsonRelativePath: `snapshots/${slug}.json`,
       basePath,
+      fetch: toJsonFetch(requestFetch),
     }),
   { getCachedData: detailPageCachedData() },
 );

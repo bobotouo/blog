@@ -42,11 +42,12 @@
 
 <script setup lang="ts">
 import { formatDateYmd } from "~/utils/format-date";
-import { detailPageCachedData, loadContentDetail } from "~/utils/async-data";
+import { detailPageCachedData, loadContentDetail, toJsonFetch } from "~/utils/async-data";
 import { normalizeTags } from "~/utils/normalize-tags";
 
 definePageMeta({
   layout: "blog",
+  prerender: false,
   middleware: (to) => {
     const s = to.params.slug as string;
     if (s === "blog" || s === "snapshots") {
@@ -56,6 +57,7 @@ definePageMeta({
 });
 
 const route = useRoute();
+const requestFetch = useRequestFetch();
 const slug = route.params.slug as string;
 const config = useRuntimeConfig();
 const base = (config.public.baseUrl as string) || "/";
@@ -73,6 +75,7 @@ const { data: post } = await useAsyncData(
       contentPath,
       jsonRelativePath: `blog/${slug}.json`,
       basePath,
+      fetch: toJsonFetch(requestFetch),
     }),
   { getCachedData: detailPageCachedData() },
 );
