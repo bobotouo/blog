@@ -1,3 +1,5 @@
+import { fetchDiscussionByPagePath } from "~/server/utils/giscus-discussion";
+
 type CommentCacheEntry = {
   comments: number | null;
   expiresAt: number;
@@ -23,12 +25,6 @@ export default defineEventHandler(async (event) => {
     return { comments: null };
   }
 
-  const [owner, name] = repo.split("/");
-  if (!owner || !name) {
-    setResponseStatus(event, 400);
-    return { error: "Invalid repo" };
-  }
-
   setHeader(event, "cache-control", "public, max-age=60, s-maxage=300, stale-while-revalidate=600");
 
   const now = Date.now();
@@ -37,38 +33,8 @@ export default defineEventHandler(async (event) => {
     return { comments: cached.comments };
   }
 
-  const gql = `
-    query($query: String!) {
-      search(type: DISCUSSION, first: 1, query: $query) {
-        nodes {
-          ... on Discussion {
-            title
-            comments {
-              totalCount
-            }
-          }
-        }
-      }
-    }
-  `;
-
-  const escapedPath = path.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
-  const variables = {
-    query: `repo:${owner}/${name} in:title "${escapedPath}"`,
-  };
-
   try {
-    const response = await $fetch("https://api.github.com/graphql", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: { query: gql, variables },
-      timeout: 4000,
-    });
-
-    const node = response?.data?.search?.nodes?.[0];
+    const node = await fetchDiscussionByPagePath(path, repo, token);
     const comments = node ? (node.comments?.totalCount ?? 0) : 0;
     commentCache.set(path, {
       comments,
