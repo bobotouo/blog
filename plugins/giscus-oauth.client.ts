@@ -1,7 +1,16 @@
-import { captureGiscusOAuthFromUrl } from "~/utils/giscus-oauth";
+import {
+  captureGiscusOAuthFromUrl,
+  hasOAuthCallback,
+  primeGiscusSessionForOAuth,
+  restoreGiscusOAuthToUrl,
+} from "~/utils/giscus-oauth";
 
-/** 仅尽早捕获 ?giscus=，具体恢复在 Comments 加载前执行，避免污染全局路由 */
+/** 在 Vue Router hydration 前捕获 OAuth 并恢复 URL / localStorage */
 captureGiscusOAuthFromUrl();
+if (hasOAuthCallback()) {
+  primeGiscusSessionForOAuth();
+  restoreGiscusOAuthToUrl();
+}
 
 export default defineNuxtPlugin({
   name: "giscus-oauth",

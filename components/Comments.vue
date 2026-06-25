@@ -109,7 +109,8 @@ function loadComments(force = false) {
 
   const script = document.createElement("script");
   script.src = giscusScriptUrl();
-  script.async = true;
+  // OAuth 回跳时同步执行 client.js，避免 async 间隙内路由清掉 ?giscus=
+  script.async = !hasOAuthCallback();
   script.crossOrigin = "anonymous";
   script.onerror = () => {
     if (gen !== loadGeneration) return;
@@ -119,7 +120,9 @@ function loadComments(force = false) {
   };
   script.onload = () => {
     if (gen !== loadGeneration) return;
-    finalizeGiscusOAuthHandoff();
+    if (!hasOAuthCallback()) {
+      finalizeGiscusOAuthHandoff();
+    }
     detectWidgetReady();
   };
   script.setAttribute("data-repo", repo);
