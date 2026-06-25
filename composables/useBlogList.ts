@@ -12,14 +12,13 @@ export function useBlogList(key = "blog") {
       const fromJson = await loadPublicJson<unknown>("blog-list.json", basePath);
       if (fromJson.length > 0) return fromJson;
 
-      if (import.meta.server || import.meta.dev) {
-        try {
-          return await queryContent("blog").sort({ date: -1 }).find();
-        } catch {
-          return [];
-        }
+      if (import.meta.server && !import.meta.dev) return [];
+
+      try {
+        return await queryContent("blog").sort({ date: -1 }).find();
+      } catch {
+        return [];
       }
-      return [];
     },
     {
       getCachedData: import.meta.dev

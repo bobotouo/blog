@@ -38,11 +38,14 @@ export async function loadContentDetail<T extends Record<string, unknown>>(optio
   );
   if (fromJson) return fromJson;
 
-  try {
-    const doc = await queryContent(options.contentPath).findOne();
-    if (doc) return doc as T;
-  } catch {
-    /* ignore */
+  // Serverless SSR 上 queryContent 会加载整库内容，易 OOM；仅客户端兜底
+  if (import.meta.client) {
+    try {
+      const doc = await queryContent(options.contentPath).findOne();
+      if (doc) return doc as T;
+    } catch {
+      /* ignore */
+    }
   }
 
   return null;

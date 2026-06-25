@@ -26,6 +26,41 @@ async function fetchJson<T>(
   }
 }
 
+/** Vercel 等 Serverless SSR：从 CDN 拉静态 JSON，勿用 useRequestFetch（会走 SSR 渲染链导致 OOM） */
+async function resolveStaticOrigins(): Promise<string[]> {
+  const origins: string[] = [];
+  try {
+    const event = useRequestEvent();
+    if (event) {
+      const { getRequestURL } = await import("h3");
+      origins.push(getRequestURL(event).origin);
+    }
+  } catch {
+    /* ignore */
+  }
+  for (const raw of [
+    process.env.VERCEL_PROJECT_PRODUCTION_URL,
+    process.env.VERCEL_URL,
+  ]) {
+    if (!raw) continue;
+    const origin = raw.startsWith("http")
+      ? raw.replace(/\/$/, "")
+      : `https://${raw.replace(/\/$/, "")}`;
+    if (!origins.includes(origin)) origins.push(origin);
+  }
+  return origins;
+}
+
+async function fetchJsonFromStaticCdn<T>(path: string): Promise<T | null> {
+  const origins = await resolveStaticOrigins();
+  const fetch = $fetch as JsonFetch;
+  for (const origin of origins) {
+    const hit = await fetchJson<T>(new URL(path, origin).href, fetch);
+    if (hit !== null && hit !== undefined) return hit;
+  }
+  return null;
+}
+
 /** 读取 public/ 下构建期生成的 JSON 对象（SSR / 预渲染 / 客户端通用） */
 export async function loadPublicJsonObject<T>(
   relativePath: string,
@@ -46,29 +81,9 @@ export async function loadPublicJsonObject<T>(
       /* 本地 dev；Vercel 函数内无 public/ */
     }
 
-    // 相对路径：走 Nitro 内部静态资源（useRequestFetch 绑定的请求上下文）
-    const relative = await fetchJson<T>(path, fetch);
-    if (relative) return relative;
+    const fromCdn = await fetchJsonFromStaticCdn<T>(path);
+    if (fromCdn) return fromCdn;
 
-    try {
-      const event = useRequestEvent();
-      if (event) {
-        const { getRequestURL } = await import("h3");
-        const origin = getRequestURL(event).origin;
-        const absolute = await fetchJson<T>(new URL(path, origin).href, fetch);
-        if (absolute) return absolute;
-      }
-    } catch {
-      /* ignore */
-    }
-
-    if (process.env.VERCEL_URL) {
-      const vercel = await fetchJson<T>(
-        new URL(path, `https://${process.env.VERCEL_URL}`).href,
-        fetch,
-      );
-      if (vercel) return vercel;
-    }
     return null;
   }
 
@@ -96,30 +111,9 @@ export async function loadPublicJson<T>(
       /* ignore */
     }
 
-    const relative = await fetchJson<T[]>(path, fetch);
-    if (Array.isArray(relative) && relative.length > 0) return relative;
+    const fromCdn = await fetchJsonFromStaticCdn<T[]>(path);
+    if (Array.isArray(fromCdn)) return fromCdn;
 
-    try {
-      const event = useRequestEvent();
-      if (event) {
-        const { getRequestURL } = await import("h3");
-        const data = await fetchJson<T[]>(
-          new URL(path, getRequestURL(event).origin).href,
-          fetch,
-        );
-        if (Array.isArray(data)) return data;
-      }
-    } catch {
-      /* ignore */
-    }
-
-    if (process.env.VERCEL_URL) {
-      const data = await fetchJson<T[]>(
-        new URL(path, `https://${process.env.VERCEL_URL}`).href,
-        fetch,
-      );
-      if (Array.isArray(data)) return data;
-    }
     return [];
   }
 

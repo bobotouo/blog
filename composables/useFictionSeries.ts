@@ -48,6 +48,8 @@ export function useFictionSeries(key = "ai-fiction-landing") {
       const fromJson = await loadPublicJson<FictionSeriesItem>("ai-fiction-series.json", basePath);
       if (fromJson.length > 0) return fromJson;
 
+      if (import.meta.server && !import.meta.dev) return [];
+
       try {
         return await loadSeriesFromQuery();
       } catch {
