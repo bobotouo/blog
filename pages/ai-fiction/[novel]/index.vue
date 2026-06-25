@@ -140,7 +140,7 @@
             <p v-if="commentCount !== null" class="font-body text-sm text-pencil/45 mb-4">
               {{ commentCount }} 条讨论 · 使用 GitHub 账号留言
             </p>
-            <ClientOnly><Comments /></ClientOnly>
+            <Comments />
           </div>
 
         </div>

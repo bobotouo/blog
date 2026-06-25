@@ -35,7 +35,7 @@
         <HandTag variant="muted">评论</HandTag>
         <span class="flex-1 hand-dashed-divider" />
       </div>
-      <ClientOnly><Comments /></ClientOnly>
+      <Comments />
     </div>
   </article>
 </template>

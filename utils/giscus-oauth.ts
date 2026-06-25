@@ -1,7 +1,7 @@
-/** Giscus OAuth 回调：保留 ?giscus= 供 client.js 读取（一次性 code） */
+/** Giscus OAuth 回调：保留 ?giscus= 供 client.js 读取（一次性加密 session） */
 export const GISCUS_OAUTH_STORAGE_KEY = "__giscus_oauth_pending__";
 const GISCUS_OAUTH_TS_KEY = "__giscus_oauth_pending_ts__";
-const GISCUS_SESSION_KEY = "giscus-session";
+export const GISCUS_SESSION_KEY = "giscus-session";
 const GISCUS_OAUTH_TTL_MS = 2 * 60 * 1000;
 
 export function getGiscusDiscussionTerm(fallbackPath = ""): string {
@@ -37,7 +37,7 @@ export function hasOAuthCallback(): boolean {
   }
 }
 
-/** 路由 hydration 可能抹掉 ?giscus=，在 client.js 执行前写回 URL（勿自行写 localStorage，交给官方 client.js） */
+/** 路由 hydration 可能抹掉 ?giscus=，在 client.js 执行前写回 URL */
 export function restoreGiscusOAuthToUrl() {
   if (typeof window === "undefined") return false;
   try {
@@ -57,28 +57,14 @@ export function restoreGiscusOAuthToUrl() {
   }
 }
 
-function readOAuthCode(): string | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const fromUrl = new URL(window.location.href).searchParams.get("giscus");
-    if (fromUrl) return fromUrl;
-    if (!isPendingFresh()) return null;
-    return sessionStorage.getItem(GISCUS_OAUTH_STORAGE_KEY);
-  } catch {
-    return null;
-  }
-}
-
-/**
- * client.js 是 async 加载，期间 SPA 可能抹掉 URL 上的 ?giscus=。
- * 仅在 OAuth 回跳时写入 localStorage，格式与官方 client.js 一致。
- */
-export function primeGiscusSessionForOAuth() {
+/** OAuth 回跳：清掉过期 session，只让 client.js 从 URL 写入 giscus-session */
+export function prepareGiscusOAuthHandoff() {
   if (!hasOAuthCallback()) return;
   restoreGiscusOAuthToUrl();
-  const code = readOAuthCode();
-  if (!code) return;
-  localStorage.setItem(GISCUS_SESSION_KEY, JSON.stringify(code));
+  const fromUrl = new URL(window.location.href).searchParams.get("giscus");
+  if (fromUrl) {
+    localStorage.removeItem(GISCUS_SESSION_KEY);
+  }
 }
 
 export function clearGiscusOAuthPending() {
@@ -93,7 +79,7 @@ export function clearGiscusSession() {
   clearGiscusOAuthPending();
 }
 
-/** client.js 同步读取 URL 后再清备份 */
+/** client.js 处理完 URL 上的 ?giscus= 后清备份 */
 export function finalizeGiscusOAuthHandoff() {
   clearGiscusOAuthPending();
 }

@@ -2,7 +2,7 @@
   <div
     id="comments"
     ref="commentsContainer"
-    class="comments-shell relative min-h-[18rem] md:min-h-[20rem] border-2 border-pencil bg-white p-4 md:p-6"
+    class="comments-shell giscus relative min-h-[18rem] md:min-h-[20rem] border-2 border-pencil bg-white p-4 md:p-6"
     :style="{ borderRadius: wobblyRadius.md, boxShadow: shadows.subtle }"
   >
     <Transition name="skeleton-fade">
@@ -37,7 +37,7 @@ import {
   finalizeGiscusOAuthHandoff,
   getGiscusDiscussionTerm,
   hasOAuthCallback,
-  primeGiscusSessionForOAuth,
+  prepareGiscusOAuthHandoff,
 } from "~/utils/giscus-oauth";
 
 const GISCUS_ORIGIN = "https://giscus.app";
@@ -95,21 +95,21 @@ function clearLoadTimeout() {
 
 function loadComments(force = false) {
   if (!commentsContainer.value || !hasGiscusConfig.value) return;
-  if (commentsLoaded.value && !force) return;
+  if (commentsLoaded.value && !force && !hasOAuthCallback()) return;
 
   const gen = ++loadGeneration;
   loadError.value = false;
   widgetReady.value = false;
   clearLoadTimeout();
-  teardownGiscus();
 
   if (hasOAuthCallback()) {
-    primeGiscusSessionForOAuth();
+    prepareGiscusOAuthHandoff();
   }
+
+  teardownGiscus();
 
   const script = document.createElement("script");
   script.src = giscusScriptUrl();
-  // OAuth 回跳时同步执行 client.js，避免 async 间隙内路由清掉 ?giscus=
   script.async = !hasOAuthCallback();
   script.crossOrigin = "anonymous";
   script.onerror = () => {
@@ -179,9 +179,7 @@ function detectWidgetReady() {
 }
 
 function isAuthError(msg: string) {
-  return msg.includes("Invalid state")
-    || msg.includes("State has expired")
-    || msg.includes("Bad credentials");
+  return msg.includes("Bad credentials") || msg.includes("State has expired");
 }
 
 function onGiscusMessage(event: MessageEvent) {
@@ -218,9 +216,7 @@ onMounted(async () => {
   widgetObserver.observe(commentsContainer.value, { childList: true, subtree: true });
 
   await router.isReady();
-  if (hasOAuthCallback()) {
-    primeGiscusSessionForOAuth();
-  }
+  prepareGiscusOAuthHandoff();
   loadComments();
   detectWidgetReady();
 });
