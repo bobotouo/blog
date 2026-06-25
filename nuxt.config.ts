@@ -43,7 +43,6 @@ const articleSlugRoutes = collectRoutes(
   "",
 ).map((s) => (s.startsWith("/") ? s : `/${s}`));
 const isGhPages = process.env.NUXT_GH_PAGES === "true";
-const isNetlify = process.env.NETLIFY === "true";
 const enableSsr = process.env.NUXT_ENABLE_SSR
   ? process.env.NUXT_ENABLE_SSR === "true"
   : !isGhPages;
@@ -178,7 +177,7 @@ export default defineNuxtConfig({
 
   ssr: enableSsr,
   nitro: {
-    preset: isGhPages || !enableSsr ? "static" : process.env.NITRO_PRESET || "netlify",
+    preset: isGhPages || !enableSsr ? "static" : process.env.NITRO_PRESET || "vercel",
     prerender: isGhPages
       ? {
           crawlLinks: false,
@@ -191,7 +190,7 @@ export default defineNuxtConfig({
           routes: ghPrerenderRoutes,
         }
       : {
-          // Netlify 有 SSR 函数，只预渲染少量关键页面加速首屏，其余由函数动态渲染
+          // Vercel SSR：只预渲染少量关键页面加速首屏，其余由 Serverless 动态渲染
           crawlLinks: false,
           failOnError: false,
           concurrency: 2,
@@ -231,7 +230,7 @@ export default defineNuxtConfig({
       giscusCategoryId: process.env.NUXT_PUBLIC_GISCUS_CATEGORY_ID || "",
       giscusTheme: process.env.NUXT_PUBLIC_GISCUS_THEME || "noborder_light",
       statsBase: process.env.NUXT_PUBLIC_STATS_BASE || "",
-      /** GitHub Pages 等静态部署无 /api，可指向 Netlify 等有后端的地址，如 "https://blog.xxx.netlify.app" */
+      /** GitHub Pages 等静态部署无 /api，可指向 Vercel 等有后端的地址，如 "https://blog.xxx.vercel.app" */
       commentsApiBase: process.env.NUXT_PUBLIC_COMMENTS_API_BASE || "",
       baseUrl: appBase,
     },

@@ -27,7 +27,7 @@ export async function loadPublicJsonObject<T>(
       const raw = await readFile(join(process.cwd(), "public", clean), "utf-8");
       return JSON.parse(raw) as T;
     } catch {
-      /* Netlify 运行时函数内可能无 public/，改走站点静态 CDN */
+      /* Serverless 运行时可能无 public/，改走站点静态 CDN */
     }
 
     try {
@@ -56,7 +56,7 @@ export async function loadPublicJson<T>(filename: string, basePath = ""): Promis
       const parsed = JSON.parse(raw) as unknown;
       if (Array.isArray(parsed) && parsed.length > 0) return parsed as T[];
     } catch {
-      /* Netlify 运行时函数内可能无 public/，改走站点静态 CDN */
+      /* Serverless 运行时可能无 public/，改走站点静态 CDN */
     }
 
     try {

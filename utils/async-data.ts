@@ -37,7 +37,7 @@ export async function loadContentDetail<T extends Record<string, unknown>>(optio
   return null;
 }
 
-/** SSR 返回空数组时，客户端强制重新拉取（避免 Netlify 首屏统计为 0） */
+/** SSR 返回空数组时，客户端强制重新拉取（避免线上首屏统计为 0） */
 export function skipEmptySsrPayload<T extends unknown[]>() {
   return (key: string, nuxtApp: NuxtApp) => {
     if (import.meta.dev) return undefined;

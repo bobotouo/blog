@@ -5,12 +5,13 @@ on:
     # 每天 UTC 07:00（北京时间 15:00）
     - cron: "0 7 * * *"
   workflow_dispatch:
-  push:
-    branches:
-      - main
 
 permissions:
   contents: write
+
+concurrency:
+  group: daily-digest
+  cancel-in-progress: false
 
 jobs:
   digest:
@@ -58,7 +59,21 @@ jobs:
         run: node scripts/generate-blog-list.mjs
 
       - name: Commit and push if changed
+        id: commit
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore(content): add daily finance, tech and twitter digests"
           file_pattern: "content/blog/*.md public/blog-list.json public/blog/*.json"
+
+      # push 到 main 后 Vercel 会自动构建；Deploy Hook 可作为备用加速触发
+      - name: Trigger Vercel deploy (optional)
+        if: steps.commit.outputs.changes_detected == 'true'
+        env:
+          VERCEL_DEPLOY_HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
+        run: |
+          if [ -n "$VERCEL_DEPLOY_HOOK" ]; then
+            curl -fsS -X POST "$VERCEL_DEPLOY_HOOK"
+            echo "Vercel deploy hook triggered."
+          else
+            echo "VERCEL_DEPLOY_HOOK not set; rely on Vercel Git integration."
+          fi

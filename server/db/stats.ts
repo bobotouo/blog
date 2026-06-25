@@ -2,8 +2,9 @@ import { promises as fs } from "node:fs";
 import { dirname, join } from "node:path";
 
 const dbPath = join(process.cwd(), "server", "db", "stats.json");
-// Netlify 函数运行时只注入 SITE_ID/SITE_NAME/URL，不注入 NETLIFY；用 SITE_ID 判断
-const isNetlify = !!process.env.SITE_ID;
+const KV_KEY = "blog-stats:db";
+// Vercel + Upstash Redis 集成后会注入 UPSTASH_REDIS_REST_URL / UPSTASH_REDIS_REST_TOKEN
+const useRedis = !!process.env.UPSTASH_REDIS_REST_URL && !!process.env.UPSTASH_REDIS_REST_TOKEN;
 
 export type DeviceType = "desktop" | "mobile" | "tablet" | "bot" | "unknown";
 
@@ -23,10 +24,10 @@ const emptyDB: StatsDB = {
 };
 
 async function readRaw(): Promise<string> {
-  if (isNetlify) {
-    const { getStore } = await import("@netlify/blobs");
-    const store = getStore({ name: "blog-stats", consistency: "strong" });
-    const value = await store.get("db");
+  if (useRedis) {
+    const { Redis } = await import("@upstash/redis");
+    const redis = Redis.fromEnv();
+    const value = await redis.get<string>(KV_KEY);
     return typeof value === "string" ? value : "{}";
   }
   await ensureFileDB();
@@ -34,10 +35,10 @@ async function readRaw(): Promise<string> {
 }
 
 async function writeRaw(data: string): Promise<void> {
-  if (isNetlify) {
-    const { getStore } = await import("@netlify/blobs");
-    const store = getStore({ name: "blog-stats", consistency: "strong" });
-    await store.set("db", data);
+  if (useRedis) {
+    const { Redis } = await import("@upstash/redis");
+    const redis = Redis.fromEnv();
+    await redis.set(KV_KEY, data);
     return;
   }
   await ensureFileDB();
