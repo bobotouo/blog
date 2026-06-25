@@ -91,7 +91,6 @@
 import { wobblyRadius } from "~/utils/design-tokens";
 import { normalizeSegment } from "~/utils/ai-fiction-slug";
 import { formatDateYmd } from "~/utils/format-date";
-import { detailPageCachedData } from "~/utils/async-data";
 import { detailPageCachedData, toJsonFetch } from "~/utils/async-data";
 import { loadPublicJson, loadPublicJsonObject } from "~/utils/load-public-json";
 import { nuxtLinkToFromContentPath } from "~/utils/route-from-content-path";
