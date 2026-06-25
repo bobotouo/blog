@@ -6,6 +6,14 @@
     <div v-if="pending && !summary" class="animate-pulse font-body text-pencil/50">
       统计加载中…
     </div>
+    <p v-else-if="error" class="font-body text-pencil/70 space-y-2">
+      <span class="block">统计 API 加载失败（常见原因：未配置 Upstash Redis 环境变量）。</span>
+      <span class="block text-sm text-pencil/50">
+        请在 Vercel → Storage → Upstash Redis 连接到本项目，确认 Production 环境有
+        <code class="text-pencil/60">UPSTASH_REDIS_REST_URL</code> 与
+        <code class="text-pencil/60">UPSTASH_REDIS_REST_TOKEN</code>，然后重新部署。
+      </span>
+    </p>
     <template v-else-if="summary">
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-2">
         <div
@@ -72,9 +80,10 @@ const props = withDefaults(
   defineProps<{
     summary: StatsSummary | null;
     pending: boolean;
+    error?: boolean;
     defaultOpen?: boolean;
   }>(),
-  { defaultOpen: false },
+  { defaultOpen: false, error: false },
 );
 
 const deviceLabels: Record<DeviceType, string> = {

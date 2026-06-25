@@ -19,6 +19,7 @@
       <StatsSummary
         :summary="statsSummaryData"
         :pending="statsSummaryPending"
+        :error="statsSummaryError"
         :default-open="true"
       />
     </HandCard>
@@ -37,4 +38,5 @@ definePageMeta({ layout: "blog" });
 const statsSummary = useStatsSummary();
 const statsSummaryData = computed(() => statsSummary.summary.value);
 const statsSummaryPending = computed(() => statsSummary.pending.value);
+const statsSummaryError = computed(() => statsSummary.error.value);
 </script>

@@ -1,10 +1,13 @@
 import { promises as fs } from "node:fs";
 import { dirname, join } from "node:path";
+import type { Redis } from "@upstash/redis";
 
-const dbPath = join(process.cwd(), "server", "db", "stats.json");
 const KV_KEY = "blog-stats:db";
-// Vercel + Upstash Redis 集成后会注入 UPSTASH_REDIS_REST_URL / UPSTASH_REDIS_REST_TOKEN
-const useRedis = !!process.env.UPSTASH_REDIS_REST_URL && !!process.env.UPSTASH_REDIS_REST_TOKEN;
+
+/** Vercel 仅 /tmp 可写；本地用 server/db/stats.json */
+const fileDbPath = process.env.VERCEL
+  ? join("/tmp", "blog-stats.json")
+  : join(process.cwd(), "server", "db", "stats.json");
 
 export type DeviceType = "desktop" | "mobile" | "tablet" | "bot" | "unknown";
 
@@ -23,34 +26,64 @@ const emptyDB: StatsDB = {
   daily: {},
 };
 
+function redisCredentials(): { url: string; token: string } | null {
+  const url = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
+  const token =
+    process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
+  if (!url || !token) return null;
+  return { url, token };
+}
+
+function useRedisAtRuntime(): boolean {
+  return redisCredentials() !== null;
+}
+
+let redisClient: Redis | null = null;
+
+async function getRedis(): Promise<Redis> {
+  if (redisClient) return redisClient;
+  const creds = redisCredentials();
+  if (!creds) {
+    throw new Error("Redis credentials missing");
+  }
+  const { Redis: RedisCtor } = await import("@upstash/redis");
+  redisClient = new RedisCtor({ url: creds.url, token: creds.token });
+  return redisClient;
+}
+
+function serializeRedisValue(value: unknown): string {
+  if (value == null) return "{}";
+  if (typeof value === "string") return value;
+  return JSON.stringify(value);
+}
+
 async function readRaw(): Promise<string> {
-  if (useRedis) {
-    const { Redis } = await import("@upstash/redis");
-    const redis = Redis.fromEnv();
-    const value = await redis.get<string>(KV_KEY);
-    return typeof value === "string" ? value : "{}";
+  if (useRedisAtRuntime()) {
+    const redis = await getRedis();
+    const value = await redis.get(KV_KEY);
+    return serializeRedisValue(value);
   }
   await ensureFileDB();
-  return fs.readFile(dbPath, "utf-8");
+  return fs.readFile(fileDbPath, "utf-8");
 }
 
 async function writeRaw(data: string): Promise<void> {
-  if (useRedis) {
-    const { Redis } = await import("@upstash/redis");
-    const redis = Redis.fromEnv();
-    await redis.set(KV_KEY, data);
+  if (useRedisAtRuntime()) {
+    const redis = await getRedis();
+    // Upstash 可直接存对象，避免双重 JSON 编码
+    await redis.set(KV_KEY, JSON.parse(data) as StatsDB);
     return;
   }
   await ensureFileDB();
-  await fs.writeFile(dbPath, data, "utf-8");
+  await fs.writeFile(fileDbPath, data, "utf-8");
 }
 
 const ensureFileDB = async (): Promise<void> => {
-  await fs.mkdir(dirname(dbPath), { recursive: true });
+  await fs.mkdir(dirname(fileDbPath), { recursive: true });
   try {
-    await fs.access(dbPath);
+    await fs.access(fileDbPath);
   } catch {
-    await fs.writeFile(dbPath, JSON.stringify(emptyDB, null, 2), "utf-8");
+    await fs.writeFile(fileDbPath, JSON.stringify(emptyDB, null, 2), "utf-8");
   }
 };
 

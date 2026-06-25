@@ -18,6 +18,7 @@ export type StatsSummary = {
 export function useStatsSummary(): {
   summary: Ref<StatsSummary | null>;
   pending: Ref<boolean>;
+  error: Ref<boolean>;
   refresh: () => Promise<void>;
 } {
   const config = useRuntimeConfig();
@@ -28,15 +29,18 @@ export function useStatsSummary(): {
 
   const summary = ref<StatsSummary | null>(null);
   const pending = ref(true);
+  const error = ref(false);
 
   const fetchSummary = async () => {
     if (!import.meta.client) return;
     pending.value = true;
+    error.value = false;
     try {
       const data = await $fetch<StatsSummary>(summaryUrl);
       summary.value = data;
     } catch {
       summary.value = null;
+      error.value = true;
     } finally {
       pending.value = false;
     }
@@ -44,5 +48,5 @@ export function useStatsSummary(): {
 
   onMounted(fetchSummary);
 
-  return { summary, pending, refresh: fetchSummary };
+  return { summary, pending, error, refresh: fetchSummary };
 }
