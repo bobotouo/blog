@@ -105,6 +105,13 @@
       </div>
     </section>
 
+    <!-- Vibe coding -->
+    <section class="hand-section pt-2 pb-8">
+      <div class="hand-container">
+        <VibeCodingSection />
+      </div>
+    </section>
+
     <!-- Latest content -->
     <section class="hand-section pt-4">
       <div class="hand-container">

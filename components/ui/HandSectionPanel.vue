@@ -9,7 +9,7 @@
     </div>
 
     <div
-      class="border-4 border-pencil bg-white px-5 pb-6 pt-10 md:px-6 md:pb-8 md:pt-11"
+      class="overflow-visible border-4 border-pencil bg-white px-5 pb-6 pt-10 md:px-6 md:pb-8 md:pt-11"
       :style="boxStyle"
     >
       <slot />

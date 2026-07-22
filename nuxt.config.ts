@@ -202,6 +202,7 @@ export default defineNuxtConfig({
         },
     // 确保 API 路由不被预渲染，由 server 函数处理
     routeRules: {
+      "/admin": { redirect: { to: "/admin/", statusCode: 301 } },
       "/api/**": { ssr: false, headers: { "Cache-Control": "public, max-age=0, must-revalidate" } },
       "/api/_content/**": { prerender: false },
       "/_content/**": { prerender: false },
@@ -213,6 +214,37 @@ export default defineNuxtConfig({
     },
   },
 
+  // 避免 macOS EMFILE：不监听构建产物与生成 JSON（改完需手动重启或跑 generate-blog-list）
+  ignore: [
+    ".vercel/**",
+    ".netlify/**",
+    ".output/**",
+    "dist/**",
+    "public/blog/**",
+    "public/ai-fiction/**",
+    "public/snapshots/**",
+    "public/uploads/**",
+  ],
+  watchers: {
+    chokidar: {
+      ignored: [
+        "**/node_modules/**",
+        "**/.git/**",
+        "**/.nuxt/**",
+        "**/.output/**",
+        "**/.vercel/**",
+        "**/.netlify/**",
+        "**/dist/**",
+        "**/public/blog/**",
+        "**/public/ai-fiction/**",
+        "**/public/snapshots/**",
+        "**/public/uploads/**",
+        "**/public/*-list.json",
+        "**/public/ai-fiction-series.json",
+      ],
+    },
+  },
+
   vite: {
     resolve: {
       dedupe: ["vue", "vue-demi"],
@@ -220,6 +252,23 @@ export default defineNuxtConfig({
     ssr: {
       // three.js/gsap 仅客户端使用，不打入 SSR bundle，节省几百 MB 构建内存
       external: ["three", "gsap"],
+    },
+    server: {
+      watch: {
+        ignored: [
+          "**/node_modules/**",
+          "**/.git/**",
+          "**/.nuxt/**",
+          "**/.output/**",
+          "**/.vercel/**",
+          "**/.netlify/**",
+          "**/dist/**",
+          "**/public/blog/**",
+          "**/public/ai-fiction/**",
+          "**/public/snapshots/**",
+          "**/public/uploads/**",
+        ],
+      },
     },
   },
 
