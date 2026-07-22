@@ -4,6 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>内容后台</title>
+    <!-- 固定 config 路径，避免 /admin（无尾斜杠）时误请求 /config.yml 拿到首页 HTML -->
+    <link rel="cms-config-url" type="text/yaml" href="/admin/config.yml" />
   </head>
   <body>
     <script src="https://unpkg.com/decap-cms@3/dist/decap-cms.js"></script>

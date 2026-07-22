@@ -1,0 +1,1 @@
+import{s,l as n}from"./DF_JTr9A.js";import{K as r}from"./Bis-qEUg.js";import{u as e,q as i}from"./CrWRJizD.js";function g(o="blog"){const a=(r().public.baseUrl||"/").replace(/\/$/,"");return e(o,async()=>{const t=await n("blog-list.json",a);if(t.length>0)return t;try{return await i("blog").sort({date:-1}).find()}catch{return[]}},{getCachedData:s()})}export{g as u};
