@@ -1,0 +1,134 @@
+---
+title: X 热点 2026-07-14
+date: 2026-07-14 09:05:12
+description: 自动抓取 X/Twitter 热门话题并由 AI 整理的每日速览
+tags:
+  - Twitter
+  - 热点
+  - 每日速览
+---
+> 数据来源：RapidAPI (twitter-api45.p.rapidapi.com)
+> 生成时间：2026-07-14 09:05:12
+
+## 今日结论
+
+今日 X/Twitter 热门话题涵盖科技、金融与社会热点，以下为精选摘要。
+
+## 热门话题
+
+- **Jordan Walker**
+- **Lindsey Graham**
+- **Sam Neill**
+- **Jurassic Park**
+- **#WWERaw**
+- **Porsha**
+- **Freddy**
+- **South Carolina**
+- **Shamea**
+- **Rihanna**
+- **Lamar**
+- **Iran**
+
+## 精选推文
+
+> **@Talkwithsisib**  ❤️ 2  🔁 2  [→ 原推文](https://x.com/Talkwithsisib/status/2076954483582488865)
+>
+> I am so excited for Jordan Walker 👏🏿🥺🎉 https://t.co/aYGhX4aXTz
+> [![▶ 点击观看视频](https://pbs.twimg.com/amplify_video_thumb/2076954425902407680/img/WpBlos5GeJ5j3Elw.jpg)](https://x.com/Talkwithsisib/status/2076954483582488865)
+
+> **@TriciaWhitaker**  ❤️ 349  🔁 8  [→ 原推文](https://x.com/TriciaWhitaker/status/2076861554818011537)
+>
+> Me: “Are you nervous?” Jordan Walker: “Absolutely. I know it’s not as easy as it looks, so we’re gonna work, we’re gonna practice and give it our all.” - Walker, on Friday on Apple TV before winning the whole damn thing today. https://t.co/OBeJVBB9ca
+> [![▶ 点击观看视频](https://pbs.twimg.com/amplify_video_thumb/2076861492406648832/img/ZmhgNQ05il3_4XbJ.jpg)](https://x.com/TriciaWhitaker/status/2076861554818011537)
+
+> **@MLFootball**  ❤️ 92  🔁 16  [→ 原推文](https://x.com/MLFootball/status/2076870415259992187)
+>
+> 🚨🚨WILD SCANDAL🚨🚨 #MLB FANS BELIEVE THE HOME RUN DERBY WAS RIGGED BECAUSE NETFLIX SHOWED THAT JORDAN WALKER WON THE DERBY EARLIER IN THE BROADCAST. The broadcast showed a graphic that Walker was the Derby champion before his final round. WOW. 😳😳😳 https://t.co/wzSNs6lLOu
+> [![▶ 点击观看视频](https://pbs.twimg.com/amplify_video_thumb/2076869511580413952/img/KSyLc6XzQ1ECv6Q0.jpg)](https://x.com/MLFootball/status/2076870415259992187)
+
+> **@Rothmus**  ❤️ 3126  🔁 441  [→ 原推文](https://x.com/Rothmus/status/2076325676727046608)
+>
+> Lindsey Graham dies suddenly and you can already feel it, a ton of people are never gonna buy whatever explanation the government puts out. Doesn’t matter if they launch an investigation, release the autopsy, or let people see the body themselves. Most people have already clocked the reality that there’s nothing regular folks can actually do to force the full truth when the powerful decide to keep things quiet. The government treats its own business like it’s none of ours and it decides what the public “needs to know” and operates in the dark by default. That’s why the skepticism is automatic.
+
+> **@MarioNawfal**  ❤️ 1286  🔁 176  [→ 原推文](https://x.com/MarioNawfal/status/2076414545304957193)
+>
+> 🇺🇸 Lindsey Graham, watching a 4th of July flyover: "They're ours, right?" He had a good sense of humor, I'll give him that 😂 Writer: Michael https://t.co/cLPDyBqRmI
+> [![▶ 点击观看视频](https://pbs.twimg.com/amplify_video_thumb/2076370623106801664/img/uF8nEQJHdx9Vt59Q.jpg)](https://x.com/MarioNawfal/status/2076414545304957193)
+
+> **@GBC_Press**  ❤️ 3184  🔁 21  [→ 原推文](https://x.com/GBC_Press/status/2076642951871295796)
+>
+> 🚨 BREAKING: ​US President Donald Trump shared a photo on his account of Senator Lindsey Graham holding his banner. ​Trump captioned his post, "I'm so sorry." https://t.co/4rkH4EvGIa
+> [![▶ 点击观看视频](https://pbs.twimg.com/ext_tw_video_thumb/2076585700078620672/pu/img/e_nNAZsq1uoJVc_k.jpg)](https://x.com/GBC_Press/status/2076642951871295796)
+
+> **@BradyJames75955**  ❤️ 67  🔁 7  [→ 原推文](https://x.com/BradyJames75955/status/2076553140111876314)
+>
+> Irish Born actor Sam Neill 78 has passed away in his home in Australia, Neil became a internet success from the clip from Jurassic park seen when he removed his sunglasses in the car but instead of dinosaurs he was looking at a Loyalist and orange Order band parade https://t.co/hIy6bZqgtf
+> [![▶ 点击观看视频](https://pbs.twimg.com/tweet_video_thumb/HNFmECiXgAAY_ie.jpg)](https://x.com/BradyJames75955/status/2076553140111876314)
+
+> **@CoVet_81**  ❤️ 479  🔁 220  [→ 原推文](https://x.com/CoVet_81/status/2076658437631386034)
+>
+> Rest in peace, Sam Neill. 🕊️🎬 You gave us so many unforgettable characters, but Dr. Alan Grant will always hold a special place in our family. My son has loved dinosaurs since before he could walk, and Jurassic Park became part of his childhood, his imagination, and a passion he still carries at 40 years old. Thank you for the adventure, the wonder, and the memories. Your legacy will continue to roar for generations. 🦖🦕💔
+
+> **@TwoPaddocks**  ❤️ 11097  🔁 1059  [→ 原推文](https://x.com/TwoPaddocks/status/1675740521480982528)
+>
+> GOODBYE . My friends, I’m just going to walk quietly away from Twitter for now . I am not happy with what’s happened at Twitter &amp; I’m not happy to be in a place that is so angry &amp; divisive . But I’ll still be alive on Instagram. https://t.co/23YkeePui4 And I miss my blue tick ! https://t.co/5KNUVBZ7cd
+> [![▶ 点击观看视频](https://pbs.twimg.com/ext_tw_video_thumb/1675740490459934720/pu/img/tkO7jM11gnx-jAUx.jpg)](https://x.com/TwoPaddocks/status/1675740521480982528)
+
+> **@cartoonvibes26**    [→ 原推文](https://x.com/cartoonvibes26/status/2076948886875488722)
+>
+> Sam Neill, the legendary Dr. Grant from the *Jurassic Park* saga, has passed away at the age of 78. Sam Neill, best known for his iconic portrayal of Dr. Alan Grant in the Jurassic Park franchise, has passed away at the age of 78. With a career spanning decades, he captivated audiences through unforgettable performances in films such as Jurassic Park, Jurassic Park III, Jurassic World Dominion, The Hunt for Red October, The Piano, and many more. His talent, warmth, and timeless screen presence made him one of the most respected actors of his generation. Rest in peace, Sam Neill. Your legacy will continue to inspire generations of movie lovers, and you will forever remain a beloved part of cinematic history. 🕊️
+
+> **@thelegacyofnerd**  ❤️ 8569  🔁 1211  [→ 原推文](https://x.com/thelegacyofnerd/status/2076664521100300660)
+>
+> Sam Neill as Dr. Alan Grant in the Jurassic Park Franchise • Jurassic Park (1993) • Jurassic Park 3 (2001) • Jurassic World: Dominion (2022) https://t.co/O8caZafE6O
+> ![](https://pbs.twimg.com/media/HNHLYDtXEAAhAqT.jpg)
+
+> **@NovusMediaZA**    [→ 原推文](https://x.com/NovusMediaZA/status/2076954985321930754)
+>
+> Beloved New Zealand actor Sam Neill, best known for his role as Dr Alan Grant in Jurassic Park, has passed away at 78. Follow us &amp; read more at: https://t.co/ogE3wc3qnW #NovaNews #SamNeill #JurassicPark #DrAlanGrant https://t.co/86sN9NrhN1
+> ![](https://pbs.twimg.com/media/HNLTjTPXQAAMdHM.jpg)
+
+> **@conlin_joseph**  ❤️ 8746  🔁 634  [→ 原推文](https://x.com/conlin_joseph/status/2072013017454166039)
+>
+> Craziest thing happened last night driving home from #WWERaw and #Smackdown but i literally drove past Sami Zayn on the highway in Atlantic City. Now more then ever I’m a Sami Zayn ride or die fan!!! https://t.co/6UDNCyo2s9
+> [![▶ 点击观看视频](https://pbs.twimg.com/amplify_video_thumb/2072012954032074752/img/gI8wHY1IuQBaqSrB.jpg)](https://x.com/conlin_joseph/status/2072013017454166039)
+
+> **@kingxd3ath_arts**  ❤️ 808  🔁 75  [→ 原推文](https://x.com/kingxd3ath_arts/status/2076832586362413342)
+>
+> Oba Femi to Brock on Raw tonight #wweraw https://t.co/9Jh39hATFq
+> [![▶ 点击观看视频](https://pbs.twimg.com/amplify_video_thumb/2076832486936465408/img/BkXvHAUFWzoLweUg.jpg)](https://x.com/kingxd3ath_arts/status/2076832586362413342)
+
+> **@DirtyDomDom**  ❤️ 221  🔁 18  [→ 原推文](https://x.com/DirtyDomDom/status/2076823398370668664)
+>
+> This is so stupid. Where is this beast? WWE is killing Brock Lesnar’s aura by making him look weak and scared of Oba Femi. This is the same Brock Lesnar who has stared down and destroyed the biggest names in WWE. #WWeraw https://t.co/BdCHD99iq8
+> [![▶ 点击观看视频](https://pbs.twimg.com/media/HNJbl01XYAAf6Bi.jpg)](https://x.com/DirtyDomDom/status/2076823398370668664)
+
+> **@Raindropsmedia1**  ❤️ 41485  🔁 2832  [→ 原推文](https://x.com/Raindropsmedia1/status/1940202148996030807)
+>
+> Simon Guobadia claims he spent over $5 million on his wedding to Porsha Williams. Only to get divorced shortly after. Porsha received his mansion and $40,000 monthly alimony. Simon says he received a deportation by I.C.E in the divorce settlement. 😳💰 https://t.co/qZGkbRSyNn
+> [![▶ 点击观看视频](https://pbs.twimg.com/amplify_video_thumb/1940201265880809472/img/TG36O5uGunCVf2-V.jpg)](https://x.com/Raindropsmedia1/status/1940202148996030807)
+
+> **@Tertainmen71306**  ❤️ 4  [→ 原推文](https://x.com/Tertainmen71306/status/2076741555747209513)
+>
+> I laughed so hard I almost peed my pants🤣😭🤣🤣😂😂😂😭🤣 ------------------------- England Fish Rihanna Porsha Kienan eThekwini Lindsey Graham blessed sunday Argentina Winnie Mandela IDAC Fatima Madlanga Anele Mall of African #SBLove Milpark Andrea Johnson #hlakasha https://t.co/LFRZG9GC5j
+> [![▶ 点击观看视频](https://pbs.twimg.com/amplify_video_thumb/2076741484259233792/img/z7wfOPesaQzquGZ9.jpg)](https://x.com/Tertainmen71306/status/2076741555747209513)
+
+> **@Tertainmen71306**  ❤️ 13  🔁 2  [→ 原推文](https://x.com/Tertainmen71306/status/2076890745407967476)
+>
+> When you lied on your CV and actually get the job😭😭 -- England Fish Rihanna Porsha Kienan eThekwini Lindsey Graham blessed sunday Argentina Winnie Mandela IDAC Fatima Madlanga Anele Mall of African #SBLove Milpark Andrea Johnson #hlakasha https://t.co/ITqkaljzvq
+> [![▶ 点击观看视频](https://pbs.twimg.com/amplify_video_thumb/2076890723891150848/img/xZIlzxlNa_ZCr_7e.jpg)](https://x.com/Tertainmen71306/status/2076890745407967476)
+
+> **@vickervics9**  ❤️ 42  🔁 10  [→ 原推文](https://x.com/vickervics9/status/2076809819009208604)
+>
+> His name is Storm. He came to Mountain Ridge Shelter in February 2015 as a six-month-old stray - adopted within a month, returned seven weeks later for "destroying furniture." Adopted again in late 2015, back by spring 2016 because "neighbors complained he was too vocal." One more adoption in 2017, returned within six weeks for being "too high-energy for our kids." After that, people stopped looking at the growing Husky mix. His energy calmed as he aged, his face went completely gray, and he lived in kennel #8 for ten years. Yesterday, Thomas, 48, who'd just lost his own Husky of sixteen years last September, walked in. Staff tried showing him younger, healthier dogs with fewer behavior issues. Thomas refused all of them and asked specifically: "Which dog has waited here the absolute longest without being chosen?" We brought out Storm. Thomas knelt beside him, looked at his entirely gray face, and said: "Ten years in a kennel. That's over right now." He signed everything immediately and walked out with Storm that afternoon. Ten years is 3,650 days behind chain-link and concrete. The wait is finally over. It's never too late for an American shelter dog to finally be chosen.
+
+> **@FreddyGusBorjaB**  ❤️ 23  [→ 原推文](https://x.com/FreddyGusBorjaB/status/2076424548237332804)
+>
+> Why doesn't anyone give up their seat to the young lady...? https://t.co/bvpDnEDdia
+> [![▶ 点击观看视频](https://pbs.twimg.com/amplify_video_thumb/2076424315445116928/img/tY1_FPeJeVXAUUHX.jpg)](https://x.com/FreddyGusBorjaB/status/2076424548237332804)
+
+## 洞察与解读
+
+- 科技方向：AI 与大模型相关话题仍持续引发广泛讨论，关注落地场景与产品迭代。
+- 市场动态：宏观经济数据与政策预期是市场情绪的主要驱动力。
+- 建议持续追踪高热度话题，结合多来源信息做出判断。
