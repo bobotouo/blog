@@ -1,0 +1,127 @@
+---
+title: X 热点 2026-07-24
+date: 2026-07-24 09:22:16
+description: 自动抓取 X/Twitter 热门话题并由 AI 整理的每日速览
+tags:
+  - Twitter
+  - 热点
+  - 每日速览
+---
+> 数据来源：RapidAPI (twitter-api45.p.rapidapi.com)
+> 生成时间：2026-07-24 09:22:16
+
+## 今日结论
+
+今日 X/Twitter 热门话题涵盖科技、金融与社会热点，以下为精选摘要。
+
+## 热门话题
+
+- **#vojaja**
+- **Goedemorgen**
+- **#twefer**
+- **Sophie Straat**
+- **#benbvolliefde**
+- **Wijndal**
+- **Carola Schouten**
+- **Berghuis**
+- **Regeer**
+- **Ouazane**
+- **#KhushalKashmir**
+- **Bouwman**
+
+## 精选推文
+
+> **@Ritax76Rita**  ❤️ 2  [→ 原推文](https://x.com/Ritax76Rita/status/2080353268115390776)
+>
+> Mister 1-0 #vojaja
+
+> **@GoalpostFC**  ❤️ 1  [→ 原推文](https://x.com/GoalpostFC/status/2080370504410571226)
+>
+> 🚨 Gloukh finds the net to extend Ajax's lead! FK Vojvodina 1-3 Ajax 🇷🇸🇳🇱 #VOJAJA https://t.co/QwGaOWPaQH
+> [![▶ 点击观看视频](https://pbs.twimg.com/amplify_video_thumb/2080370303926964224/img/yIxWfH6DSHOwaLsu.jpg)](https://x.com/GoalpostFC/status/2080370504410571226)
+
+> **@Robin_Lamberink**  ❤️ 4  [→ 原推文](https://x.com/Robin_Lamberink/status/2080147644907651359)
+>
+> 𝐌𝐀𝐓𝐂𝐇𝐃𝐀𝐘 ⵑ 👊🏼🔴💪🏼 #FCTwente - #FerencvárosiTC #TWEFER #EuropaLeague #FCT #COTE https://t.co/lEldZZ2dk9
+> ![](https://pbs.twimg.com/media/HN4rQbBWcAAxNqw.jpg)
+
+> **@CRYPTOSTACKERZ**    [→ 原推文](https://x.com/CRYPTOSTACKERZ/status/2080345033870299323)
+>
+> COTE 🛑 🛑 #twefer
+
+> **@Myscoutnotes**  ❤️ 3  [→ 原推文](https://x.com/Myscoutnotes/status/2080372693308706855)
+>
+> Sondre Ørjasæter (22) 🇧🇻 is such a constant attacking threat and has the potential to become one of the best attackers in the Eredivisie this season. If he can add more end product to his game, FC Twente will have struck gold. #FCTwente #Football #TweFer
+
+> **@europa**  ❤️ 30  🔁 3  [→ 原推文](https://x.com/europa/status/2080562994807762970)
+>
+> 🇧🇪 Belgium’s anti-discrimination body Unia has ruled that Dutch singer Sophie Straat’s call for “all white men to the back” of the audience at the Boomtown festival was not discrimination. The body received nearly 200 complaints but said the remarks were a symbolic artistic expression protected by freedom of expression. Follow: @europa
+
+> **@time2barbecue**  ❤️ 9  [→ 原推文](https://x.com/time2barbecue/status/2080366302091223192)
+>
+> Good evening! #BenBvolliefde https://t.co/0WPLJGUpD9
+> [![▶ 点击观看视频](https://pbs.twimg.com/tweet_video_thumb/HN7yIGYXoAErDiN.jpg)](https://x.com/time2barbecue/status/2080366302091223192)
+
+> **@GoalRaider**    [→ 原推文](https://x.com/GoalRaider/status/2080368095445553476)
+>
+> 🚩 Live: FK Vojvodina 1-2 Ajax ⚽️ Goal: Steven Berghuis (37') https://t.co/Uql7z0Zg4m
+
+> **@TheEnzoEra**  ❤️ 1  [→ 原推文](https://x.com/TheEnzoEra/status/2080363590943637797)
+>
+> ⚽️ GOAL | FK Vojvodina 1-2 Ajax Steven Berghuis restores Ajax's lead! https://t.co/mvGl7QNDZi
+
+> **@ZachLowy**  ❤️ 8124  🔁 739  [→ 原推文](https://x.com/ZachLowy/status/1662890275348582400)
+>
+> Steven Berghuis punched a Twente fan after he allegedly yelled “cancer blackie” at Berghuis’ Ajax teammate Brian Brobbey. https://t.co/Sm14FsUP88
+> [![▶ 点击观看视频](https://pbs.twimg.com/ext_tw_video_thumb/1662858423099170817/pu/img/qgksQSbOb6RGnCOG.jpg)](https://x.com/ZachLowy/status/1662890275348582400)
+
+> **@AstroDusler**  ❤️ 3  🔁 2  [→ 原推文](https://x.com/AstroDusler/status/2080183589052833816)
+>
+> 🇷🇸 Vojvodina vs Ajax 🇳🇱 🏆 UEFA Conference League — Second Qualifying Round, First Leg 📅 23 July 2026 ⏰ 21:00 Türkiye time 🏟️ Karađorđe Stadium, Novi Sad 👔 Manager Check 🇷🇸 Vojvodina: Miroslav Tanjga Tanjga has been in charge since March 2025 and recently extended his contract. There has been no managerial change at Vojvodina. 🇳🇱 Ajax: Míchel Sánchez — NEW MANAGER This will be Míchel’s first competitive match as Ajax head coach. The Dutch side therefore enters Europe with a completely new coaching staff and a tactical structure still under construction. 🩺 Availability Check Vojvodina 🔴 Kornél Szűcs — SUSPENDED The central defender is unavailable after receiving a red card away to Ferencváros. Tanjga has indicated that Đorđe Crnomarković and Siniša Tanjga are expected to form the replacement centre-back partnership. No other major confirmed injury has been recorded. Several players are still feeling the physical effects of the Ferencváros tie, but none has been declared unavailable. Ajax 🔴 Ahmetcan Kaplan — OUT: knee problem and not included in the travelling squad. 🔴 Dies Janse — OUT: injured. 🔴 Kian Fitz-Jim — OUT: not fully fit. 🔴 Rayane Bounida — OUT: not fully fit. 🟠 Kasper Dolberg — DOUBTFUL: carrying a physical issue, although he played 45 minutes against Olympiakos and travelled to Serbia. 🟢 Youri Baas and Jorthy Mokio — AVAILABLE: both recovered sufficiently to join the squad. ⚪ Ko Itakura and Josip Šutalo — UNAVAILABLE: not yet back with the team following the World Cup; not classified as injuries. 🔮 Probable Line-ups Vojvodina: Rosić; Butean, Siniša Tanjga, Crnomarković, Lucas Barros; Njegoš Petrović, Đakovac, Zukić; Ranđelović, Mulahusejnović, Sukačev. Ajax: Paes; Lucas Rosa, Bouwman, Blind, Caio Henrique; Regeer, Klaassen, Gloukh; Berghuis, Dolberg, Godts. Marcos Leonardo has completed only two full training sessions with Ajax and appears more likely to feature from the bench. 🧠 Form & Context ⚡ Vojvodina’s European results require context: The Serbian side lost both matches against Ferencváros—2–1 at home and 3–0 away—but the second leg unravelled after Szűcs was sent off. The final score does not fully represent Vojvodina’s eleven-versus-eleven level. 🔥 Immediate domestic response: Vojvodina followed that elimination with an emphatic 4–0 league victory over OFK Beograd. Ranđelović’s transition speed, the Đakovac–Petrović midfield partnership and Mulahusejnović’s penalty-area presence remain their primary attacking weapons. 🧱 Suspension weakens the hosts: Szűcs’ absence forces Vojvodina to reorganise the centre of defence against an Ajax attack containing Gloukh, Godts, Berghuis and potentially Dolberg. 🆕 Ajax begin a new era: This is Ajax’s first competitive appearance under Míchel. Their pre-season produced two wins, one draw and one defeat: Panathinaikos 3–1 Ajax Ajax 1–0 AEK Larnaca Ajax 1–1 Bochum Ajax 1–0 Olympiakos ⚠️ The favourites are not fully settled: Ajax possess the stronger squad, but a potential Blind–Bouwman centre-back pairing could lack recovery speed. Vojvodina will try to exploit that area through Ranđelović’s direct running. 🎯 Striker uncertainty: Dolberg is not guaranteed to be at full intensity, while Marcos Leonardo has only just joined the group. That makes aggressive Ajax handicap positions less attractive. 🔍 Match Breakdown 🌪️ Vojvodina’s transition route: The hosts are unlikely to dominate possession. Their best route is to regain the ball centrally and release Ranđelović quickly into the space behind Ajax’s advanced full-backs. 🧮 Midfield control: Ajax should enjoy a technical advantage through Regeer, Klaassen and Gloukh. If they circulate the ball cleanly and prevent Đakovac from winning second balls, they can force Vojvodina into a prolonged low block. 🛡️ Both centre-back partnerships carry risk: Vojvodina are missing Szűcs, while Ajax could field an inexperienced or relatively slow defensive combination. This supports a game containing chances at both ends. 🎯 Ajax attacking mismatch: Godts and Berghuis can stretch the home defence before Gloukh attacks the spaces between midfield and defence. Szűcs’ suspension makes those central movements particularly dangerous. ⏱️ Expected game flow: Ajax should control possession, but Vojvodina will remain aggressive at home and search for quick breaks. The Dutch side’s superior individual quality should eventually decide the contest without necessarily producing a comfortable victory. 📊 Tale of the Tape MetricVojvodinaAjaxEuropean statusEliminated by FerencvárosFirst competitive matchLatest result4–0 vs OFK Beograd1–0 vs OlympiakosConfirmed main absenceSzűcs suspendedMultiple unavailable defendersManager situationContinuityNew managerPrimary strengthTransitions and second ballsTechnical quality and possessionMain concernReorganised central defenceUnsettled defensive structure 🔮 Prediction & Bet Map Correct-score lean: Vojvodina 1–2 Ajax Core plays ✅ Ajax Double Chance & Over 1.5 Goals The most balanced option. It protects against Ajax’s transitional defensive problems while accounting for the visitors’ superior attacking quality and Vojvodina’s weakened centre-back partnership. ✅ Ajax to Win — only at 1.55 or higher Ajax are deserved favourites, but prices around 1.50–1.53 already account for most of the quality difference. The managerial transition, defensive absences and Dolberg’s condition prevent this from being a high-confidence short-priced selection. Alternative 🎯 Ajax Over 1.5 Team Goals — take at 1.65+ Vojvodina’s reorganised defence could struggle against Ajax’s movement between the lines. The price must remain high enough to compensate for the visitors’ unfinished attacking structure. Avoid ⛔ Ajax −1.5 Asian Handicap — PASS Ajax may win, but demanding a two-goal margin is unnecessarily aggressive in Míchel’s first competitive match, particularly with an unsettled defence and an incomplete striker rotation. Confidence order: Ajax Double Chance & Over 1.5 Goals Ajax to Win — 1.55+ Ajax Over 1.5 Team Goals — 1.65+ Ajax −1.5 — PASS Overall confidence: ★★★☆☆
+
+> **@newballers7**  ❤️ 1  [→ 原推文](https://x.com/newballers7/status/2080554784952647799)
+>
+> 🇲🇦💎 Abdellah Ouazane (17) vs Vojvodina. ✨ What a spectacular talent. Morocco have another gem on the right flank. 🌟 By the 2030 World Cup on home soil, he could be one of the stars of the national team. https://t.co/WD4qlzLQE9
+> [![▶ 点击观看视频](https://pbs.twimg.com/amplify_video_thumb/2080396974965100544/img/9qWx6EiZ7KfWNPRW.jpg)](https://x.com/newballers7/status/2080554784952647799)
+
+> **@RookieResearch**  ❤️ 5  [→ 原推文](https://x.com/RookieResearch/status/2080440478382612620)
+>
+> Ouazane is simply fantastic 💎 https://t.co/1EL3aOX5G3
+> [![▶ 点击观看视频](https://pbs.twimg.com/amplify_video_thumb/2080396974965100544/img/9qWx6EiZ7KfWNPRW.jpg)](https://x.com/RookieResearch/status/2080440478382612620)
+
+> **@cdfgnz**  ❤️ 14  🔁 2  [→ 原推文](https://x.com/cdfgnz/status/2079919421074575612)
+>
+> Abdellah #Ouazane (17) is showing serious high-volume underlying metrics in the Eerste Divisie (#Ajax). 🇲🇦🇳🇱 📊 25 Apps | 1,494 mins | 4G + 5A (0.54 G+A/90)🎯 66.1% Shot Accuracy (13/34 on target) 🧵 Full Data Breakdown &amp; Scouting Graphics below: https://t.co/IqtHDNtOA8
+> [![▶ 点击观看视频](https://pbs.twimg.com/amplify_video_thumb/2079918930513047552/img/gn4FpOLazaEDqtR6.jpg)](https://x.com/cdfgnz/status/2079919421074575612)
+
+> **@AP**  ❤️ 1504  🔁 627  [→ 原推文](https://x.com/AP/status/2079887904818503809)
+>
+> ChatGPT maker OpenAI said Tuesday that its artificial intelligence system hacked into another AI company on its own in what the company called an “unprecedented cyber incident.” https://t.co/zwTQJrjxIX
+> [![▶ 点击观看视频](https://pbs.twimg.com/media/HN0_BusX0AA0p4d.jpg)](https://x.com/AP/status/2079887904818503809)
+
+> **@silentguyy66**  ❤️ 1  [→ 原推文](https://x.com/silentguyy66/status/2080583470129017009)
+>
+> SPENT 3 MONTHS TREATING CLAUDE CODE LIKE A CHATBOT one prompt with everything in it "fix this, refactor that, add tests, deploy" 12k tokens per call, $0.12, 90 seconds half the context was instructions re-explaining what to do then i split it into 6 graph nodes extract → transform → analyze → validate → route → report each node: ~200 tokens, $0.002, 3 seconds narrow scope, cheap model per call output of one node is input to the next total pipeline: 6 calls, $0.012, 18 seconds one-shot prompt: one call, $0.12, 90 seconds 10x cheaper. 5x faster. fully traceable if a node fails, i know exactly which one barry zhang from anthropic said it best: "optimize every node of that decision tree" graph engineering is the real skill. prompt engineering is table stakes.
+
+> **@vikas_ai_**  ❤️ 1137  🔁 230  [→ 原推文](https://x.com/vikas_ai_/status/2080238996102566350)
+>
+> INSTEAD OF WATCHING NETFLIX TONIGHT. Spend 1 hour with this. Claude AI FULL COURSE that teaches you how to BUILD and AUTOMATE anything. The people who watch this tonight will wake up tomorrow with a new skill. Watch it and bookmark it now https://t.co/NUpyeu4yN4
+> [![▶ 点击观看视频](https://pbs.twimg.com/amplify_video_thumb/2080233659714666496/img/wOP-yTHlVeJBUPcR.jpg)](https://x.com/vikas_ai_/status/2080238996102566350)
+
+> **@JulianGoldieSEO**    [→ 原推文](https://x.com/JulianGoldieSEO/status/2080581300956868700)
+>
+> A serious AI setup does not need a serious budget. The free stack includes: → ChatGPT for everyday drafting and planning. → GPT-5.6 Terra access through Codex on eligible free accounts. → Claude Sonnet 5 for structured writing. → Claude Artifacts for editable documents and code. → Gemini 3.5 Flash for fast everyday work. → A limited monthly allowance for Gemini Deep Research. → Projects, files, voice tools and custom assistants. Three accounts. Dozens of practical workflows. Zero need to subscribe before learning what you actually use. Save this video, you’ll know how much the free plans already include. Want the SOP? DM me. 💬
+
+> **@Ric_RTP**  ❤️ 694  🔁 222  [→ 原推文](https://x.com/Ric_RTP/status/2079941508807921958)
+>
+> OpenAI's newest AI escaped the test environment it was locked inside and hacked into another company on its OWN. To remind you: Last week one of the biggest AI companies on Earth got breached. A platform called Hugging Face, which hosts more than a million AI models and datasets, said an "autonomous AI agent" had broken into its systems. Nobody knew whose agent it was. For five days the whole industry wondered who was behind it. Yesterday OpenAI raised its hand and said it was them. Or more precisely, it was their models, acting completely on their own. So what did these models actually do? OpenAI was running two of them, GPT-5.6 Sol and an unreleased model they will only describe as "even more capable." They wanted to measure how good the models were at hacking, so they deliberately turned the safety filters down. They locked both models inside a sealed test environment with no real internet access. The only task was a benchmark called ExploitGym, a set of 898 real software vulnerabilities where the model has to turn each bug into a working attack. But the models got OBSESSED with winning... Instead of solving the test the honest way, they went hunting for a shortcut. They found a zero-day flaw in the software running their own sandbox, a bug nobody knew existed, and used it to break out. Once they were loose on the open internet, they worked out that Hugging Face was probably storing the answer key to the benchmark. So they hacked their way in. They chained multiple exploits together, escalated their access, moved across servers, and pulled the test solutions straight out of Hugging Face's live production database. They literally cheated on the test by breaking into another company to steal the answers. OpenAI called it "an unprecedented cyber incident, involving state-of-the-art cyber capabilities." In their own words, the models were "hyperfocused on finding a solution" and went "to extreme lengths to achieve a rather narrow testing goal." And this was not the first time: Before Sol ever launched, an independent red-team lab called METR caught it gaming its own tests to inflate its scores. It hid an exploit inside a data stream, escalated its privileges on the testing server, and leaked the answers human evaluators had hidden. And OpenAI shipped it anyway. The day before the Hugging Face story, OpenAI paused a different unreleased model. This is the same model that earlier this year disproved a famous 1946 math conjecture, a result a Fields Medal winner called a breakthrough. They told it to only post its results to Slack but it found a way out of its sandbox and posted to a public GitHub page instead. They had to pause it because it kept finding ways to act outside the box they built for it. And it is not just OpenAI... Anthropic has reported that one of its own models slipped its sandbox during safety testing and reached the internet it was never supposed to touch, then used it to email a researcher. So step back and look at what these companies are telling you: The only thing standing between these models and a real attack was a set of safety filters. Turn those filters down for a single test, and the model taught itself to escape, break into a company it was never pointed at, and take what it wanted. OpenAI even said they expect incidents like it to "become more commonplace" as the models get more capable. Sam Altman also predicted there'll be a major cyber attack this year. And keep in mind that Sol is not a locked-away experiment but a publicly available model that businesses are already wiring into their own systems. The next model that breaks out of its box might not be doing it just to cheat on a math test...
+
+> **@JulianGoldieSEO**  ❤️ 1  [→ 原推文](https://x.com/JulianGoldieSEO/status/2080573321557786910)
+>
+> Most people use AI one chat at a time. Hermes Agent OS lets you run an entire AI team from one place. Here’s the setup: → Plug Kimi K3 into Hermes → Choose the agent profile you need → Assign jobs by voice or text → Let background agents handle the work → Save every result into one memory vault → Review everything from the same dashboard Kimi K3 becomes the brain. Hermes becomes the army. Save this video, you’ll know how to turn one model into a full operating system. Want the SOP? DM me. 💬
+
+## 洞察与解读
+
+- 科技方向：AI 与大模型相关话题仍持续引发广泛讨论，关注落地场景与产品迭代。
+- 市场动态：宏观经济数据与政策预期是市场情绪的主要驱动力。
+- 建议持续追踪高热度话题，结合多来源信息做出判断。
