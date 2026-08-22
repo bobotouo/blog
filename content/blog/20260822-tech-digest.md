@@ -1,0 +1,48 @@
+---
+title: 技术日报 2026-08-22
+date: 2026-08-22 07:32:14
+description: 自动抓取掘金关注页并生成的每日技术摘要
+tags:
+  - 技术
+  - 掘金
+  - 每日速览
+---
+> 数据来源：https://juejin.cn/following
+> 参考来源：https://juejin.cn/recommended?sort=newest
+> 生成时间：2026-08-22 07:32:14
+> 抓取方式：使用 JUEJIN_COOKIE 抓取关注页
+
+## 今日技术主题
+- AI 与智能开发：相关信号 6 条
+- 后端与架构：相关信号 1 条
+- Flutter 生态：相关信号 1 条
+
+## 综合-最新（前10，筛 AI/Flutter）
+- Flutter (二十) 轮播图（https://juejin.cn/post/7676436966323748864）
+  - 摘要：轮播图 CarouselView系统自带的,基于CustomScrollView。 CarouselSlider 第三方插件,基于PageView。 CarouselView reverse 默认第一
+- 调用了 async 函数却没执行？一文讲透协程、event loop 与 await（https://juejin.cn/post/7676392949267283994）
+  - 摘要：写在前面 Day17、Day18 分别讲了多线程和多进程，两者都是"重量级"的并发方案——线程有 GIL 限制，进程有创建开销和内存隔离。面对成千上万个 I/O 密集型任务（比如同时发出几千个网络请求
+- ai agent - RAG 汇总（https://juejin.cn/post/7676709710451965978）
+  - 摘要：一. RAG 是什么? RAG = Retrieval（检索）+ Augmented（增强）+ Generation（生成） 二. RAG 的作用 三. RAG 的好处 四.RAG 的完整工作流程（核
+- AI为拿高分不惜入侵网站：22个模型作弊审计，真相让人背脊发凉（https://juejin.cn/post/7676625061882314771）
+  - 摘要：Apollo Research对22个前沿AI模型的审计揭示了一个令人不安的事实：在攻击性网络任务中，37.1%的通过任务涉及作弊行为，平均通过率41.5%但真实解决率仅26.1%。模型并非不会解题，
+- 尝尝咸淡：从朴素 RAG 到 Graph RAG——一个烹饪问答系统的三层检索升级之路（https://juejin.cn/post/7676398004518191114）
+  - 摘要：记录烹饪问答系统从朴素RAG到Graph RAG的三层升级。以知识图谱替代纯文本块，构建图键值、向量、关键词三路检索，经倒数排名融合与交叉编码器精排，引入图多跳推理和语言模型路由。
+- 开源项目第194期：deepseek-harness — DeepSeek 出品的 AI Agent 开发框架，万物皆插件（https://juejin.cn/post/7676392949266890778）
+  - 摘要：DeepSeek AI 出品的 Agent 开发框架，以 Cordis 插件架构为核心——内核只管插件生命周期，其余一切（工具、后端、UI）均为可替换插件。
+- Code Agent 解剖（07）：外部工具怎么接进来？MCP 集成是怎么做的？（https://juejin.cn/post/7676398131042992138）
+  - 摘要：深入 MyCodeAgent 的 MCP 集成：可选依赖、配置发现、stdio/HTTP 传输、Adapter 把远端工具伪装成本地 Tool、结果收成通用协议。
+- ai可以摸平技术，但抹不平品味（https://juejin.cn/post/7676392949266956314）
+  - 摘要：技术护城河被打破之后，我开始重新想一个问题：当 " 会不会写代码 ” 不再稀缺，真正还值钱的，也许只剩暂时无法被 AI 替代的品味与决策能力。
+- TypeScript 高级类型进阶：keyof、Exclude、Record 与类型组合思想（https://juejin.cn/post/7676694450111070217）
+  - 摘要：上一篇介绍了 TypeScript 中常用的工具类型： Pick：挑选字段 Omit：排除字段 Partial：字段变可选 Required：字段变必填 这些工具类型解决的问题是： 但是它们背后还有一
+- 若依启动突然报 Redis MISCONF？一次从应用报错到磁盘爆满的完整排查记录（https://juejin.cn/post/7676404079283388452）
+  - 摘要：若依启动突然报 Redis MISCONF？一次从应用报错到磁盘爆满的完整排查记录 最近在启动一个若依后台项目时，遇到了一个看起来像 Spring Bean 注入失败的问题。项目使用的是 RuoYi
+
+## 关注补充（未使用且不过旧）
+- 关注流没有可补充的新文章（可能都已使用或较旧）。
+
+## 学习建议
+- 先选择 1 篇偏“原理”与 1 篇偏“实战”的文章做组合学习。
+- 阅读时同步记录可迁移到当前项目的实践点（如构建优化、组件抽象、测试策略）。
+- 将今天的关键结论整理为团队可复用的 checklist 或脚手架模板。
