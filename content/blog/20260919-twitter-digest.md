@@ -1,0 +1,128 @@
+---
+title: X 热点 2026-09-19
+date: 2026-09-19 11:49:33
+description: 自动抓取 X/Twitter 热门话题并由 AI 整理的每日速览
+tags:
+  - Twitter
+  - 热点
+  - 每日速览
+---
+> 数据来源：RapidAPI (twitter-api45.p.rapidapi.com)
+> 生成时间：2026-09-19 11:49:33
+
+## 今日结论
+
+今日 X/Twitter 热门话题涵盖科技、金融与社会热点，以下为精选摘要。
+
+## 热门话题
+
+- **Texas Tech**
+- **Greenland**
+- **White House**
+- **Good Saturday**
+- **Resident Evil**
+- **Josh Allen**
+- **Tillamook**
+- **Wake Forest**
+- **Politico**
+- **#LaneKiffinHour**
+- **Lions**
+- **Halal**
+
+## 精选推文
+
+> **@NealDriscoll**  ❤️ 63  🔁 4  [→ 原推文](https://x.com/NealDriscoll/status/2100784393358807454)
+>
+> Following the predicted draft order set by @JustinM_NFL Round One 1-Cleveland Browns: Arch Manning, QB, Texas 2-Miami Dolphins: Jeremiah Smith, WR, Ohio State 3-Arizona Cardinals: Colin Simmons, Edge, Texas 4-Las Vegas Raiders: Trevor Goosby, OT, Texas 5-Atlanta Falcons: Dante Moore, QB, Oregon 6-New York Jets: Darian Mensah, QB, Miami 7-Tennessee Titans: Dylan Stewart, Edge, South Carolina 8-New York Jets (via IND): Leonard Moore, Cornerback, Notre Dame 9-New York Giants: Cam Coleman, WR, Texas 10-Pittsburgh Steelers: CJ Carr, QB, Notre Dame 11-New Orleans Saints: Will Echoles, DL, Mississippi 12-Philadelphia Eagles: Jordan Seaton, OT, LSU 13-Carolina Panthers: Yhonzae Pierre, Edge, Alabama 14-Minnesota Vikings: Jadan Baugh, RB, Florida 15-Washington Commanders: Charlie Becker, WR, Indiana 16-Chicago Bears: Trevor Lauck, OT, Iowa 17-Los Angeles Chargers: David Stone, DT, Oklahoma 18-New England Patriots: Jamari Johnson, TE, Oregon 19-Cincinnati Bengals: KJ Bolden, S, Georgia 20-New York Jets (via GB): Greg Johnson, OL, Minnesota 21-Jacksonville Jaguars: Justin Scott, DT, Miami 22-Tampa Bay Buccaneers: Ashton Hampton, CB, Clemson 23-Kansas City Chiefs: Trey’Dez Green, TE, LSU 24-Dallas Cowboys: Ellis Robinson IV, CB, Georgia 25-San Francisco 49ers: Brauntae Johnson, S, Notre Dame 26-Detroit Lions: Kelley Jones, CB, Mississippi State 27-Baltimore Ravens: Sammy Brown, LB, Clemson 28-Buffalo Bills: Nick Marsh, WR, Indiana 29-Seattle Seahawks: Zabien Brown, CB, Alabama 30-Denver Broncos: Ahmad Moten Sr., DL, Miami 31-Houston Texans: Kade Pieper, OL, Iowa 32-Cleveland Browns (via LAR): Kenyatta Jackson Jr., Edge, Ohio State Round Two 33-Cleveland Browns: Kyngstonn Viliamu-Asa, LB, Notre Dame 34-Miami Dolphins: A’Mauri Washington, DL, Oregon 35-Arizona Cardinals: Trinidad Chambliss, QB, Mississippi 36-Las Vegas Raiders: KJ Duff, WR, Rutgers 37-Atlanta Falcons: Carter Smith, OT, Indiana 38-New York Jets: Chris Cole, LB/Edge, Georgia 39-Tennessee Titans: Kewan Lacy, RB, Mississippi 40-Indianapolis Colts: LaNorris Sellers, QB, South Carolina 41-New York Giants: Bear Alexander, DL, Oregon 42-Pittsburgh Steelers: Zach Lutmer, S, Iowa 43-New Orleans Saints: OJ Frederique Jr., CB, Miami 44-Philadelphia Eagles: Matayo Uiagalelei, Edge, Oregon 45-Carolina Panthers: Cayden Green, OL, Missouri 46-Minnesota Vikings: Koi Perich, S, Oregon 47-Washington Commanders: Jaccarius Peak, OT, South Carolina 48-Chicago Bears: Quincy Rhodes Jr., Edge, Arkansas 49-Los Angeles Chargers: Elijah Green, CB, Tulsa 50-New England Patriots: Will Heldt, Edge, Clemson 51-Cincinnati Bengals: Ahmad Hardy, RB, Missouri 52-Green Bay Packers: Chris Peal, CB, Syracuse 53-Jacksonville Jaguars: Austin Siereveld, OL, Ohio State 54-Tampa Bay Buccaneers: AJ Holmes Jr., DL, Texas Tech 55-Kansas City Chiefs: Jelani McDonald, S, Texas 56-Dallas Cowboys: Ryan Coleman-Williams, WR, Alabama 57-San Francisco 49ers: PJ Williams, OT, SMU 58-Detroit Lions: Mateen Ibirogba, DL, Texas Tech 59-Baltimore Ravens: Iapanai Laloulu, OL, Oregon 60-Buffalo Bills: Rasheem Biles, LB, Texas 61-Seattle Seahawks: Omarion Miller, WR, Arizona State 62-Denver Broncos: Damon Wilson II, Edge, Miami 63-Houston Texans: Nate Frazier, RB, Georgia 64-Los Angeles Rams: Mario Craver, WR, Texas A&M
+
+> **@DirtyBubbleBets**  ❤️ 8  [→ 原推文](https://x.com/DirtyBubbleBets/status/2101150904573419600)
+>
+> Pain. Nothing But Fucking Pain. 🤮 ✖️ Texas Tech -7 (-125) 1U ✖️ TTech/Houston u52.5 (-110) 1U Disgusting Way To End My Friday Night 💀 Work To Do Tomorrow, We'll Be Back 🧪 https://t.co/qJdBpNmzmO
+> [![▶ 点击观看视频](https://pbs.twimg.com/ext_tw_video_thumb/2101149553479081984/pu/img/FCKoENtdYysj-79-.jpg)](https://x.com/DirtyBubbleBets/status/2101150904573419600)
+
+> **@nuttallriley1**  ❤️ 65  🔁 2  [→ 原推文](https://x.com/nuttallriley1/status/2100970758281252948)
+>
+> I have it on good authority Texas Tech Football plays Nickelback as it’s pregame pump music! https://t.co/Sm6Zt0Qk5N
+> [![▶ 点击观看视频](https://pbs.twimg.com/tweet_video_thumb/HSglxJiXMAA8-Oj.jpg)](https://x.com/nuttallriley1/status/2100970758281252948)
+
+> **@HarmlessHQ**  ❤️ 77  🔁 16  [→ 原推文](https://x.com/HarmlessHQ/status/2101264658833297592)
+>
+> President Trump is a man with balls made of steel. Man's committed to taking America higher. He just secured the full control of Greenland, something the democrats never dared to discuss. He's still in charge of Venezuela and its peace restoration. He's also in the middle east, working round the clock to ensure energy security for the world. The President of the World indeed.
+
+> **@Ric_RTP**  ❤️ 16  🔁 15  [→ 原推文](https://x.com/Ric_RTP/status/2101249091770470495)
+>
+> The problem is, Trump has no way to use ANYTHING of what he just stole. Strip the flags and the military off this deal and here is what he took: A veto over the largest pile of rare earth minerals on the planet. Those are the metals inside every AI chip, every electric motor, and every guided missile. On paper, he just cornered the fuel of the next century. But this "victory" is actually hollow: Digging the rock out of the ground is the easy half. The hard half is the one that counts: Turning that ore into usable metal. That refining is a completely separate industry, and China owns roughly 90% of it. For the heavy rare earths that matter most, the ones that keep a magnet alive inside a missile or an EV motor, China refines closer to 98%. So follow the ore: It comes out of Greenland, and to become anything at all, it has to be shipped straight to the one country this entire deal was built to DEFEAT. He seized the mine. China still owns the only factories on Earth that can turn what's in it into something real. And it gets worse, because China saw this coming: It has already banned the export of its refining technology and slapped controls on the exact heavy metals the West is scrambling for. So even the know-how to process this stuff is locked behind the same door. Trump can hold every rock in Greenland and still be told what he's allowed to make from it. And the most important question: If these minerals are a decade away from being usable, then what is this deal producing today? The honest answer is a stock. A company called Critical Metals Corp controls Greenland's flagship deposit. It books roughly $560,000 in sales, yet it carries a market value near $1.5 billion. That's a price of about 2,500x what it sells. Its own auditor formally flagged doubt that it can stay in business. And every time a government headline like this one lands, the stock rips 30, 40, even 60%, then bleeds back down while the company sells fresh shares into the hype. So understand what this "national security win" really is: The mine is a decade from producing anything. The processing still belongs to China. What gets manufactured on day one is a share price, and the people who buy that story are the ones left holding it when the headline fades. What he seized is a rock only his enemy can turn to gold, and a stock only retail is left holding. Maybe there was a reason why no prior president tried to get hold of Greenland…
+
+> **@EricLDaugh**  ❤️ 23593  🔁 4660  [→ 原推文](https://x.com/EricLDaugh/status/2101071240555647403)
+>
+> 🚨 HE DID IT! Donald Trump now has FULL CONTROL over Greenland security and got EVERYTHING he wanted The Democrats said it was impossible, but it just happened. THE LEFT IS HAVING A HORRIBLE NIGHT 🤣 https://t.co/gZg3iFT5MW
+> [![▶ 点击观看视频](https://pbs.twimg.com/amplify_video_thumb/2101071144665378817/img/dyx-8lJjCTc4GRl5.jpg)](https://x.com/EricLDaugh/status/2101071240555647403)
+
+> **@mattvanswol**  ❤️ 37799  🔁 14275  [→ 原推文](https://x.com/mattvanswol/status/2100928675189493909)
+>
+> 🚨#BREAKING: Outrage is erupting after White inmate in a South Carolina jail run by a Black man just DIED OF THIRST on the floor of his cell... covered INCHES-DEEP IN FECES, with the water to his sink SHUT OFF. He drank out of his OWN TOILET to stay alive. He wrote letters to his father pleading for help because he was being tortured because he was White. His name was Gary "Bubba" Blair, he was 43. He was the caregiver for his own elderly father. He had two nephews he adored and a dog named Scrubby. So why was he in jail? In February, Bubba showed up at his sister's house wearing a sheriff's office golf shirt, a security badge, handcuffs, and pepper spray. Deputies arrested him for impersonating a police officer. A judge found he wasn't mentally competent to stand trial and ORDERED the state to place him into treatment on June 3. The South Carolina Office of Mental Health never followed through. Bubba sat in that jail for 181 days waiting for a spot. He passed away 51 days after a judge ordered them to get him help. In April, he write a letter to his father: "I've lost about 90 pounds so far. I'm starving to death in here; only two meals a day, that's it... you starve, and I also have to drink from my toilet and no mattress to sleep on, only a hard ground." "I’ve been abused by staff and assaulted by everyone on the unit; I had to go 28 days without a shower... no help for a white man" "The staff is very nasty to white inmates thanks to Troy Ellerbe and James Dixon." Then in May, Bubba did something that will haunt me. He wrote a letter to a CIRCUIT COURT JUDGE begging for help. The letter had a bad address. It was returned. It never arrived. Meanwhile, sources say the water to his sink was SHUT OFF. His cell floor and walls were covered in feces INCHES DEEP. He was alone. Never let out. Other inmates, who got a few hours out of their cells, told the news they watched Bubba drink toilet water. So they took an empty potato chip bag and filled it with water and pushed it through the food slot in his door!!!!! Most of it spilled before it ever reached him. On July 24th, jailers found him dead on the floor. 49 days later, the autopsy came back. Cause of death: profound dehydration due to DEPRIVATION OF WATER. Manner of death: HOMICIDE. The report also found bed sores on his HEELS, consistent with a man lying on a concrete floor for days at a time. Acute bronchial pneumonia. Profound weight loss. Physical evidence that he had been INGESTING TOILET WATER. He had lost so much weigh and was in such poor condition, his sister and aunt went to the funeral home to see him... they did not recognize his body. The sheriff fired the Black jail administrator 5 days after Bubba died, and refuses to say why. Bubba Blair sang to old folks in nursing homes. He took care of his daddy. He deserved so much better than dying of thirst on a concrete floor. Say his name. Gary "Bubba" Blair. WE DO NOT HAVE TO LIVE LIKE THIS!!!!!!!
+
+> **@WhiteHouse**  ❤️ 17795  🔁 3214  [→ 原推文](https://x.com/WhiteHouse/status/2098733584009896197)
+>
+> "Today, I'm proud to report that the United States of America is doing better, literally, better than it's ever done before." President Trump on American success at the U.S. Embassy in Dublin. 🇺🇸🇮🇪 https://t.co/Qz6bXupdY3
+> [![▶ 点击观看视频](https://pbs.twimg.com/amplify_video_thumb/2098732604250075136/img/NgEyWxUjmd-FF1ka.jpg)](https://x.com/WhiteHouse/status/2098733584009896197)
+
+> **@WhiteHouse**  ❤️ 7055  🔁 1468  [→ 原推文](https://x.com/WhiteHouse/status/2100224110051708984)
+>
+> The Kennedy Center Board voted nearly unanimously to close the building immediately for safety reasons and prepare for reconstruction. Renovation cannot begin until the D.C. Circuit rules on the Board’s approved name. In the meantime, $17M raised by President Trump has been placed in the Kennedy Center account to keep it afloat.
+
+> **@Lissie_Elliott**  ❤️ 17  [→ 原推文](https://x.com/Lissie_Elliott/status/2101269015289020437)
+>
+> Good Saturday morning 🌞 My mind is a little preoccupied this morning - busy, circling, not quite still. Look at them: the hummingbirds don’t wait for the sky to settle. They hover in the gold, drink from the sunflower, and keep moving. The flowers just turn toward the light like they always have. Dew still beads on the leaves. The sun still comes up. Just a little presence in the middle of the swirl. A reminder that beauty doesn’t require us to have it all sorted first. May your Saturday hold a few of those quiet, winged moments, the ones that find you even when your thoughts are elsewhere. The light is already here. Have a blessed day ☕🙏🌞🤗🥰😘
+
+> **@JewelsJonesLive**  ❤️ 258  🔁 40  [→ 原推文](https://x.com/JewelsJonesLive/status/2101206435652661509)
+>
+> Good morning, happy Saturday! 🎹 A cat has claimed the piano keys as her own bed, sprawled on her back soaking up every note her human plays. Find the spot that soothes you this weekend, settle in fully, and let a little music carry your worries away. 🐾🔊 https://t.co/ipeH6z2gQt
+> [![▶ 点击观看视频](https://pbs.twimg.com/amplify_video_thumb/2090765095869534209/img/TcVf6A1u3-l8femr.jpg)](https://x.com/JewelsJonesLive/status/2101206435652661509)
+
+> **@TexasStrong59**  ❤️ 71  🔁 13  [→ 原推文](https://x.com/TexasStrong59/status/2101254968644669710)
+>
+> Good Saturday morning, sweet friends! ☀️☕️ We’re heading up to around 93° today, but with a low of 73°, it’s finally starting to cool down a little at night! 🙌 Today is National Dance Day 💃 and Batman Day! 🦇 I guess I’ll dance around while doing my gardening today… but I definitely won’t be dressing up like Batman! 😂😂😂 Enjoy your Saturday, relax, and go touch some grass! 🌿🌸 I know I will. I won’t be on much today, but I’ll pop in and say hi! ❤️ Have a beautiful Saturday, love y’all! 🤗
+
+> **@SonyMoviesSA**  ❤️ 45  🔁 28  [→ 原推文](https://x.com/SonyMoviesSA/status/2101234849084535078)
+>
+> Your first Survival challenge is here! 🧟‍♂️ You're driving through the mountains at night. Suddenly... you hit something. What would YOU do? Comment for your chance to WIN a limited-edition Resident Evil hamper! Think fast. Trust your instincts. #ResidentEvil creeps into cinemas 23 September.
+
+> **@lifeisbreezy**  ❤️ 124  🔁 5  [→ 原推文](https://x.com/lifeisbreezy/status/2100765555196146075)
+>
+> im not tryna change anybody’s mind about the ending to resident evil (2026) EYE didn’t like it. if YOU did, that’s great! https://t.co/FQLBW4DTFi
+> [![▶ 点击观看视频](https://pbs.twimg.com/tweet_video_thumb/HRomXuYbUAAQgB0.jpg)](https://x.com/lifeisbreezy/status/2100765555196146075)
+
+> **@YuRaynus**  ❤️ 656  🔁 50  [→ 原推文](https://x.com/YuRaynus/status/2100791777816871377)
+>
+> Resident Evil (2026) The first half is pretty good, but then the fat guy in a suit shows up and starts talking and it all goes to total shit. A climax so asinine and a protagonist so bafflingly stupid I almost walked out with only 5 minutes left. 4/10. Fuck this shit https://t.co/A0V4mtSRt2
+> [![▶ 点击观看视频](https://pbs.twimg.com/tweet_video_thumb/HSeC--9WAAAH9qT.jpg)](https://x.com/YuRaynus/status/2100791777816871377)
+
+> **@MLFootball**  ❤️ 9256  🔁 459  [→ 原推文](https://x.com/MLFootball/status/2101036176593334305)
+>
+> 🚨🚨THIS IS WILD🚨🚨 A #Bills fan initiated his newborn baby into Bills Mafia by putting him through a mini table. “In the name of Jim Kelly, Doug Flutie, and Josh Allen, we initiate you into the Bills Mafia.” 😭😭😭 https://t.co/4WpuCmyKRO
+> [![▶ 点击观看视频](https://pbs.twimg.com/amplify_video_thumb/2101035322242994176/img/CKUdd4SQnBvtK42m.jpg)](https://x.com/MLFootball/status/2101036176593334305)
+
+> **@JoshChambers**  ❤️ 7201  🔁 660  [→ 原推文](https://x.com/JoshChambers/status/2100353666351821298)
+>
+> Josh Allen reveals he had zero scholarship offers coming out of high school so he sent 1,000 emails with his highlights attached to every coach in the country, only two responded “The email said something like, Hey, I’m Josh Allen. I’m 6’5”, 220 pounds. I feel like I’d be a great fit for your program. Here’s my Hudl. These are my stats… I literally just went copy, paste, copy, paste and sent it to every single coach I could find an email for.” “I played in a small town called Firebaugh, California. I had zero offers out of high school. I had no preferred walk-ons. A couple Division III schools were trying to give me academic scholarships so I could go play there, but I didn’t want to make my parents pay for me to go somewhere.” “So I went the junior college route. I felt like I was good enough to play, which is obviously why I kept going. I wanted to go to junior college, earn a scholarship and kind of pay my family back for everything they had done for me.” “I also played football, basketball and baseball. I was a three-sport guy, so I didn’t spend my summers going around to every quarterback camp. I got the chance to play different sports, feel different emotions, meet different types of people and learn how to deal with all of it.” “I think that’s something a lot of kids need to continue doing, play more sports. Every sport teaches you something that you can ultimately use later in life.”
+
+> **@CoorsBettah**  ❤️ 14322  🔁 486  [→ 原推文](https://x.com/CoorsBettah/status/2100744391799251311)
+>
+> How it feels being a James Cook fantasy owner and seeing Josh Allen QB sneaks https://t.co/AfhN4REXUj
+> [![▶ 点击观看视频](https://pbs.twimg.com/amplify_video_thumb/2093784537289437184/img/Uidt6UzAmzw8XMID.jpg)](https://x.com/CoorsBettah/status/2100744391799251311)
+
+> **@Blast3d**  ❤️ 68  🔁 1  [→ 原推文](https://x.com/Blast3d/status/2100587112710226230)
+>
+> @WallStreetApes I'm boycotting Tillamook starting today. I can only hope more people do. https://t.co/9BDhD5F1SD
+> [![▶ 点击观看视频](https://pbs.twimg.com/tweet_video_thumb/HSbI2BxbQAA3fVd.jpg)](https://x.com/Blast3d/status/2100587112710226230)
+
+> **@ACTBrigitte**  ❤️ 21716  🔁 8019  [→ 原推文](https://x.com/ACTBrigitte/status/2100629103682437128)
+>
+> 🚨 Tillamook cheese: now Certified Halal !! One of America’s favorite cheeses just put “Certified Halal” on the package. Not because Americans demanded it. Because corporations keep groveling to Islam. Now non-Muslims are forced to eat food made to Muslim standards. Time to find a company that won’t bend the knee to pander to Islam.
+
+## 洞察与解读
+
+- 科技方向：AI 与大模型相关话题仍持续引发广泛讨论，关注落地场景与产品迭代。
+- 市场动态：宏观经济数据与政策预期是市场情绪的主要驱动力。
+- 建议持续追踪高热度话题，结合多来源信息做出判断。
