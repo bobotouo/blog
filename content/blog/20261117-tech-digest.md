@@ -1,0 +1,49 @@
+---
+title: 技术日报 2026-11-17
+date: 2026-11-17 16:44:28
+description: 自动抓取掘金关注页并生成的每日技术摘要
+tags:
+  - 技术
+  - 掘金
+  - 每日速览
+---
+> 数据来源：https://juejin.cn/following
+> 参考来源：https://juejin.cn/recommended?sort=newest
+> 生成时间：2026-11-17 16:44:28
+> 抓取方式：使用 JUEJIN_COOKIE 抓取关注页
+
+## 今日技术主题
+- AI 与智能开发：相关信号 8 条
+- 性能与体验优化：相关信号 1 条
+- Flutter 生态：相关信号 1 条
+
+## 综合-最新（前10，筛 AI/Flutter）
+- 设计模式与生活·总论：AI 能替你砌墙，替不了你打地基（https://juejin.cn/post/7708966693008506899）
+  - 摘要：今天北京的温度是个位数。没太阳。 出门的时候风从领口往里钻。到公司，AI 助手把一个小接口的实现给了三版，都能跑，注释也齐。选哪版，卡了一会儿。快是真快；可“为什么选这版”，它答得很顺，却替不了我签字
+- 2027年火的很可能是AI工作台（https://juejin.cn/post/7708966693008359443）
+  - 摘要：先说个判断：2027 年大概率会火的是 AI 工作台。不是那种陪你聊两句的对话框，是能把一件事从接单做到验收、还得有人签收的工具。正好这两天我把 SoduWork 拉到本地跑了一遍——国内网络三道坎都
+- 一天一个开源项目（第262篇）：AG-UI —— 把 AI Agent 接进前端的开放协议，和 MCP、A2A 并列的第三块拼图（https://juejin.cn/post/7709049532554870793）
+  - 摘要：AG-UI（Agent-User Interaction Protocol）是由 CopilotKit 发起的开放、轻量、基于事件的协议，规定 AI Agent 如何与面向用户的应用对接。
+- 【轻量化复现大模型 / KIMI K3】MTP / EAGLE‑3 模块交互式演示（https://juejin.cn/post/7709028054174629903）
+  - 摘要：【轻量化复现大模型 / KIMI K3】MTP / EAGLE‑3 模块交互式演示 0x00 概述 0x01 核心数学 1.1 MTP 层前向（§4.1.4） 1.2 联合损失（Table 1） 1.
+- Coding Agent，通往 AGI 的重要一环（https://juejin.cn/post/7709028971803099187）
+  - 摘要：昨天后台很多人问，我来给诸位解释科普一个点。 为什么 Coding Agent 是通往 AGI 非常重要的一环？ 现在我们在用的 Codex，Claude Code，Kimi Code，Grok 等等
+- Genie 4 刷屏之后，AI 视频生成正在走向下一阶段（https://juejin.cn/post/7709021467456307226）
+  - 摘要：过去一年，AI 视频生成技术的发展速度令人惊讶。从最初只能生成几秒钟、人物动作和画面细节经常出现异常的视频，到如今可以生成具有较高视觉质量、自然运动和同步声音的内容，视频生成模型正在快速跨越从技术演示
+- Apple Foundation Models：Apple AI核心框架（https://juejin.cn/post/7708979718930858027）
+  - 摘要：Apple Foundation Models是苹果提供的生成式AI开发框架。开发者通过统一的 API 调用端侧模型、Private Cloud Compute(苹果私有云模型)或自定义模型
+- 欢迎报名丨让 Agent 成为企业生产力，AgentCore 八城巡回沙龙·南京站（https://juejin.cn/post/7709056452724310066）
+  - 摘要：11 月 20 日，Alibaba Cloud AgentCore 企业智能体构建与治理八城巡回沙龙第五站，将走进南京。活动以“让 Agent 成为企业生产力”为主题，通过五大技术议题、标杆客户实践与
+- 新出的 Hy4 flash 好用吗？我用 WorkBuddy 做了个小测试（https://juejin.cn/post/7708963436193955874）
+  - 摘要：昨天腾讯出了个新模型，叫 Hy4 flash，11 月底前免费。 大家好，我是小虎。 免费的东西我见多了，是骡子是马，得拉出来遛遛，我的判断是先看实际延迟和吞吐能不能打。 按腾讯的说法，这模型主打一个...
+- Redis那个过期删除策略，差点让我线上崩了（https://juejin.cn/post/7708953356711297059）
+  - 摘要：凌晨三点，告警炸了 那是一个用户画像项目，Redis 里缓存了 3000W+ 的 user tags，每个 key 设置了 24h 过期时间。上线一周风平浪静，直到某天凌晨突然 CPU 飙到 90
+
+## 关注补充（未使用且不过旧）
+- Flutter Native Interop 稳定了，Platform Channel 要退场了（https://juejin.cn/post/7708728039933624363）
+  - 摘要：Flutter 3.50 发布之后，Flutter Native Interop 也正是 stable 了，那接下来就是 Platform Channel 要直接退休了，感觉也就再过两个版本应该就差不
+
+## 学习建议
+- 先选择 1 篇偏“原理”与 1 篇偏“实战”的文章做组合学习。
+- 阅读时同步记录可迁移到当前项目的实践点（如构建优化、组件抽象、测试策略）。
+- 将今天的关键结论整理为团队可复用的 checklist 或脚手架模板。
